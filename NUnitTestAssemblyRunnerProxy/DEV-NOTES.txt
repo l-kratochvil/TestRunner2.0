@@ -1,0 +1,8 @@
+﻿- This assembly will act as a proxy between the NUnit test runner and the test test runner
+- The proxy is necessary because the test library is in a different target framework (.NET Framework) then the test runner (modern .NET)
+
+Design:
+- Create COM exposed by this assemblys
+- Then consume the COM interface by the test runner app
+- Also different technology may be used instead of COM 
+- See: https://claude.ai/share/292c8fdb-8bc9-400d-917c-242f853b0db8
