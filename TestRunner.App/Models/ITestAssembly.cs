@@ -1,6 +1,8 @@
+namespace TestRunner.App.Models;
+
 using System;
 
-namespace TestRunner.App.Models;
+using TestRunner.Common;
 
 internal interface ITestAssembly
 {

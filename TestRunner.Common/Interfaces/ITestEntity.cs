@@ -1,6 +1,6 @@
-﻿namespace TestRunner.App.Interfaces;
+﻿namespace TestRunner.Common.Interfaces;
 
-internal interface ITestEntity
+public interface ITestEntity
 {
     public int ID { get; }
 

@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestRunner.App", "TestRunne
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRunner.App.Tests", "TestRunner.App.Tests\TestRunner.App.Tests.csproj", "{1B51598F-655B-4584-87DA-4996D8A2C90F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRunner.NUnitTestAssemblyRunnerProxy", "TestRunner.NUnitTestAssemblyRunnerProxy\TestRunner.NUnitTestAssemblyRunnerProxy.csproj", "{F52DA07E-E6A5-40B9-B020-76564F4A414A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRunner.NUnitTestRunnerProxy", "TestRunner.NUnitTestRunnerProxy\TestRunner.NUnitTestRunnerProxy.csproj", "{F52DA07E-E6A5-40B9-B020-76564F4A414A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRunner.Common", "TestRunner.Common\TestRunner.Common.csproj", "{9516CD2F-653D-481B-B254-62DA3C53BBEA}"
 EndProject

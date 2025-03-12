@@ -1,6 +1,6 @@
-﻿using TestRunner.App.Interfaces;
+﻿namespace TestRunner.App.Screens;
 
-namespace TestRunner.App.Screens;
+using TestRunner.Common.Interfaces;
 
 internal sealed class HomeScreen : BaseScreen
 {
@@ -36,12 +36,12 @@ internal sealed class HomeScreen : BaseScreen
 
         Info = () =>
         {
-            var testSuites = TestRunConfig.Current.TestEntities.Where(e => e.Type == TestRunner.App.Interfaces.ITestEntity.TypeKind.TestSuite)
+            var testSuites = TestRunConfig.Current.TestEntities.Where(e => e.Type == ITestEntity.TypeKind.TestSuite)
                 .ToArray();
-            var testCases = TestRunConfig.Current.TestEntities.Where(e => e.Type == TestRunner.App.Interfaces.ITestEntity.TypeKind.TestCase)
+            var testCases = TestRunConfig.Current.TestEntities.Where(e => e.Type == ITestEntity.TypeKind.TestCase)
                 .ToArray();
 
-            TestRunner.App.Interfaces.ITestEntity[] testEntities = [];
+            ITestEntity[] testEntities = [];
 
             if (testSuites.Length != 0)
             {

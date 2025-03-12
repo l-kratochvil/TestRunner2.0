@@ -1,29 +1,37 @@
+namespace TestRunner.App.Services;
+
 using System;
+using System.Runtime.InteropServices;
 
 using NUnit.Framework.Api;
-using NUnit.Framework.Interfaces;
-using NUnit.Framework.Internal;
 
-namespace TestRunner.App.Services;
+using TestRunner.App.COM;
+using TestRunner.Common;
+using TestRunner.Common.Interfaces;
 
 /// <summary>
 /// Services serving as a fascade for NUnitTestAssemblyRunner.
 /// </summary>
-internal class TestRunnerEngine : ITestRunnerEngine
+internal class TestRunnerEngine : ITestRunnerEngine, IDisposable
 {
-    public bool IsAssemblyLoaded => runner.IsTestLoaded;
+    // ReSharper disable once SuspiciousTypeConversion.Global
+    private readonly INUnitTestRunnerComClient testRunnerComClient = (INUnitTestRunnerComClient)new NUnitTestRunnerComClient();
 
-    public bool IsTestRunning => runner.IsTestRunning;
+    public bool IsAssemblyLoaded => testRunnerComClient.IsAssemblyLoaded;
 
-    private readonly NUnitTestAssemblyRunner runner = new(new DefaultTestAssemblyBuilder());
+    public bool IsTestRunning => testRunnerComClient.IsTestRunning;
 
-    public async Task<Types.TestResult> RunTestAsync(IEnumerable<TestSuiteEntity> testsuites, string dllPath)
-    {
-        throw new NotImplementedException("TODO: See TestRunnerUI");
-    }
+    public async Task<Types.TestResult[]> RunTestAsync(IEnumerable<TestSuiteEntity> testsuites, string dllPath)
+        => await Task.Run(() => testRunnerComClient.RunTest(testsuites, dllPath));
 
     public void StopTest(bool force)
+        => testRunnerComClient.StopTest(force);
+
+    public TestSuiteEntity[] GetTestEntities(string dllPath)
     {
         throw new NotImplementedException();
     }
+
+    public void Dispose()
+        => Marshal.ReleaseComObject(this.testRunnerComClient);
 }

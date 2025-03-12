@@ -6,4 +6,3 @@ global using TestRunner.App.Utils;
 global using TestRunner.App.Extensions;
 
 global using static TestRunner.App.Types;
-global using static TestRunner.App.Utils.CommonUtils;

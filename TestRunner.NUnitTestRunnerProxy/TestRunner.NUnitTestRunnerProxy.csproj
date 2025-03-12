@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NUnit" Version="4.3.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TestRunner.Common\TestRunner.Common.csproj" />
   </ItemGroup>
 

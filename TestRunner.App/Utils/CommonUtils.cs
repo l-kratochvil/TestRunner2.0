@@ -14,7 +14,4 @@ internal static class CommonUtils
         reference = null;
         return value;
     }
-
-    internal static int CalculateHashCode(params int[] hashCodes)
-        => hashCodes.Aggregate(17, (curr, prev) => curr * 31 + prev);
 }

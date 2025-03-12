@@ -2,12 +2,12 @@ namespace TestRunner.App.Screens;
 
 using TestRunner.App.Common;
 using TestRunner.App.Extensions;
-using TestRunner.App.Interfaces;
+using TestRunner.Common.Interfaces;
 
 internal class TestEntitiesFromTestsuitesPromptScreen(IScreen sourceScreen)
     : BaseForwardedScreen(sourceScreen)
 {
-    private readonly IEqualityComparer<TestRunner.App.Interfaces.ITestEntity> testEntityComparer = new TestRunner.App.Common.TestEntitiesComparer();
+    private readonly IEqualityComparer<ITestEntity> testEntityComparer = new TestEntitiesComparer();
 
     protected override ScreenRenderer CreateRenderer() => new()
     {
@@ -16,7 +16,7 @@ internal class TestEntitiesFromTestsuitesPromptScreen(IScreen sourceScreen)
             // TODO: Fetch from TestLink
             var testsuites = DATA.TestSuites;
 
-            var prompt = new MultiSelectionPrompt<TestRunner.App.Interfaces.ITestEntity>(testEntityComparer)
+            var prompt = new MultiSelectionPrompt<ITestEntity>(testEntityComparer)
                 .Title("# Select test suites: ")
                 .MoreChoicesText("[grey](Move up and down to reveal more)[/]")
                 .InstructionsText("[grey](Press [blue]<space>[/] to select an item, [green]<enter>[/] to accept)[/]")

@@ -13,6 +13,7 @@ internal class Application
     {
         Services = new ServiceCollection()
             .AddSingleton<TestLinkApi.ITestLinkApiClient, TestLinkApi.TestLinkApiClient>()
+            .AddTransient<Services.ITestRunnerEngine>(_ => new Services.TestRunnerEngine())
             .BuildServiceProvider();
     }
 
@@ -46,7 +47,7 @@ internal class Application
 
         while (currentScreen is not null)
         {
-            var renderedScreen = PickRef(ref currentScreen)
+            var renderedScreen = CommonUtils.PickRef(ref currentScreen)
                                  ?? throw new InvalidOperationException("Current screen is null thus there is none to render");
 
             var renderOutput = renderedScreen.Render().Result;

@@ -8,4 +8,4 @@ Design:
 - See: https://claude.ai/share/292c8fdb-8bc9-400d-917c-242f853b0db8
 
 TODO: 
-- Rename to: TestRunner.NUnitTestRunnerProxy (omit "Assembly")
+- See SOLUTON.md 

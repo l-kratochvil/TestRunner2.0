@@ -4,18 +4,19 @@ using Spectre.Console;
 
 using Common;
 
-using TestRunner.App.Interfaces;
+using TestRunner.Common.Interfaces;
+using TestRunner.Common;
 
 internal class TestEntitiesFromTestCasesPromptScreen(IScreen sourceScreen)
     : BaseForwardedScreen(sourceScreen)
 {
-    private readonly IEqualityComparer<TestRunner.App.Interfaces.ITestEntity> testEntityComparer = new TestEntitiesComparer();
+    private readonly IEqualityComparer<ITestEntity> testEntityComparer = new TestEntitiesComparer();
 
     protected override ScreenRenderer CreateRenderer() => new()
     {
         Main = ct =>
         {
-            static string converter(TestRunner.App.Interfaces.ITestEntity entity) => entity.Name;
+            static string converter(ITestEntity entity) => entity.Name;
 
             var testSuites = DATA.TestSuites;
 
@@ -27,14 +28,14 @@ internal class TestEntitiesFromTestCasesPromptScreen(IScreen sourceScreen)
                 .InstructionsText(instructionsText)
                 .PageSize(10)
                 .AddChoices(testSuites)
-                .UseConverter((Func<TestRunner.App.Interfaces.ITestEntity, string>)converter);
+                .UseConverter((Func<ITestEntity, string>)converter);
 
-            if (TestRunner.App.Utils.ConsoleUtils.ShowPrompt(selectTestSuitesPrompt, ct, out var selectedTestSuites))
+            if (ConsoleUtils.ShowPrompt(selectTestSuitesPrompt, ct, out var selectedTestSuites))
             {
-                return new Types.RenderOutput { NextScreen = new HomeScreen() };
+                return new RenderOutput { NextScreen = new HomeScreen() };
             }
 
-            var selectTestCasesPrompt = new MultiSelectionPrompt<TestRunner.App.Interfaces.ITestEntity>(testEntityComparer)
+            var selectTestCasesPrompt = new MultiSelectionPrompt<ITestEntity>(testEntityComparer)
                 .Title("# Select test cases: ")
                 .MoreChoicesText(moreChoicesText)
                 .InstructionsText(instructionsText)
@@ -54,7 +55,7 @@ internal class TestEntitiesFromTestCasesPromptScreen(IScreen sourceScreen)
                         .Union(selectedTestCases)
                         .ToArray();
 
-                    return new Types.RenderOutput { NextScreen = new HomeScreen() };
+                    return new RenderOutput { NextScreen = new HomeScreen() };
                 },
                 ct);
         }

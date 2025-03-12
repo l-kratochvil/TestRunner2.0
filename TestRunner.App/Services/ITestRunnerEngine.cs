@@ -1,14 +1,8 @@
-using System;
+﻿namespace TestRunner.App.Services;
 
-namespace TestRunner.App.Services;
+using TestRunner.Common;
 
-internal interface ITestRunnerEngine
+internal interface ITestRunnerEngine : TestRunner.Common.Interfaces.ITestRunnerEngine
 {
-    bool IsAssemblyLoaded { get; }
-
-    bool IsTestRunning { get; }
-
-    Task<Types.TestResult> RunTestAsync(IEnumerable<TestSuiteEntity> testEntitiesToRun, string dllPath);
-
-    void StopTest(bool force);
+    Task<Types.TestResult[]> RunTestAsync(IEnumerable<TestSuiteEntity> testsuites, string dllPath);
 }

@@ -1,6 +1,6 @@
 ﻿namespace TestRunner.App;
 
-using TestRunner.App.Interfaces;
+using TestRunner.Common.Interfaces;
 
 internal class TestRunConfig
 {
@@ -27,7 +27,7 @@ internal class TestRunConfig
 
     public string? IdeVersion { get; set; } = null;
 
-    public IEnumerable<TestRunner.App.Interfaces.ITestEntity> TestEntities { get; set; } = [];
+    public IEnumerable<ITestEntity> TestEntities { get; set; } = [];
 
     public bool? IsRuntimeTest { get; set; } = false;
 }

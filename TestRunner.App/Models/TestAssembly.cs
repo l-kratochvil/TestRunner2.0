@@ -1,9 +1,11 @@
-using System;
+namespace TestRunner.App.Models;
+
+using Microsoft.Extensions.DependencyInjection;
 
 using NUnit;
-using NUnit.Framework.Api;
 
-namespace TestRunner.App.Models;
+using TestRunner.App.Services;
+using TestRunner.Common;
 
 /// <summary>
 /// Test assembly model.
@@ -12,14 +14,14 @@ internal class TestAssembly : ITestAssembly
 {
     private TestAssembly(string dllPath)
     {
-        ITestAssemblyRunner runner = new NUnitTestAssemblyRunner(new DefaultTestAssemblyBuilder());
+        var testRunnerEngine = Application.Services.GetRequiredService<ITestRunnerEngine>();
 
         var settings = new Dictionary<string, object>()
         {
             { FrameworkPackageSettings.WorkDirectory, dllPath }
         };
 
-        // TODO: this.TestSuites = runner.Load(Path.Combine(dllPath), settings)...
+        this.TestSuites = testRunnerEngine.GetTestEntities(dllPath);
     }
 
     public TestSuiteEntity[] TestSuites { get; }

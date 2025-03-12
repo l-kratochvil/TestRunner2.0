@@ -42,9 +42,4 @@ internal class Types
 
         public required TestRunner.App.Screens.IScreen NextScreen { get; init; }
     }
-
-    public record TestResult(TestStatus status)
-    {
-        public TestStatus Status { get; } = status;
-    }
 }
