@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NUnit;
 
 using TestRunner.App.Services;
-using TestRunner.Common;
+using TestRunner.Common.ComplexTypes;
 
 /// <summary>
 /// Test assembly model.
@@ -21,7 +21,7 @@ internal class TestAssembly : ITestAssembly
             { FrameworkPackageSettings.WorkDirectory, dllPath }
         };
 
-        this.TestSuites = testRunnerEngine.GetTestEntities(dllPath);
+        this.TestSuites = testRunnerEngine.GetTestSuiteEntities(dllPath);
     }
 
     public TestSuiteEntity[] TestSuites { get; }

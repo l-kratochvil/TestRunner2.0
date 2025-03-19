@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 using TestRunner.Common;
+using TestRunner.Common.ComplexTypes;
 
 [ComVisible(true)]
 [Guid(Constants.COM.ClassGuid)]
@@ -20,19 +21,21 @@ public class ComServer : IComServer
     public bool IsTestRunning => throw new NotImplementedException();
 
     public void RunTestAsync()
-        => runner.R
+    {
+        throw new NotImplementedException();
+    }
 
     public void StopTest(bool force)
     {
         throw new NotImplementedException();
     }
 
-    public Types.TestResult[] RunTest(IEnumerable<TestSuiteEntity> testEntitiesToRun, string dllPath)
+    public SimpleTypes.TestResult[] RunTest(IEnumerable<TestSuiteEntity> testEntitiesToRun, string dllPath)
     {
         throw new NotImplementedException();
     }
 
-    public TestSuiteEntity[] GetTestEntities(string dllPath)
+    public TestSuiteEntity[] GetTestSuiteEntities(string dllPath)
     {
         throw new NotImplementedException();
     }

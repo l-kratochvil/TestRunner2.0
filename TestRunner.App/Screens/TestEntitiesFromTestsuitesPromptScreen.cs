@@ -1,7 +1,6 @@
 namespace TestRunner.App.Screens;
 
 using TestRunner.App.Common;
-using TestRunner.App.Extensions;
 using TestRunner.Common.Interfaces;
 
 internal class TestEntitiesFromTestsuitesPromptScreen(IScreen sourceScreen)

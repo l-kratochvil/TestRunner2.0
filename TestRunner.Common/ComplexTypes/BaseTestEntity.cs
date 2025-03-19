@@ -1,4 +1,4 @@
-﻿namespace TestRunner.Common;
+﻿namespace TestRunner.Common.ComplexTypes;
 
 public abstract class BaseTestEntity(int id, string name) : Interfaces.ITestEntity
 {

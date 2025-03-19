@@ -1,8 +1,9 @@
 ﻿namespace TestRunner.App.Services;
 
 using TestRunner.Common;
+using TestRunner.Common.ComplexTypes;
 
 internal interface ITestRunnerEngine : TestRunner.Common.Interfaces.ITestRunnerEngine
 {
-    Task<Types.TestResult[]> RunTestAsync(IEnumerable<TestSuiteEntity> testsuites, string dllPath);
+    Task<SimpleTypes.TestResult[]> RunTestAsync(IEnumerable<TestSuiteEntity> testsuites, string dllPath);
 }

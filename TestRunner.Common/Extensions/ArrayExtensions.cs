@@ -1,4 +1,4 @@
-namespace TestRunner.App.Extensions;
+namespace TestRunner.Common.Extensions;
 
 public static class ArrayExtensions
 {

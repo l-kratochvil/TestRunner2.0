@@ -5,7 +5,21 @@ Design:
 - Create COM exposed by this assemblys
 - Then consume the COM interface by the test runner app
 - Also different technology may be used instead of COM 
-- See: https://claude.ai/share/292c8fdb-8bc9-400d-917c-242f853b0db8
+- See: 
+	- COM implementation: https://claude.ai/share/292c8fdb-8bc9-400d-917c-242f853b0db8
+	- msbuild: https://claude.ai/share/4d6fede7-8578-40b1-a8b5-b8bb1c137d6c
+- The Com server and client need to have a manifest file:
+	- there will be template manifest that will be modified by msbuild (some values, eg. assembly name, will be replaced))
+	- manifest for COM server has to have the same name as the assembly (e.g. for assembly.dll, the manifest will be assembly.manifest)) thus the msbuild will rename the file accordingly
+
+# Com server assembly distribution
+	- TestRunner.NUnitTestRunnerProxy.dll has to be distributed to the TestRunner.App execution directory
+	- This will be handled by msbuild target/tasks
+	- In the solution level, there will be an Exchange directory
+	- The TestRunner.NUnitTestRunnerProxy.dll will be copied to the Exchange directory
+	- TestRunner.App:
+		- will then copy the dll from the Exchange directory to its output directory
+		- In app.manifest there will dynamically set a dependency attribute/element with path to the com server dll (e.g NUnitTestRunnerProxy\NUnitTestRunnerProxy.dll)
 
 TODO: 
 - See SOLUTON.md 

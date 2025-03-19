@@ -1,4 +1,4 @@
-﻿namespace TestRunner.Common;
+﻿namespace TestRunner.Common.ComplexTypes;
 
 using Interfaces;
 

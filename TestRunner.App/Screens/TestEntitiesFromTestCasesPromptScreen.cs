@@ -1,11 +1,11 @@
 namespace TestRunner.App.Screens;
 
-using Spectre.Console;
-
 using Common;
 
+using Spectre.Console;
+
+using TestRunner.Common.ComplexTypes;
 using TestRunner.Common.Interfaces;
-using TestRunner.Common;
 
 internal class TestEntitiesFromTestCasesPromptScreen(IScreen sourceScreen)
     : BaseForwardedScreen(sourceScreen)

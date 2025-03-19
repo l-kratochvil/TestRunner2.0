@@ -1,8 +1,6 @@
 namespace TestRunner.Common.Interfaces;
 
-using System;
-
-using TestRunner.Common;
+using TestRunner.Common.ComplexTypes;
 
 public interface ITestRunnerEngine
 {
@@ -12,5 +10,5 @@ public interface ITestRunnerEngine
 
     void StopTest(bool force);
 
-    TestSuiteEntity[] GetTestEntities(string dllPath);
+    TestSuiteEntity[] GetTestSuiteEntities(string dllPath);
 }
