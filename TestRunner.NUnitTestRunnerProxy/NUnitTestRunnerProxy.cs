@@ -7,19 +7,25 @@ using NUnit.Framework.Internal;
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-using TestRunner.Common;
+using TestRunner.Common.COM;
 using TestRunner.Common.ComplexTypes;
-using TestRunner.Common.Interfaces;
 
-using TestResult = Common.SimpleTypes.TestResult;
+using TestResult = Common.TestResult;
 using TestStatus = Common.ComplexTypes.TestStatus;
 
-// NOTE: For working solution see TestRunnerUI
-public class TestRunnerEngine : ITestRunnerEngine
+/// <summary>
+/// Implementation of <see cref="INUnitTestRunnerProxy"/> COM interface.
+/// </summary>
+[Guid(Guids.NUnitTestRunnerProxyClassGuid)] // REMINDER: This GUID has to be used in the COM server manifest file
+[ComVisible(true)]
+public class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 {
+    // NOTE: The working solution is in the TestRunnerUI project
+
     public bool IsAssemblyLoaded => runner.IsTestLoaded;
 
     public bool IsTestRunning => runner.IsTestRunning;
@@ -111,7 +117,7 @@ public class TestRunnerEngine : ITestRunnerEngine
         runner.StopRun(force);
     }
 
-    public TestSuiteEntity[] GetTestSuiteEntities(string dllPath)
+    public ITestSuiteEntity[] GetTestSuiteEntities(string dllPath)
     {
         var settings = new Dictionary<string, object>()
         {

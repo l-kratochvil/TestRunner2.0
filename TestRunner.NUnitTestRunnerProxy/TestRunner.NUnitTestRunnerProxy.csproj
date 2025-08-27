@@ -1,18 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net481</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <LangVersion>12.0</LangVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net481</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>12.0</LangVersion>
 
-  <ItemGroup>
-    <PackageReference Include="NUnit" Version="4.3.2" />
-  </ItemGroup>
+		<!-- COM props -->
+		<!--<RegisterForComInterop>true</RegisterForComInterop>-->
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\TestRunner.Common\TestRunner.Common.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="NUnit" Version="4.3.2" />
+	</ItemGroup>
 
+	<ItemGroup>
+		<ProjectReference Include="..\TestRunner.Common\TestRunner.Common.csproj" />
+	</ItemGroup>
+
+	<Target Name="CopyExchangeFiles" AfterTargets="Build">
+		<PropertyGroup>
+			<DestinationDir>$(ExchangeDir)$(AssemblyName).X\</DestinationDir>
+		</PropertyGroup>
+
+		<ItemGroup>
+			<OutFile Include="$(TargetDir)\**\*" />
+		</ItemGroup>
+
+		<RemoveDir Directories="$(DestinationDir)" />
+		<Copy SourceFiles="@(OutFile)" DestinationFiles="$(DestinationDir)%(OutFile.RecursiveDir)%(OutFile.Filename)%(OutFile.Extension)" />
+	</Target>
 </Project>

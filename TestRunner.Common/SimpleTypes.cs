@@ -2,10 +2,7 @@
 
 using ComplexTypes;
 
-public class SimpleTypes
+public record TestResult(TestStatus Status)
 {
-    public record TestResult(TestStatus Status)
-    {
-        public TestStatus Status { get; } = Status;
-    }
+    public TestStatus Status { get; } = Status;
 }

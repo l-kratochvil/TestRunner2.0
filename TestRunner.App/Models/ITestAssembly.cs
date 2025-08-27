@@ -1,8 +1,8 @@
 namespace TestRunner.App.Models;
 
-using TestRunner.Common.ComplexTypes;
+using TestRunner.Common.COM;
 
 internal interface ITestAssembly
 {
-    public TestSuiteEntity[] TestSuites { get; }
+    public ITestSuiteEntity[] TestSuites { get; }
 }

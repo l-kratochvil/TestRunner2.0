@@ -5,15 +5,27 @@ using Microsoft.Extensions.DependencyInjection;
 using NUnit;
 using NUnit.Framework.Api;
 
+using System.Reflection;
+
+using TestRunner.App.Services;
+
 internal class Application
 {
     public static IServiceProvider Services { get; set; }
 
     static Application()
     {
+        var manifestPath = Path.ChangeExtension(Assembly.GetExecutingAssembly().Location, "manifest");
+        COM.INUnitTestRunnerProxy nunitTestRunnerProxy;
+        using (new DevKit.UtilityObjects.ComHostActivationContext(manifestPath))
+        {
+            nunitTestRunnerProxy = new COM.INUnitTestRunnerProxy();
+        }
+
+        var nunitTestRunner = new NUnitTestRunner(nunitTestRunnerProxy);
         Services = new ServiceCollection()
             .AddSingleton<TestLinkApi.ITestLinkApiClient, TestLinkApi.TestLinkApiClient>()
-            .AddTransient<Services.ITestRunnerEngine>(_ => new Services.TestRunnerEngine())
+            .AddSingleton<INUnitTestRunner>(_ => nunitTestRunner)
             .BuildServiceProvider();
     }
 

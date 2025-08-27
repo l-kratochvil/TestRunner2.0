@@ -2,8 +2,10 @@
 
 using Interfaces;
 
+using TestRunner.Common.COM;
+
 public class TestSuiteEntity(int id, string name, TestCaseEntity[] testcases)
-    : BaseTestEntity(id, name)
+    : BaseTestEntity(id, name), ITestSuiteEntity
 {
     private readonly int id = id;
 
