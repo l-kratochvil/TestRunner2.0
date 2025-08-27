@@ -55,4 +55,13 @@
 		<!-- Include COM server output from "echange" dir -->
 		<Content Include="$(ExchangeDir)**\*" CopyToOutputDirectory="Always" />
 	</ItemGroup>
+
+	<!-- Flatten essential reg-free COM files to the app output root -->
+	<Target Name="CopyRegFreeComToOutput" AfterTargets="Build">
+		<ItemGroup>
+			<_ComFilesToRoot Include="$(ExchangeDir)TestRunner.NUnitTestRunnerProxy.X\TestRunner.NUnitTestRunnerProxy.X.manifest" />
+			<_ComFilesToRoot Include="$(ExchangeDir)TestRunner.NUnitTestRunnerProxy.X\TestRunner.NUnitTestRunnerProxy.Server.exe" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_ComFilesToRoot)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+	</Target>
 </Project>

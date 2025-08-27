@@ -18,6 +18,13 @@
 		<ProjectReference Include="..\TestRunner.Common\TestRunner.Common.csproj" />
 	</ItemGroup>
 
+	<!-- Ensure the reg-free COM manifest ships next to the server DLL (disabled by default; in-proc not supported from .NET 8) -->
+	<ItemGroup Condition="'$(BuildRegFreeInProc)'=='true'">
+		<None Include="TestRunner.NUnitTestRunnerProxy.X.manifest">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
 	<Target Name="CopyExchangeFiles" AfterTargets="Build">
 		<PropertyGroup>
 			<DestinationDir>$(ExchangeDir)$(AssemblyName).X\</DestinationDir>
