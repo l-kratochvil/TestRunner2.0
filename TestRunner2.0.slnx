@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+  </Folder>
+  <Project Path="../DevKit/DevKit/DevKit.csproj" />
+  <Project Path="TestRunner.App.Tests/TestRunner.App.Tests.csproj" />
+  <Project Path="TestRunner.App/TestRunner.App.csproj" />
+  <Project Path="TestRunner.Common/TestRunner.Common.csproj" />
+  <Project Path="TestRunner.NUnitTestRunnerProxy.Server/TestRunner.NUnitTestRunnerProxy.Server.csproj" />
+  <Project Path="TestRunner.NUnitTestRunnerProxy/TestRunner.NUnitTestRunnerProxy.csproj" />
+</Solution>

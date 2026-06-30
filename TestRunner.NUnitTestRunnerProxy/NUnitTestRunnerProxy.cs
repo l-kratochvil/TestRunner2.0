@@ -48,6 +48,9 @@ public class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 
     // TEST: Mít knihovnu testů s test případy s výsledky: selže, projede, blokovaný
     // TODO: Dořešit filtrování testů 
+    // TODO:
+    // Není možné, aby metoda COM objektu byla async (Task nepůjde přenášet přes COM ... nebo ano?) 
+    // Navracet na místo toho objekt s property IsCompleted a při volání metody se bude skrze while čekat na dokončení?
     public async Task<TestResult> RunTestAsync(IEnumerable<TestAssemblyEntity> testEntitiesToRun)
     {
         // TODO: Ověřit, co se stane, když by tento guard nebyl aktivní a nebyla načtena knihovna
