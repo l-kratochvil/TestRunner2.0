@@ -10,7 +10,7 @@ internal class IdeVersionPromptScreen(IScreen sourceScreen)
             version =>
             {
                 TestRunConfig.Current.IdeVersion = version;
-                return new Types.RenderOutput { NextScreen = new HomeScreen() };
+                return new RenderOutput { NextScreen = new HomeScreen() };
             },
             ct)
     };

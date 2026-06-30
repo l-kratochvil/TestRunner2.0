@@ -1,12 +1,12 @@
+namespace TestRunner.App.Tests;
+
 using System;
 
 using NUnit.Framework;
 
 using TestRunner.App.TestLinkApi;
 
-namespace TestRunner.App.Tests;
-
-// TODO: Vytvoøit v TL vlastní projekt pro úèely testování TestLinkApi
+// TODO: Vytvoï¿½it v TL vlastnï¿½ projekt pro ï¿½ï¿½ely testovï¿½nï¿½ TestLinkApi
 
 [TestFixture]
 public class TestLinkApiClientTests
@@ -22,27 +22,27 @@ public class TestLinkApiClientTests
     [TestCase, Order(CtorTestCaseOrderNumber)]
     public void TestLinkApiClientCtor_WhenCalledWithValidArgs_ThenNoExceptionsThrown()
     {
-        Assert.DoesNotThrow(() => _ = new TestRunner.App.TestLinkApi.TestLinkApiClient(ApiKey, Url));
+        Assert.DoesNotThrow(() => _ = new TestLinkApiClient(ApiKey, Url));
     }
 
     [TestCase, Order(CtorTestCaseOrderNumber)]
     public void TestLinkApiClientCtor_WhenCalledWithUriEmpty_ThenTestLinkApiExceptionIsThrown()
     {
-        Assert.Throws<TestRunner.App.TestLinkApi.TestLinkApiException>(()
-            => _ = new TestRunner.App.TestLinkApi.TestLinkApiClient(ApiKey, string.Empty));
+        Assert.Throws<TestLinkApiException>(()
+            => _ = new TestLinkApiClient(ApiKey, string.Empty));
     }
 
     [TestCase, Order(CtorTestCaseOrderNumber)]
     public void TestLinkApiClientCtor_WhenCalledWithApiKeyEmpty_ThenTestLinkApiExceptionIsThrown()
     {
-        Assert.Throws<TestRunner.App.TestLinkApi.TestLinkApiException>(() => _ = new TestRunner.App.TestLinkApi.TestLinkApiClient(string.Empty, Url));
+        Assert.Throws<TestLinkApiException>(() => _ = new TestLinkApiClient(string.Empty, Url));
     }
 
     [TestCase]
     public void GetBuildsForTestPlan_WhenValidTestPlanId_ThenShouldReturnSomeProjects()
     {
         // Arrange
-        var client = new TestRunner.App.TestLinkApi.TestLinkApiClient(ApiKey, Url);
+        var client = new TestLinkApiClient(ApiKey, Url);
 
         // Act
         var projects = client.GetBuildsForTestPlan(TestPlanId);

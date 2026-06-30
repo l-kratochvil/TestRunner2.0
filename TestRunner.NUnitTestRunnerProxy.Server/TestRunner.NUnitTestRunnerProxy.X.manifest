@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
-  <assemblyIdentity type="win32" name="TestRunner.NUnitTestRunnerProxy.X" version="1.0.0.0" />
-  <!-- Local (out-of-proc) COM server: COM SxS will launch this EXE to host the class factory -->
-  <file name="TestRunner.NUnitTestRunnerProxy.Server.exe">
-    <comClass clsid="{ce5a2f7a-0b53-4daf-8f53-11f670f15b27}" progid="TestRunner.NUnitTestRunnerProxy.NUnitTestRunnerProxy" threadingModel="Both" />
-  </file>
-</assembly>

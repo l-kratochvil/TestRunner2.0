@@ -7,15 +7,15 @@ using WindowsInput.Native;
 /// </summary>
 internal abstract class BaseForwardedScreen : BaseScreen
 {
-    private readonly Lazy<Types.InterruptionCommand[]> lazyAdditionalInterruptionCommands;
+    private readonly Lazy<InterruptionCommand[]> lazyAdditionalInterruptionCommands;
 
     public BaseForwardedScreen(IScreen sourceScreen)
     {
-        lazyAdditionalInterruptionCommands = new Lazy<Types.InterruptionCommand[]>(() =>
+        lazyAdditionalInterruptionCommands = new Lazy<InterruptionCommand[]>(() =>
         [
             new() { Key = VirtualKeyCode.F1, Text = "Back", NextScreen = sourceScreen }
         ]);
     }
 
-    protected override Types.InterruptionCommand[] AdditionalInterruptionCommands => lazyAdditionalInterruptionCommands.Value;
+    protected override InterruptionCommand[] AdditionalInterruptionCommands => lazyAdditionalInterruptionCommands.Value;
 }

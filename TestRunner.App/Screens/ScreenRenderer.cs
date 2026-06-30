@@ -9,7 +9,7 @@ using WindowsInput.Native;
 /// </summary>
 internal class ScreenRenderer
 {
-    public delegate Types.RenderOutput MainRender(CancellationToken cancellationToken);
+    public delegate RenderOutput MainRender(CancellationToken cancellationToken);
 
     public delegate void StatusRender();
 
@@ -34,5 +34,5 @@ internal class ScreenRenderer
         }));
     }
 
-    public Types.InterruptionCommand[] InterruptionCommands { get; set; } = [];
+    public InterruptionCommand[] InterruptionCommands { get; set; } = [];
 }

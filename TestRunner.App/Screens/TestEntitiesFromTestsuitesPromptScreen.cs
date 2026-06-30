@@ -35,7 +35,7 @@ internal class TestEntitiesFromTestsuitesPromptScreen(IScreen sourceScreen)
                         .Union(selectedTestSuites)
                         .ToArray();
 
-                    return new Types.RenderOutput { NextScreen = new HomeScreen() };
+                    return new RenderOutput { NextScreen = new HomeScreen() };
                 },
                 ct);
         }

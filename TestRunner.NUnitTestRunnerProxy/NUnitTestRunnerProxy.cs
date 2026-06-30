@@ -1,94 +1,96 @@
-﻿namespace TestRunner.NUnitTestRunnerProxy;
+namespace TestRunner.NUnitTestRunnerProxy;
 
-using NUnit;
 using NUnit.Framework.Api;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 
-using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
-using TestRunner.Common.COM;
+using TestRunner.Common;
 using TestRunner.Common.ComplexTypes;
+using TestRunner.Common.Services;
 
 using TestResult = Common.TestResult;
 using TestStatus = Common.ComplexTypes.TestStatus;
 
 /// <summary>
-/// Implementation of <see cref="INUnitTestRunnerProxy"/> COM interface.
+/// Out-of-process NUnit test runner. Hosts the .NET Framework <see cref="ITestAssemblyRunner"/>
+/// and is exposed to the application over StreamJsonRpc.
 /// </summary>
-[Guid(Guids.NUnitTestRunnerProxyClassGuid)] // REMINDER: This GUID has to be used in the COM server manifest file
-[ComVisible(true)]
-public class NUnitTestRunnerProxy : INUnitTestRunnerProxy
+public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 {
-    // NOTE: The working solution is in the TestRunnerUI project
-
-    public bool IsAssemblyLoaded => runner.IsTestLoaded;
-
-    public bool IsTestRunning => runner.IsTestRunning;
-
     private readonly ITestAssemblyRunner runner = new NUnitTestAssemblyRunner(new DefaultTestAssemblyBuilder());
 
-    // TEST
-    public TestAssemblyEntity LoadTestAssembly(string path)
-    {
-        var testAssesmblyElement = runner.Load(path, new Dictionary<string, object>());
+    public Task<bool> GetIsAssemblyLoadedAsync(CancellationToken cancellationToken = default)
+        => Task.FromResult(runner.IsTestLoaded);
 
-        if (!testAssesmblyElement.Tests.Any())
+    public Task<bool> GetIsTestRunningAsync(CancellationToken cancellationToken = default)
+        => Task.FromResult(runner.IsTestRunning);
+
+    public Task<TestAssemblyEntity> LoadTestAssemblyAsync(string path, CancellationToken cancellationToken = default)
+        => Task.Run(() =>
         {
-            return TestAssemblyEntity.Default;
-        }
+            var testAssemblyElement = runner.Load(path, new Dictionary<string, object>());
 
-        var rootTestSuiteElement = testAssesmblyElement.Tests[0]; // Root test element = Z200Tests namespace
-        return TransformITestToTestEntities(rootTestSuiteElement);
-    }
+            if (!testAssemblyElement.Tests.Any())
+            {
+                return TestAssemblyEntity.Default;
+            }
 
-    // TEST: Mít knihovnu testů s test případy s výsledky: selže, projede, blokovaný
-    // TODO: Dořešit filtrování testů 
-    // TODO:
-    // Není možné, aby metoda COM objektu byla async (Task nepůjde přenášet přes COM ... nebo ano?) 
-    // Navracet na místo toho objekt s property IsCompleted a při volání metody se bude skrze while čekat na dokončení?
-    public async Task<TestResult> RunTestAsync(IEnumerable<TestAssemblyEntity> testEntitiesToRun)
+            var rootTestSuiteElement = testAssemblyElement.Tests[0]; // Root test element = namespace
+            return TransformITestToTestEntities(rootTestSuiteElement);
+        }, cancellationToken);
+
+    public Task<TestResult> RunTestAsync(IEnumerable<TestAssemblyEntity> testsToRun, CancellationToken cancellationToken = default)
     {
-        // TODO: Ověřit, co se stane, když by tento guard nebyl aktivní a nebyla načtena knihovna
         if (!runner.IsTestLoaded)
         {
-            throw new Exception("Test assembly wasn't loaded yet");
+            throw new InvalidOperationException("Test assembly wasn't loaded yet");
         }
 
-        TNode testFilterNode = new("filter");
-        FillFilterNodeWithTestEntities(testFilterNode, testEntitiesToRun);
+        var testFilterNode = new TNode("filter");
+        FillFilterNodeWithTestEntities(testFilterNode, testsToRun);
         var testFilter = TestFilter.FromXml(testFilterNode);
 
-        return await Task.Run(() =>
+        // Cancellation forcibly aborts the in-progress run.
+        var cancellationRegistration = cancellationToken.Register(() => runner.StopRun(force: true));
+
+        return Task.Run(() =>
         {
-            var result = runner.Run(TestListener.NULL, testFilter);
-            return new TestResult(
-                result.ResultState.Status switch
-                {
-                    NUnit.Framework.Interfaces.TestStatus.Passed => TestStatus.Passed,
-                    NUnit.Framework.Interfaces.TestStatus.Failed => TestStatus.Failed,
-                    NUnit.Framework.Interfaces.TestStatus.Skipped => TestStatus.Skipped,
-                    NUnit.Framework.Interfaces.TestStatus.Inconclusive => TestStatus.Inconclusive,
-                    NUnit.Framework.Interfaces.TestStatus.Warning => TestStatus.Warning,
-                    _ => TestStatus.Unknown
-                });
-        });
+            try
+            {
+                var result = runner.Run(TestListener.NULL, testFilter);
+                return new TestResult(
+                    result.ResultState.Status switch
+                    {
+                        NUnit.Framework.Interfaces.TestStatus.Passed => TestStatus.Passed,
+                        NUnit.Framework.Interfaces.TestStatus.Failed => TestStatus.Failed,
+                        NUnit.Framework.Interfaces.TestStatus.Skipped => TestStatus.Skipped,
+                        NUnit.Framework.Interfaces.TestStatus.Inconclusive => TestStatus.Inconclusive,
+                        NUnit.Framework.Interfaces.TestStatus.Warning => TestStatus.Warning,
+                        _ => TestStatus.Unknown
+                    });
+            }
+            finally
+            {
+                cancellationRegistration.Dispose();
+            }
+        }, cancellationToken);
     }
 
-    // TEST: Pro parametr bude použit Stub
-    public static TestAssemblyEntity TransformITestToTestEntities(ITest test)
+    private static TestAssemblyEntity TransformITestToTestEntities(ITest test)
     {
         const string parameterizedMethodTypeName = "parameterizedmethod";
 
         var children = test.Tests
-            .Where(test => Regex.IsMatch(test.TestType.ToLower(), $"testsuite|testfixture|{parameterizedMethodTypeName}"))
-            .Select(test => test.TestType.ToLower().Equals(parameterizedMethodTypeName)
-                ? new TestAssemblyEntity(DetermineTestType(test), test.Tests[0].Name, test.Tests[0].FullName)
-                : TransformITestToTestEntities(test))
+            .Where(t => Regex.IsMatch(t.TestType.ToLower(), $"testsuite|testfixture|{parameterizedMethodTypeName}"))
+            .Select(t => t.TestType.ToLower().Equals(parameterizedMethodTypeName)
+                ? new TestAssemblyEntity(DetermineTestType(t), t.Tests[0].Name, t.Tests[0].FullName)
+                : TransformITestToTestEntities(t))
             .ToArray();
 
         return new TestAssemblyEntity(DetermineTestType(test), test.Name, test.FullName, children);
@@ -113,22 +115,5 @@ public class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                 FillFilterNodeWithTestEntities(filterNode, testEntity.Children);
             }
         }
-    }
-
-    public void StopTest(bool force = true)
-    {
-        runner.StopRun(force);
-    }
-
-    public ITestSuiteEntity[] GetTestSuiteEntities(string dllPath)
-    {
-        var settings = new Dictionary<string, object>()
-        {
-            { FrameworkPackageSettings.WorkDirectory, dllPath }
-        };
-
-        // TODO: this.TestSuites = runner.Load(Path.Combine(dllPath), settings)...
-
-        throw new NotImplementedException();
     }
 }

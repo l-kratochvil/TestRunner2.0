@@ -41,7 +41,7 @@ namespace TestRunner.App.TestLinkApi
         /// <summary>
         /// temporarily stores current errors
         /// </summary>
-        public List<TestRunner.App.TestLinkApi.Types.TestLinkErrorMessage> errors;
+        public List<TestLinkErrorMessage> errors;
 
         /// <summary>
         /// basic Constructor
@@ -67,7 +67,7 @@ namespace TestRunner.App.TestLinkApi
         /// constructor that takes a list of error messages
         /// </summary>
         /// <param name="errs"></param>
-        public TestLinkApiException(List<TestRunner.App.TestLinkApi.Types.TestLinkErrorMessage> errs)
+        public TestLinkApiException(List<TestLinkErrorMessage> errs)
             : base("TestLinkApiException: testlink returned error messages. See errors")
         {
             errors = errs;
@@ -80,7 +80,7 @@ namespace TestRunner.App.TestLinkApi
         /// </summary>
         /// <param name="msg"></param>
         /// <param name="errs"></param>
-        public TestLinkApiException(string msg, List<TestRunner.App.TestLinkApi.Types.TestLinkErrorMessage> errs)
+        public TestLinkApiException(string msg, List<TestLinkErrorMessage> errs)
             : base(msg)
         {
             errors = errs;

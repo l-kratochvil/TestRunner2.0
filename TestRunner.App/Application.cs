@@ -5,28 +5,19 @@ using Microsoft.Extensions.DependencyInjection;
 using NUnit;
 using NUnit.Framework.Api;
 
-using System.Reflection;
-
-using TestRunner.App.Services;
+using DevKit.Core.Extensions.Types;
 
 internal class Application
 {
     public static IServiceProvider Services { get; set; }
 
-    static Application()
+    /// <summary>
+    /// Registers the application's shared services. The out-of-process NUnit runner proxy is registered
+    /// separately by the composition root (or by tests, which can substitute a fake implementation).
+    /// </summary>
+    public static void ConfigureServices(IServiceCollection services)
     {
-        var manifestPath = Path.ChangeExtension(Assembly.GetExecutingAssembly().Location, "manifest");
-        COM.INUnitTestRunnerProxy nunitTestRunnerProxy;
-        using (new DevKit.UtilityObjects.ComHostActivationContext(manifestPath))
-        {
-            nunitTestRunnerProxy = new COM.INUnitTestRunnerProxy();
-        }
-
-        var nunitTestRunner = new NUnitTestRunner(nunitTestRunnerProxy);
-        Services = new ServiceCollection()
-            .AddSingleton<TestLinkApi.ITestLinkApiClient, TestLinkApi.TestLinkApiClient>()
-            .AddSingleton<INUnitTestRunner>(_ => nunitTestRunner)
-            .BuildServiceProvider();
+        services.AddSingleton<TestLinkApi.ITestLinkApiClient, TestLinkApi.TestLinkApiClient>();
     }
 
     public void Run()
@@ -35,7 +26,7 @@ internal class Application
 
         try
         {
-            MainRender(new TestRunner.App.Screens.HomeScreen());
+            MainRender(new Screens.HomeScreen());
         }
         catch (Exception ex)
         {
@@ -53,7 +44,7 @@ internal class Application
         }
     }
 
-    public static void MainRender(TestRunner.App.Screens.IScreen initScreen)
+    public static void MainRender(Screens.IScreen initScreen)
     {
         var currentScreen = initScreen;
 

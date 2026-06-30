@@ -52,7 +52,7 @@ namespace TestRunner.App.TestLinkApi
 
         [XmlRpcMethod("tl.createTestCase", StructParams = true)]
         object createTestCase(string devKey, string authorlogin, int testsuiteid, string testcasename, int testprojectid,
-                              string summary, TestRunner.App.TestLinkApi.Types.TestStep[] steps, string keywords,
+                              string summary, TestStep[] steps, string keywords,
                               int order, int checkduplicatedname, string actiononduplicatedname, int executiontype, int importance);
 
         [XmlRpcMethod("tl.addTestCaseToTestPlan", StructParams = true)]

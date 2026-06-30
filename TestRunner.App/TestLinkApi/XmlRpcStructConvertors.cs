@@ -9,17 +9,17 @@ namespace TestRunner.App.TestLinkApi
 {
     public static class XmlRpcStructConvertors
     {
-        internal static TestRunner.App.TestLinkApi.Types.TestLinkErrorMessage ToTestLinkErrorMessage(XmlRpcStruct data)
+        internal static TestLinkErrorMessage ToTestLinkErrorMessage(XmlRpcStruct data)
         {
-            var item = new TestRunner.App.TestLinkApi.Types.TestLinkErrorMessage();
+            var item = new TestLinkErrorMessage();
             item.code = ToInt(data, "code");
             item.message = (string)data["message"];
             return item;
         }
 
-        internal static TestRunner.App.TestLinkApi.Types.GeneralResult ToGeneralResult(XmlRpcStruct data)
+        internal static GeneralResult ToGeneralResult(XmlRpcStruct data)
         {
-            var item = new TestRunner.App.TestLinkApi.Types.GeneralResult();
+            var item = new GeneralResult();
             item.operation = (string)data["operation"];
             item.status = (bool)data["status"];
             item.id = ToInt(data, "id");
@@ -38,9 +38,9 @@ namespace TestRunner.App.TestLinkApi
         ///  constructor used by XMLRPC interface on decoding the function return
         /// </summary>
         /// <param name="data">data returned by Testlink</param>
-        internal static TestRunner.App.TestLinkApi.Types.AttachmentRequestResponse ToAttachmentRequestResponse(XmlRpcStruct data)
+        internal static AttachmentRequestResponse ToAttachmentRequestResponse(XmlRpcStruct data)
         {
-            var item = new TestRunner.App.TestLinkApi.Types.AttachmentRequestResponse();
+            var item = new AttachmentRequestResponse();
             item.foreignKeyId = ToInt(data, "fk_id");
             item.linkedTableName = (string)data["fk_table"];
             item.title = (string)data["title"];
@@ -56,9 +56,9 @@ namespace TestRunner.App.TestLinkApi
         ///  constructor used by XMLRPC interface on decoding the function return
         /// </summary>
         /// <param name="data">data returned by Testlink</param>
-        internal static TestRunner.App.TestLinkApi.Types.AdditionalInfo ToAdditionalInfo(XmlRpcStruct data)
+        internal static AdditionalInfo ToAdditionalInfo(XmlRpcStruct data)
         {
-            var item = new TestRunner.App.TestLinkApi.Types.AdditionalInfo();
+            var item = new AdditionalInfo();
             item.new_name = (string)data["new_name"];
             item.status_ok = ToInt(data, "status_ok") == 1;
             item.msg = (string)data["msg"];
@@ -70,9 +70,9 @@ namespace TestRunner.App.TestLinkApi
             return item;
         }
 
-        internal static TestRunner.App.TestLinkApi.Types.Build ToBuild(XmlRpcStruct data)
+        internal static Build ToBuild(XmlRpcStruct data)
         {
-            var item = new TestRunner.App.TestLinkApi.Types.Build();
+            var item = new Build();
             item.id = ToInt(data, "id");
             item.active = ToInt(data, "active") == 1;
             item.name = (string)data["name"];
@@ -84,9 +84,9 @@ namespace TestRunner.App.TestLinkApi
         }
 
 
-        internal static TestRunner.App.TestLinkApi.Types.TestCaseFromTestSuite ToTestCaseFromTestSuite(XmlRpcStruct data)
+        internal static TestCaseFromTestSuite ToTestCaseFromTestSuite(XmlRpcStruct data)
         {
-            var item = new TestRunner.App.TestLinkApi.Types.TestCaseFromTestSuite();
+            var item = new TestCaseFromTestSuite();
             item.active = int.Parse((string)data["active"]) == 1;
             item.id = ToInt(data, "id");
             item.name = (string)data["name"];
@@ -124,9 +124,9 @@ namespace TestRunner.App.TestLinkApi
         ///  constructor used by the XML Rpc return
         /// </summary>
         /// <param name="data"></param>
-        internal static TestRunner.App.TestLinkApi.Types.TestStep ToTestStep(XmlRpcStruct data)
+        internal static TestStep ToTestStep(XmlRpcStruct data)
         {
-            var item = new TestRunner.App.TestLinkApi.Types.TestStep();
+            var item = new TestStep();
             item.id = ToInt(data, "id");
             item.step_number = ToInt(data, "step_number");
             item.actions = (string)data["actions"];
@@ -141,9 +141,9 @@ namespace TestRunner.App.TestLinkApi
         ///  constructor used by XMLRPC interface on decoding the function return
         /// </summary>
         /// <param name="data">data returned by Testlink</param>
-        internal static TestRunner.App.TestLinkApi.Types.TestSuite ToTestSuite(XmlRpcStruct data)
+        internal static TestSuite ToTestSuite(XmlRpcStruct data)
         {
-            var item = new TestRunner.App.TestLinkApi.Types.TestSuite();
+            var item = new TestSuite();
             item._name = (string)data["name"];
             item._id = ToInt(data, "id");
             item._details = (string)data["details"];
@@ -158,9 +158,9 @@ namespace TestRunner.App.TestLinkApi
         /// <summary>
         /// </summary>
         /// <param name="data"></param>
-        internal static TestRunner.App.TestLinkApi.Types.TestPlatform ToTestPlatform(XmlRpcStruct data)
+        internal static TestPlatform ToTestPlatform(XmlRpcStruct data)
         {
-            var item = new TestRunner.App.TestLinkApi.Types.TestPlatform();
+            var item = new TestPlatform();
             item.id = ToInt(data, "id");
             item.name = (string)data["name"];
             item.notes = (string)data["notes"];

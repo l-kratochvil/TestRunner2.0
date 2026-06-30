@@ -21,7 +21,7 @@ internal partial class RuntimeVersionPromptScreen(IScreen sourceScreen)
                 version =>
                 {
                     TestRunConfig.Current.RuntimeVersion = version;
-                    return new Types.RenderOutput { NextScreen = new HomeScreen() };
+                    return new RenderOutput { NextScreen = new HomeScreen() };
                 },
                 ct);
         }

@@ -5,18 +5,18 @@ using WindowsInput;
 
 internal abstract class BaseScreen : IScreen
 {
-    private readonly Lazy<Types.InterruptionCommand[]> lazyInterruptionCommands;
+    private readonly Lazy<InterruptionCommand[]> lazyInterruptionCommands;
     private readonly Lazy<ScreenRenderer> lazyRenderer;
 
     private readonly InputSimulator inputSimulator = new();
 
     protected BaseScreen()
     {
-        lazyInterruptionCommands = new Lazy<Types.InterruptionCommand[]>(() =>
+        lazyInterruptionCommands = new Lazy<InterruptionCommand[]>(() =>
         [
-            new Types.InterruptionCommand { Key = VirtualKeyCode.ESCAPE, Text = "Exit", NextScreen = new ExitScreen(this) },
+            new InterruptionCommand { Key = VirtualKeyCode.ESCAPE, Text = "Exit", NextScreen = new ExitScreen(this) },
             ..AdditionalInterruptionCommands,
-            new Types.InterruptionCommand { Key = VirtualKeyCode.F12, Text = "Settings", NextScreen = new SettingsScreen(this) }
+            new InterruptionCommand { Key = VirtualKeyCode.F12, Text = "Settings", NextScreen = new SettingsScreen(this) }
         ]);
 
         lazyRenderer = new Lazy<ScreenRenderer>(
@@ -28,15 +28,15 @@ internal abstract class BaseScreen : IScreen
         );
     }
 
-    protected virtual Types.InterruptionCommand[] AdditionalInterruptionCommands { get; } = [];
+    protected virtual InterruptionCommand[] AdditionalInterruptionCommands { get; } = [];
 
-    protected Types.InterruptionCommand[] InterruptionCommands => lazyInterruptionCommands.Value;
+    protected InterruptionCommand[] InterruptionCommands => lazyInterruptionCommands.Value;
 
     protected ScreenRenderer Renderer => lazyRenderer.Value;
 
     protected abstract ScreenRenderer CreateRenderer();
 
-    public async Task<Types.RenderOutput> Render()
+    public async Task<RenderOutput> Render()
     {
         Clear();
 
@@ -55,7 +55,7 @@ internal abstract class BaseScreen : IScreen
         }
 
         return output.Interrupted
-            ? new Types.RenderOutput
+            ? new RenderOutput
             {
                 Interrupted = true,
                 InterruptionCommand = InterruptionCommands.FirstOrDefault(command => command.Key == interuptRenderByKeyTask.Result)
@@ -65,20 +65,18 @@ internal abstract class BaseScreen : IScreen
             : output;
     }
 
-    protected static Types.RenderOutput ShowPrompt<T>(IPrompt<T> prompt, Func<T, Types.RenderOutput> onSucces, CancellationToken ct)
-        => TestRunner.App.Utils.ConsoleUtils.ShowPrompt(prompt, ct, out var result)
-            ? new Types.RenderOutput { Interrupted = true }
+    protected static RenderOutput ShowPrompt<T>(IPrompt<T> prompt, Func<T, RenderOutput> onSucces, CancellationToken ct)
+        => ConsoleUtils.ShowPrompt(prompt, ct, out var result)
+            ? new RenderOutput { Interrupted = true }
             : onSucces(result);
 
     private async Task<VirtualKeyCode> InteruptRenderByKeyAsync(CancellationTokenSource renderCts, CancellationToken ct)
     {
         VirtualKeyCode GetPressedKey()
-        {
-            return Enum.GetValues(typeof(VirtualKeyCode))
+            => Enum.GetValues<VirtualKeyCode>()
                 .Cast<VirtualKeyCode>()
                 .FirstOrDefault(inputSimulator.InputDeviceState.IsKeyDown);
-        }
-
+        
         const int waitTimeMs = 10;
 
         return await Task.Run(async () =>

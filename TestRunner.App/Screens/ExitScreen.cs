@@ -8,7 +8,7 @@ internal class ExitScreen(IScreen sourceScreen)
     {
         Main = ct => ShowPrompt(
             new ConfirmationPrompt("Exit?").No('n').Yes('y'),
-            confirmed => confirmed ? new Types.RenderOutput { Exit = true } : new Types.RenderOutput { NextScreen = new HomeScreen() },
+            confirmed => confirmed ? new RenderOutput { Exit = true } : new RenderOutput { NextScreen = new HomeScreen() },
             ct)
     };
 }

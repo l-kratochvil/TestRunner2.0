@@ -22,7 +22,7 @@ internal class Types
         /// <summary>
         /// Next screen to render
         /// </summary>
-        public TestRunner.App.Screens.IScreen? NextScreen { get; init; }
+        public IScreen? NextScreen { get; init; }
 
         public InterruptionCommand? InterruptionCommand { get; init; }
 
@@ -40,6 +40,6 @@ internal class Types
 
         public required string Text { get; init; }
 
-        public required TestRunner.App.Screens.IScreen NextScreen { get; init; }
+        public required IScreen NextScreen { get; init; }
     }
 }

@@ -117,7 +117,7 @@ namespace TestRunner.App.TestLinkApi
             return true; // The errors matched to the expectations
         }
 
-        private static List<TestRunner.App.TestLinkApi.Types.TestLinkErrorMessage> DecodeErrors(object[] messages)
+        private static List<TestLinkErrorMessage> DecodeErrors(object[] messages)
             => messages
                 .Cast<XmlRpcStruct>()
                 .Where(message => message.ContainsKey("code") && message.ContainsKey("message"))
@@ -128,7 +128,7 @@ namespace TestRunner.App.TestLinkApi
         /// </summary>
         /// <param name="testPlanId">The id of the testplan</param>
         /// <returns>A list (may be empty)</returns>
-        public TestRunner.App.TestLinkApi.Types.Build[] GetBuildsForTestPlan(int testPlanId)
+        public Build[] GetBuildsForTestPlan(int testPlanId)
         {
             var response = proxy.getBuildsForTestPlan(devkey, testPlanId);
 
@@ -149,7 +149,7 @@ namespace TestRunner.App.TestLinkApi
         /// <param name="buildName">name of the build</param>
         /// <param name="buildNotes">notes</param>
         /// <returns>General Result object</returns>
-        public TestRunner.App.TestLinkApi.Types.GeneralResult CreateBuild(int testPlanId, string buildName, string buildNotes)
+        public GeneralResult CreateBuild(int testPlanId, string buildName, string buildNotes)
         {
             // REFACTORED BUT NOT TESTED
 
@@ -181,7 +181,7 @@ namespace TestRunner.App.TestLinkApi
         /// <param name="buildId">If not given, then highest build id willl be used</param>
         /// <param name="bugId">Id for a bug if used in conjunction with a defect tracker</param>
         /// <returns></returns>
-        public TestRunner.App.TestLinkApi.Types.GeneralResult UploadTestCaseExecutionResult(
+        public GeneralResult UploadTestCaseExecutionResult(
             int testCaseId,
             int testplanid,
             string status,
@@ -233,7 +233,7 @@ namespace TestRunner.App.TestLinkApi
 
             if (response is not object[] { Length: > 0 } responseList)
             {
-                return new TestRunner.App.TestLinkApi.Types.GeneralResult();
+                return new GeneralResult();
             }
 
             var msg = (XmlRpcStruct)responseList[0];
@@ -253,7 +253,7 @@ namespace TestRunner.App.TestLinkApi
         /// <param name="fileType">The file type of the Attachment (e.g.: text/plain)</param>
         /// <param name="content">The content (Base64 encoded) of the Attachment</param>
         /// <returns>An AttachmentRequestResponse</returns>
-        public TestRunner.App.TestLinkApi.Types.AttachmentRequestResponse UploadExecutionAttachment(
+        public AttachmentRequestResponse UploadExecutionAttachment(
             int executionId, string filename, string fileType, byte[] content,
             string title = "", string description = "")
         {
@@ -282,7 +282,7 @@ namespace TestRunner.App.TestLinkApi
         /// <param name="testSuiteId">Id of the test suite</param>
         /// <param name="deep">Set the deep flag to false if you only want test cases in the test suite provided and no child test cases.</param>
         /// <returns>A list of Test Cases</returns>
-        public TestRunner.App.TestLinkApi.Types.TestCaseFromTestSuite[] GetTestCasesForTestSuite(int testSuiteId, bool deep)
+        public TestCaseFromTestSuite[] GetTestCasesForTestSuite(int testSuiteId, bool deep)
         {
             var response = proxy.getTestCasesForTestSuite(devkey, testSuiteId, deep, "full");
             if (response is string && (string)response == string.Empty) // equals null return
@@ -305,7 +305,7 @@ namespace TestRunner.App.TestLinkApi
         /// <remarks>Throws an exception of type Testlink Exception</remarks>
         /// <param name="testplanid"></param>
         /// <returns>a list of testplan platforms</returns>
-        public TestRunner.App.TestLinkApi.Types.TestPlatform[] GetTestPlanPlatforms(int testplanid)
+        public TestPlatform[] GetTestPlanPlatforms(int testplanid)
         {
             var response = proxy.getTestPlanPlatforms(devkey, testplanid);
 
@@ -322,7 +322,7 @@ namespace TestRunner.App.TestLinkApi
         /// </summary>
         /// <param name="testProjectId"></param>
         /// <returns></returns>
-        public TestRunner.App.TestLinkApi.Types.TestSuite[] GetFirstLevelTestSuitesForTestProject(int testProjectId)
+        public TestSuite[] GetFirstLevelTestSuitesForTestProject(int testProjectId)
         {
             var response = proxy.getFirstLevelTestSuitesForTestProject(devkey, testProjectId);
             var errors = DecodeErrors(response);
@@ -336,7 +336,7 @@ namespace TestRunner.App.TestLinkApi
             return response.Cast<XmlRpcStruct>().Select(XmlRpcStructConvertors.ToTestSuite).ToArray();
         }
 
-        public TestRunner.App.TestLinkApi.Types.TestSuite[] GetTestSuitesForTestSuite(int testSuiteId)
+        public TestSuite[] GetTestSuitesForTestSuite(int testSuiteId)
         {
             var response = proxy.getTestSuitesForTestSuite(devkey, testSuiteId);
             // Testlink returns an empty string if a test suite has no child test suites
@@ -356,7 +356,7 @@ namespace TestRunner.App.TestLinkApi
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public TestRunner.App.TestLinkApi.Types.TestSuite? GetTestSuiteById(int id)
+        public TestSuite? GetTestSuiteById(int id)
         {
             var response = proxy.getTestSuiteByID(devkey, id);
             return CheckErrorMessage(response, 8000) ? null : XmlRpcStructConvertors.ToTestSuite((XmlRpcStruct)response);

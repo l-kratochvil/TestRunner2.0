@@ -19,7 +19,7 @@ internal sealed class HomeScreen : BaseScreen
 
             return ShowPrompt(
                 prompt,
-                choice => new Types.RenderOutput
+                choice => new RenderOutput
                 {
                     NextScreen = choice.Type switch
                     {

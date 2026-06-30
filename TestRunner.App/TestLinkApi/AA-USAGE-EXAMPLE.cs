@@ -34,10 +34,10 @@ namespace TestRunner.App.TestLinkApi
             var testSuites = GetAllTestSuitesAndTestCases(testProjectId);
         }
 
-        List<TestRunner.App.TestLinkApi.Types.TestSuite> GetAllTestSuitesAndTestCases(int testProjectId)
+        List<TestSuite> GetAllTestSuitesAndTestCases(int testProjectId)
         {
             var testSuitesForTestProject = apiClient.GetFirstLevelTestSuitesForTestProject(testProjectId);
-            var suites = new List<TestRunner.App.TestLinkApi.Types.TestSuite>();
+            var suites = new List<TestSuite>();
 
             foreach (var testSuite in testSuitesForTestProject)
             {
@@ -49,13 +49,13 @@ namespace TestRunner.App.TestLinkApi
             return suites;
         }
 
-        string GetInformationForTester(TestRunner.App.TestLinkApi.Types.TestSuite testSuite)
+        string GetInformationForTester(TestSuite testSuite)
         {
             var text = TransformFromHTMLDocToText(testSuite);
             return GetMatchedTextForTester(text);
         }
 
-        string TransformFromHTMLDocToText(TestRunner.App.TestLinkApi.Types.TestSuite testSuite)
+        string TransformFromHTMLDocToText(TestSuite testSuite)
         {
             var doc = new HtmlDocument();
             doc.LoadHtml(testSuite._details);
@@ -77,9 +77,9 @@ namespace TestRunner.App.TestLinkApi
         }
 
 
-        TestRunner.App.TestLinkApi.Types.TestSuite GetTestSuitesAndCases(TestRunner.App.TestLinkApi.Types.TestSuite testSuite)
+        TestSuite GetTestSuitesAndCases(TestSuite testSuite)
         {
-            var suite = new TestRunner.App.TestLinkApi.Types.TestSuite(testSuite._id, testSuite._name, testSuite._details, testSuite._nodeOrder,
+            var suite = new TestSuite(testSuite._id, testSuite._name, testSuite._details, testSuite._nodeOrder,
                 testSuite._nodeTypeId,
                 testSuite._parentId);
             var tc = apiClient.GetTestCasesForTestSuite(testSuite._id, false);
@@ -109,20 +109,20 @@ namespace TestRunner.App.TestLinkApi
         {
             foreach (var result in Result)
             {
-                TestRunner.App.TestLinkApi.Types.TestPlatform testPlatform = apiClient.GetTestPlanPlatforms(result.testPlanId).First();
+                TestPlatform testPlatform = apiClient.GetTestPlanPlatforms(result.testPlanId).First();
 
                 if (!apiClient.GetBuildsForTestPlan(result.testPlanId).Any(x => x.name == build))
                 {
                     apiClient.CreateBuild(result.testPlanId, build, "");
                 }
 
-                TestRunner.App.TestLinkApi.Types.Build testBuild = apiClient.GetBuildsForTestPlan(result.testPlanId).First(x => x.name == build);
+                Build testBuild = apiClient.GetBuildsForTestPlan(result.testPlanId).First(x => x.name == build);
 
                 // NOTE: testcase/testsuite ID se získá: Specifikace testů >> pravé tl. myši na test. příp. ve stromu
-                TestRunner.App.TestLinkApi.Types.TestCaseFromTestSuite[] testsuiteTestcases =
+                TestCaseFromTestSuite[] testsuiteTestcases =
                     apiClient.GetTestCasesForTestSuite(result.testSuiteId, true);
 
-                TestRunner.App.TestLinkApi.Types.TestCaseFromTestSuite
+                TestCaseFromTestSuite
                     testcase = testsuiteTestcases.First(x
                         => x.external_id == result.testCaseId.ToString()); // 44 je číselná složka z ID ve formátu Z200-XX (Z200-44)
                 int testcaseApiId = testcase.id;

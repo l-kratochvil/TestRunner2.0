@@ -18,7 +18,7 @@ internal class SettingsScreen(IScreen sourceScreen)
 
             AnsiConsole.Console.Input.ReadKey(true);
 
-            return new Types.RenderOutput { NextScreen = new HomeScreen() };
+            return new RenderOutput { NextScreen = new HomeScreen() };
         }
     };
 }
