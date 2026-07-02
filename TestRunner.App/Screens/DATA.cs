@@ -1,6 +1,7 @@
-﻿using TestRunner.Common.ComplexTypes;
+﻿namespace TestRunner.App.Screens;
 
-namespace TestRunner.App.Screens;
+using TestRunner.Common.ComplexTypes;
+
 // TODO: Remove after loading real test entties data
 
 // TODO: Fetch from TestLink

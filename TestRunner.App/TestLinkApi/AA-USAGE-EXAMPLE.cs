@@ -1,10 +1,10 @@
-﻿using HtmlAgilityPack;
+﻿using System.Text.RegularExpressions;
+
+using HtmlAgilityPack;
 
 using Microsoft.Extensions.DependencyInjection;
-
+// TOOD: Remove this reference (only NUnitRunnerProxy should know about NUnit)
 using NUnit.Framework.Interfaces;
-
-using System.Text.RegularExpressions;
 
 using TestRunner.App.TestLinkApi.Types;
 
@@ -12,36 +12,39 @@ using TestRunner.App.TestLinkApi.Types;
 
 namespace TestRunner.App.TestLinkApi
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
     class Program
     {
         private const string ApiKey = "dc7a17e14a9f1879d38583a38c3a81e8";
 
         private const string Url = "https://vyvoj.zat.lan/tester/testlink/lib/api/xmlrpc/v1/xmlrpc.php";
 
-        private readonly ITestLinkApiClient apiClient = Application.Services.GetService<ITestLinkApiClient>() ??
-                                                        throw new Exception("ITestLinkApiClient is not registered in the service collection");
+        private readonly TestLinkApiClient apiClient = new(AppSystemConfig.CreateDefault());
 
         void Main(string[] args)
         {
             const int testProjectId = 6302;
 
-            var projectTestsuites = apiClient.GetFirstLevelTestSuitesForTestProject(testProjectId);
+            var projectTestsuites = this.apiClient.GetFirstLevelTestSuitesForTestProject(testProjectId);
 
-            var testsuite = apiClient.GetTestSuiteById(9572);
+            var testsuite = this.apiClient.GetTestSuiteById(9572);
 
-            var info = GetInformationForTester(testsuite);
+            var info = this.GetInformationForTester(testsuite);
 
-            var testSuites = GetAllTestSuitesAndTestCases(testProjectId);
+            var testSuites = this.GetAllTestSuitesAndTestCases(testProjectId);
         }
 
         List<TestSuite> GetAllTestSuitesAndTestCases(int testProjectId)
         {
-            var testSuitesForTestProject = apiClient.GetFirstLevelTestSuitesForTestProject(testProjectId);
+            var testSuitesForTestProject = this.apiClient.GetFirstLevelTestSuitesForTestProject(testProjectId);
             var suites = new List<TestSuite>();
 
             foreach (var testSuite in testSuitesForTestProject)
             {
-                var _ts = GetTestSuitesAndCases(testSuite);
+                var _ts = this.GetTestSuitesAndCases(testSuite);
 
                 suites.Add(_ts);
             }
@@ -51,8 +54,8 @@ namespace TestRunner.App.TestLinkApi
 
         string GetInformationForTester(TestSuite testSuite)
         {
-            var text = TransformFromHTMLDocToText(testSuite);
-            return GetMatchedTextForTester(text);
+            var text = this.TransformFromHTMLDocToText(testSuite);
+            return this.GetMatchedTextForTester(text);
         }
 
         string TransformFromHTMLDocToText(TestSuite testSuite)
@@ -72,7 +75,7 @@ namespace TestRunner.App.TestLinkApi
 
             string userText = match.Groups[1].Value.Trim();
 
-            if (userText == "") throw new Exception("The match for this text cannot be found.");
+            if (userText == string.Empty) throw new Exception("The match for this text cannot be found.");
             return userText;
         }
 
@@ -82,8 +85,8 @@ namespace TestRunner.App.TestLinkApi
             var suite = new TestSuite(testSuite._id, testSuite._name, testSuite._details, testSuite._nodeOrder,
                 testSuite._nodeTypeId,
                 testSuite._parentId);
-            var tc = apiClient.GetTestCasesForTestSuite(testSuite._id, false);
-            var ts = apiClient.GetTestSuitesForTestSuite(testSuite._id);
+            var tc = this.apiClient.GetTestCasesForTestSuite(testSuite._id, false);
+            var ts = this.apiClient.GetTestSuitesForTestSuite(testSuite._id);
 
             for (int i = 0; i < tc.Length; i++)
             {
@@ -95,7 +98,7 @@ namespace TestRunner.App.TestLinkApi
             {
                 for (int i = 0; i < ts.Length; i++)
                 {
-                    var childSuite = GetTestSuitesAndCases(ts[i]);
+                    var childSuite = this.GetTestSuitesAndCases(ts[i]);
                     suite.AddTestSuite(childSuite);
                 }
             }
@@ -105,22 +108,22 @@ namespace TestRunner.App.TestLinkApi
 
 
         void SaveTestResults(string build,
-                             (TestStatus status, int testPlanId, int testSuiteId, int testCaseId, string notes)[] Result)
+            (TestStatus status, int testPlanId, int testSuiteId, int testCaseId, string notes)[] Result)
         {
             foreach (var result in Result)
             {
-                TestPlatform testPlatform = apiClient.GetTestPlanPlatforms(result.testPlanId).First();
+                TestPlatform testPlatform = this.apiClient.GetTestPlanPlatforms(result.testPlanId).First();
 
-                if (!apiClient.GetBuildsForTestPlan(result.testPlanId).Any(x => x.name == build))
+                if (!this.apiClient.GetBuildsForTestPlan(result.testPlanId).Any(x => x.name == build))
                 {
-                    apiClient.CreateBuild(result.testPlanId, build, "");
+                    this.apiClient.CreateBuild(result.testPlanId, build, string.Empty);
                 }
 
-                Build testBuild = apiClient.GetBuildsForTestPlan(result.testPlanId).First(x => x.name == build);
+                Build testBuild = this.apiClient.GetBuildsForTestPlan(result.testPlanId).First(x => x.name == build);
 
                 // NOTE: testcase/testsuite ID se získá: Specifikace testů >> pravé tl. myši na test. příp. ve stromu
                 TestCaseFromTestSuite[] testsuiteTestcases =
-                    apiClient.GetTestCasesForTestSuite(result.testSuiteId, true);
+                    this.apiClient.GetTestCasesForTestSuite(result.testSuiteId, true);
 
                 TestCaseFromTestSuite
                     testcase = testsuiteTestcases.First(x
@@ -132,10 +135,10 @@ namespace TestRunner.App.TestLinkApi
                     TestStatus.Passed => "p",
                     TestStatus.Failed => "f",
                     TestStatus.Skipped => "b",
-                    _ => ""
+                    _ => string.Empty,
                 };
 
-                var res = apiClient.UploadTestCaseExecutionResult(
+                var res = this.apiClient.UploadTestCaseExecutionResult(
                     testcaseApiId,
                     result.testPlanId,
                     resultStatus,

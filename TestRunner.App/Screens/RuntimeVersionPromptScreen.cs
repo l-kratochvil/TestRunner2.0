@@ -1,41 +1,53 @@
 ﻿namespace TestRunner.App.Screens;
 
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
-internal partial class RuntimeVersionPromptScreen(IScreen sourceScreen)
-    : BaseForwardedScreen(sourceScreen)
+using TestRunner.App.Stores;
+
+internal partial class RuntimeVersionPromptScreen(
+    TestRunConfigStore testRunConfigStore,
+    AppUserSettingsStore appUserSettingsStore,
+    Lazy<ExitScreen> exitScreen,
+    Lazy<SettingsScreen> settingsScreen)
+    : BaseForwardedScreen(exitScreen, settingsScreen)
 {
-    protected override ScreenRenderer CreateRenderer() => new()
-    {
-        Main = ct =>
+    /// <inheritdoc/>
+    protected override ScreenRenderer CreateRenderer()
+        => new()
         {
-            var prompt = new SelectionPrompt<string>()
-                .Title("# Select runtime version:")
-                .PageSize(10)
-                .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]")
-                .AddChoices(GetInstalledRuntimeVersions());
+            Main = ct =>
+            {
+                var prompt = new SelectionPrompt<string>()
+                    .Title("# Select runtime version:")
+                    .PageSize(10)
+                    .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]")
+                    .AddChoices(GetInstalledRuntimeVersions(appUserSettingsStore));
 
-            return ShowPrompt(
-                prompt,
-                version =>
-                {
-                    TestRunConfig.Current.RuntimeVersion = version;
-                    return new RenderOutput { NextScreen = new HomeScreen() };
-                },
-                ct);
-        }
-    };
+                return ShowPromptAsync(
+                    prompt,
+                    version =>
+                    {
+                        testRunConfigStore.RuntimeVersion = version;
+                        return new RenderOutput();
+                    },
+                    ct);
+            },
+        };
 
-    private static string[] GetInstalledRuntimeVersions()
-        => Directory.GetDirectories(Settings.IdeInstallationDirPath)
-            .Select((dir) => Path.GetFileName(dir) ?? "")
-            .Where(dirName => !string.IsNullOrEmpty(dirName) && RuntimeVersion().IsMatch(dirName))
-            .OrderBy(x => int.TryParse(x, out var parsed) ? parsed : char.MaxValue) // full numeric
-            .ThenBy(x => int.TryParse(RuntimeVersion().Match(x).Value, out var parsed) ? parsed : char.MaxValue) // starting with numeric
-            .ThenBy(x => x) // others
-            .Reverse()
-            .ToArray();
+    private static string[] GetInstalledRuntimeVersions(AppUserSettingsStore appUserSettingsStore)
+        =>
+        [
+            ..Directory
+                .GetDirectories(appUserSettingsStore.Current.IdeInstallFolderPath)
+                .Select(static dir => Path.GetFileName(dir))
+                .Where(static dirName => !string.IsNullOrEmpty(dirName) && RuntimeVersion().IsMatch(dirName))
+                .OrderBy(static x => int.TryParse(x, out var parsed) ? parsed : char.MaxValue) // full numeric
+                .ThenBy(static x => int.TryParse(RuntimeVersion().Match(x).Value, out var parsed) ? parsed : char.MaxValue) // starting with numeric
+                .ThenBy(static x => x) // others
+                .Reverse()
+        ];
 
     [GeneratedRegex(@"^\d+")]
     private static partial Regex RuntimeVersion();

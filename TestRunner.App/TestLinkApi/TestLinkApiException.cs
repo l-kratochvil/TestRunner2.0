@@ -24,14 +24,15 @@ DEALINGS IN THE SOFTWARE.
 */
 
 
-using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 using TestRunner.App.TestLinkApi.Types;
 
 namespace TestRunner.App.TestLinkApi
 {
+    using System;
+    using System.Collections.Generic;
+
     /// <summary>
     /// basic exception thrown whenever Testlink returns an error
     /// </summary>
@@ -70,9 +71,9 @@ namespace TestRunner.App.TestLinkApi
         public TestLinkApiException(List<TestLinkErrorMessage> errs)
             : base("TestLinkApiException: testlink returned error messages. See errors")
         {
-            errors = errs;
+            this.errors = errs;
             foreach (var error in errs)
-                Data.Add(error.code, error.message);
+                this.Data.Add(error.code, error.message);
         }
 
         /// <summary>
@@ -83,9 +84,9 @@ namespace TestRunner.App.TestLinkApi
         public TestLinkApiException(string msg, List<TestLinkErrorMessage> errs)
             : base(msg)
         {
-            errors = errs;
+            this.errors = errs;
             foreach (var error in errs)
-                Data.Add(error.code, error.message);
+                this.Data.Add(error.code, error.message);
         }
 
         /// <summary>
@@ -105,6 +106,7 @@ namespace TestRunner.App.TestLinkApi
         {
         }
 
+        /// <inheritdoc/>
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);

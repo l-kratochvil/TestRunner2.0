@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-
-using CookComputing.XmlRpc;
+﻿using CookComputing.XmlRpc;
 
 using TestRunner.App.TestLinkApi.Types;
 
 namespace TestRunner.App.TestLinkApi
 {
+    using System;
+
     public static class XmlRpcStructConvertors
     {
         internal static TestLinkErrorMessage ToTestLinkErrorMessage(XmlRpcStruct data)
@@ -104,7 +103,7 @@ namespace TestRunner.App.TestLinkApi
             if (data.ContainsKey("details"))
                 item.details = (string)data["details"];
             else
-                item.details = "";
+                item.details = string.Empty;
             item.author_id = ToInt(data, "author_id");
             item.creation_ts = ToDate(data, "creation_ts");
             item.importance = ToInt(data, "importance");

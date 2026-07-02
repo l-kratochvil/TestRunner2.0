@@ -1,15 +1,21 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Hosting;
 
 using TestRunner.App;
-using TestRunner.Common.Services;
+using TestRunner.App.Application.DependencyInjection;
 
-await using var connection = await NUnitTestRunnerProxyConnection.StartAsync();
+await using var nunitTestRunnerProxyConnector = await NUnitTestRunnerProxyConnector.ConnectAsync();
 
-var services = new ServiceCollection();
-Application.ConfigureServices(services);
-services.AddSingleton(connection.Proxy);
-Application.Services = services.BuildServiceProvider();
+var host = Host
+    .CreateDefaultBuilder()
+    .InitServices(nunitTestRunnerProxyConnector.Proxy)
+    .InitScreens()
+    .InitStores()
+    .UseDefaultServiceProvider(
+        (_, options) =>
+        {
+            options.ValidateScopes = true;
+            options.ValidateOnBuild = true;
+        })
+    .Build();
 
-new Application().Run();
+await App.RunAsync(host);

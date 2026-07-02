@@ -1,5 +1,3 @@
-using System;
-
 using TestRunner.App.TestLinkApi.Types;
 
 namespace TestRunner.App.TestLinkApi;

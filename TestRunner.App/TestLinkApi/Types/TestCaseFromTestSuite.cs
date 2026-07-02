@@ -1,5 +1,7 @@
 ﻿namespace TestRunner.App.TestLinkApi.Types;
 
+using System;
+
 /// <summary>
 /// test case as it is retrieved from testsuite
 /// </summary>

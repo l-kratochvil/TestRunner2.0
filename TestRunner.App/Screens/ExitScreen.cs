@@ -1,14 +1,16 @@
 ﻿namespace TestRunner.App.Screens;
 
-internal class ExitScreen(IScreen sourceScreen)
-    : BaseForwardedScreen(sourceScreen)
+internal class ExitScreen(Lazy<ExitScreen> exitScreen, Lazy<SettingsScreen> settingsScreen)
+    : BaseForwardedScreen(exitScreen, settingsScreen)
 {
     // TODO:
-    protected override ScreenRenderer CreateRenderer() => new()
-    {
-        Main = ct => ShowPrompt(
-            new ConfirmationPrompt("Exit?").No('n').Yes('y'),
-            confirmed => confirmed ? new RenderOutput { Exit = true } : new RenderOutput { NextScreen = new HomeScreen() },
-            ct)
-    };
+    /// <inheritdoc/>
+    protected override ScreenRenderer CreateRenderer()
+        => new()
+        {
+            Main = ct => ShowPromptAsync(
+                new ConfirmationPrompt("Exit?").No('n').Yes('y'),
+                confirmed => confirmed ? new RenderOutput(Exit: true) : new RenderOutput(),
+                ct),
+        };
 }

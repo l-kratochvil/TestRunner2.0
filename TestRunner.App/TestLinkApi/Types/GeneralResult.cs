@@ -46,7 +46,7 @@ public class GeneralResult
     /// </summary>
     public GeneralResult()
     {
-        status = false;
-        message = "no response from server";
+        this.status = false;
+        this.message = "no response from server";
     }
 }

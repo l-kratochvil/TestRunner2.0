@@ -1,16 +1,15 @@
 namespace TestRunner.NUnitTestRunnerProxy;
 
-using NUnit.Framework.Api;
-using NUnit.Framework.Interfaces;
-using NUnit.Framework.Internal;
-
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-using TestRunner.Common;
+using NUnit.Framework.Api;
+using NUnit.Framework.Interfaces;
+using NUnit.Framework.Internal;
+
 using TestRunner.Common.ComplexTypes;
 using TestRunner.Common.Services;
 
@@ -25,16 +24,19 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 {
     private readonly ITestAssemblyRunner runner = new NUnitTestAssemblyRunner(new DefaultTestAssemblyBuilder());
 
+    /// <inheritdoc/>
     public Task<bool> GetIsAssemblyLoadedAsync(CancellationToken cancellationToken = default)
-        => Task.FromResult(runner.IsTestLoaded);
+        => Task.FromResult(this.runner.IsTestLoaded);
 
+    /// <inheritdoc/>
     public Task<bool> GetIsTestRunningAsync(CancellationToken cancellationToken = default)
-        => Task.FromResult(runner.IsTestRunning);
+        => Task.FromResult(this.runner.IsTestRunning);
 
+    /// <inheritdoc/>
     public Task<TestAssemblyEntity> LoadTestAssemblyAsync(string path, CancellationToken cancellationToken = default)
         => Task.Run(() =>
         {
-            var testAssemblyElement = runner.Load(path, new Dictionary<string, object>());
+            var testAssemblyElement = this.runner.Load(path, new Dictionary<string, object>());
 
             if (!testAssemblyElement.Tests.Any())
             {
@@ -45,9 +47,10 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
             return TransformITestToTestEntities(rootTestSuiteElement);
         }, cancellationToken);
 
+    /// <inheritdoc/>
     public Task<TestResult> RunTestAsync(IEnumerable<TestAssemblyEntity> testsToRun, CancellationToken cancellationToken = default)
     {
-        if (!runner.IsTestLoaded)
+        if (!this.runner.IsTestLoaded)
         {
             throw new InvalidOperationException("Test assembly wasn't loaded yet");
         }
@@ -57,13 +60,13 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
         var testFilter = TestFilter.FromXml(testFilterNode);
 
         // Cancellation forcibly aborts the in-progress run.
-        var cancellationRegistration = cancellationToken.Register(() => runner.StopRun(force: true));
+        var cancellationRegistration = cancellationToken.Register(() => this.runner.StopRun(force: true));
 
         return Task.Run(() =>
         {
             try
             {
-                var result = runner.Run(TestListener.NULL, testFilter);
+                var result = this.runner.Run(TestListener.NULL, testFilter);
                 return new TestResult(
                     result.ResultState.Status switch
                     {
@@ -72,7 +75,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                         NUnit.Framework.Interfaces.TestStatus.Skipped => TestStatus.Skipped,
                         NUnit.Framework.Interfaces.TestStatus.Inconclusive => TestStatus.Inconclusive,
                         NUnit.Framework.Interfaces.TestStatus.Warning => TestStatus.Warning,
-                        _ => TestStatus.Unknown
+                        _ => TestStatus.Unknown,
                     });
             }
             finally

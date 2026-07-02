@@ -10,7 +10,7 @@ namespace TestRunner.App.TestLinkApi
     /// </summary>
     /// <remarks>This class makes use of XML-RPC.NET Copyright (c) 2006 Charles Cook</remarks>
     [XmlRpcUrl("")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles",
+    [SuppressMessage("Style", "IDE1006:Naming Styles",
         Justification = "Class method names reflects XML RPC method names (they are in camelcase)")]
     public interface IXmlRpcProxy : CookComputing.XmlRpc.IXmlRpcProxy
     {

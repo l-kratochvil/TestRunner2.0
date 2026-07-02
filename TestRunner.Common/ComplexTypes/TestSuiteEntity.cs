@@ -1,6 +1,6 @@
 ﻿namespace TestRunner.Common.ComplexTypes;
 
-using Interfaces;
+using TestRunner.Common.Interfaces;
 
 public class TestSuiteEntity(int id, string name, TestCaseEntity[] testcases)
     : BaseTestEntity(id, name)
@@ -9,9 +9,12 @@ public class TestSuiteEntity(int id, string name, TestCaseEntity[] testcases)
 
     public TestCaseEntity[] TestCases { get; } = testcases;
 
+    /// <inheritdoc/>
     public override ITestEntity.TypeKind Type => ITestEntity.TypeKind.TestSuite;
 
-    public override int GetHashCode() => CommonUtils.CalculateHashCode(id, Name.GetHashCode());
+    /// <inheritdoc/>
+    public override int GetHashCode() => CommonUtils.CalculateHashCode(this.id, this.Name.GetHashCode());
 
-    public override bool Equals(object? obj) => GetHashCode() == obj?.GetHashCode();
+    /// <inheritdoc/>
+    public override bool Equals(object? obj) => this.GetHashCode() == obj?.GetHashCode();
 }

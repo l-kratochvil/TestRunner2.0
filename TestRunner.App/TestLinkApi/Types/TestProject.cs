@@ -1,5 +1,7 @@
 ﻿namespace TestRunner.App.TestLinkApi.Types;
 
+using System.Collections.Generic;
+
 /// <summary>
 /// represent a test project object in testlink
 /// </summary>

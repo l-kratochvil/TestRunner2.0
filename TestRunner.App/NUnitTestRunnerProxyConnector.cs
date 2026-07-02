@@ -16,7 +16,7 @@ using TestRunner.Common.Services;
 /// named pipe and exposes a strongly-typed <see cref="INUnitTestRunnerProxy"/>. Disposing tears the connection
 /// down and stops the server process.
 /// </summary>
-internal sealed class NUnitTestRunnerProxyConnection : IAsyncDisposable
+internal sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
 {
     // The server and its .NET Framework dependencies are copied here by the build (Exchange output).
     private const string ServerRelativePath = @"TestRunner.NUnitTestRunnerProxy\TestRunner.NUnitTestRunnerProxy.exe";
@@ -30,16 +30,20 @@ internal sealed class NUnitTestRunnerProxyConnection : IAsyncDisposable
     /// <summary>The remote NUnit test runner.</summary>
     public INUnitTestRunnerProxy Proxy { get; }
 
-    private NUnitTestRunnerProxyConnection(Process serverProcess, NamedPipeServerStream pipe, JsonRpc rpc, INUnitTestRunnerProxy proxy)
+    private NUnitTestRunnerProxyConnector(
+        Process serverProcess,
+        NamedPipeServerStream pipe,
+        JsonRpc rpc,
+        INUnitTestRunnerProxy proxy)
     {
         this.serverProcess = serverProcess;
         this.pipe = pipe;
         this.rpc = rpc;
-        Proxy = proxy;
+        this.Proxy = proxy;
     }
 
     /// <summary>Launches the proxy server and connects to it.</summary>
-    public static async Task<NUnitTestRunnerProxyConnection> StartAsync(CancellationToken cancellationToken = default)
+    public static async Task<NUnitTestRunnerProxyConnector> ConnectAsync(CancellationToken cancellationToken = default)
     {
         var serverPath = Path.Combine(AppContext.BaseDirectory, ServerRelativePath);
         if (!File.Exists(serverPath))
@@ -73,7 +77,7 @@ internal sealed class NUnitTestRunnerProxyConnection : IAsyncDisposable
             var proxy = rpc.Attach<INUnitTestRunnerProxy>();
             rpc.StartListening();
 
-            return new NUnitTestRunnerProxyConnection(serverProcess, pipe, rpc, proxy);
+            return new NUnitTestRunnerProxyConnector(serverProcess, pipe, rpc, proxy);
         }
         catch
         {
@@ -83,23 +87,24 @@ internal sealed class NUnitTestRunnerProxyConnection : IAsyncDisposable
         }
     }
 
+    /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
         // Closing the RPC connection lets the server observe the disconnect and exit gracefully.
-        try { rpc.Dispose(); }
+        try { this.rpc.Dispose(); }
         catch
         {
             /* best effort */
         }
 
-        try { await pipe.DisposeAsync().ConfigureAwait(false); }
+        try { await this.pipe.DisposeAsync().ConfigureAwait(false); }
         catch
         {
             /* best effort */
         }
 
-        KillProcess(serverProcess);
-        serverProcess.Dispose();
+        KillProcess(this.serverProcess);
+        this.serverProcess.Dispose();
     }
 
     private static void KillProcess(Process? process)

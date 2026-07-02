@@ -1,7 +1,6 @@
 namespace TestRunner.App.Tests;
 
-using System;
-
+// TOOD: Remove this reference (only NUnitRunnerProxy should know about NUnit)
 using NUnit.Framework;
 
 using TestRunner.App.TestLinkApi;
@@ -11,9 +10,11 @@ using TestRunner.App.TestLinkApi;
 [TestFixture]
 public class TestLinkApiClientTests
 {
-    private const string ApiKey = "dc7a17e14a9f1879d38583a38c3a81e8";
-
-    private const string Url = "https://vyvoj.zat.lan/tester/testlink/lib/api/xmlrpc/v1/xmlrpc.php";
+    private static readonly AppSystemConfig DefaultAppSystemConfig = new(
+        TestLinkConfig: new TestLinkConfig(
+            ApiKey: "dc7a17e14a9f1879d38583a38c3a81e8",
+            XmlRpcServerUrl: "https://vyvoj.zat.lan/tester/testlink/lib/api/xmlrpc/v1/xmlrpc.php",
+            LoggingEnabled: false));
 
     private const int TestPlanId = 9560;
 
@@ -22,27 +23,43 @@ public class TestLinkApiClientTests
     [TestCase, Order(CtorTestCaseOrderNumber)]
     public void TestLinkApiClientCtor_WhenCalledWithValidArgs_ThenNoExceptionsThrown()
     {
-        Assert.DoesNotThrow(() => _ = new TestLinkApiClient(ApiKey, Url));
+        Assert.DoesNotThrow(() => _ = new TestLinkApiClient(DefaultAppSystemConfig));
     }
 
     [TestCase, Order(CtorTestCaseOrderNumber)]
     public void TestLinkApiClientCtor_WhenCalledWithUriEmpty_ThenTestLinkApiExceptionIsThrown()
     {
-        Assert.Throws<TestLinkApiException>(()
-            => _ = new TestLinkApiClient(ApiKey, string.Empty));
+        // ReSharper disable once WithExpressionModifiesAllMembers
+        var currentConfig = DefaultAppSystemConfig with
+        {
+            TestLinkConfig = DefaultAppSystemConfig.TestLinkConfig with
+            {
+                XmlRpcServerUrl = string.Empty,
+            },
+        };
+        Assert.Throws<TestLinkApiException>(() => _ = new TestLinkApiClient(currentConfig));
     }
 
     [TestCase, Order(CtorTestCaseOrderNumber)]
     public void TestLinkApiClientCtor_WhenCalledWithApiKeyEmpty_ThenTestLinkApiExceptionIsThrown()
     {
-        Assert.Throws<TestLinkApiException>(() => _ = new TestLinkApiClient(string.Empty, Url));
+        // ReSharper disable once WithExpressionModifiesAllMembers
+        var currentConfig = DefaultAppSystemConfig with
+        {
+            TestLinkConfig = DefaultAppSystemConfig.TestLinkConfig with
+            {
+                ApiKey = string.Empty,
+            },
+        };
+
+        Assert.Throws<TestLinkApiException>(() => _ = new TestLinkApiClient(currentConfig));
     }
 
     [TestCase]
     public void GetBuildsForTestPlan_WhenValidTestPlanId_ThenShouldReturnSomeProjects()
     {
         // Arrange
-        var client = new TestLinkApiClient(ApiKey, Url);
+        var client = new TestLinkApiClient(DefaultAppSystemConfig);
 
         // Act
         var projects = client.GetBuildsForTestPlan(TestPlanId);

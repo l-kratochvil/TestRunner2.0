@@ -1,7 +1,14 @@
 ﻿namespace TestRunner.App.Screens;
 
-using WindowsInput.Native;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+using DevKit.Core.Extensions;
+
 using WindowsInput;
+using WindowsInput.Native;
 
 internal abstract class BaseScreen : IScreen
 {
@@ -10,94 +17,109 @@ internal abstract class BaseScreen : IScreen
 
     private readonly InputSimulator inputSimulator = new();
 
-    protected BaseScreen()
+    protected BaseScreen(Lazy<ExitScreen> exitScreen, Lazy<SettingsScreen> settingsScreen)
     {
-        lazyInterruptionCommands = new Lazy<InterruptionCommand[]>(() =>
+        this.lazyInterruptionCommands = new Lazy<InterruptionCommand[]>(() =>
         [
-            new InterruptionCommand { Key = VirtualKeyCode.ESCAPE, Text = "Exit", NextScreen = new ExitScreen(this) },
-            ..AdditionalInterruptionCommands,
-            new InterruptionCommand { Key = VirtualKeyCode.F12, Text = "Settings", NextScreen = new SettingsScreen(this) }
+            new InterruptionCommand(Key: VirtualKeyCode.ESCAPE, Text: "Exit", NextScreen: exitScreen.Value),
+            ..this.AdditionalInterruptionCommands,
+            new InterruptionCommand(Key: VirtualKeyCode.F12, Text: "Settings", NextScreen: settingsScreen.Value)
         ]);
 
-        lazyRenderer = new Lazy<ScreenRenderer>(
-            () => CreateRenderer().Pipe(renderer =>
+        this.lazyRenderer = new Lazy<ScreenRenderer>(
+            () => this.CreateRenderer().Pipe(renderer =>
             {
-                renderer.InterruptionCommands = InterruptionCommands;
+                renderer.InterruptionCommands = this.InterruptionCommands;
                 return renderer;
-            })
-        );
+            }));
     }
 
     protected virtual InterruptionCommand[] AdditionalInterruptionCommands { get; } = [];
 
-    protected InterruptionCommand[] InterruptionCommands => lazyInterruptionCommands.Value;
+    protected InterruptionCommand[] InterruptionCommands
+        => this.lazyInterruptionCommands.Value;
 
-    protected ScreenRenderer Renderer => lazyRenderer.Value;
+    protected ScreenRenderer Renderer
+        => this.lazyRenderer.Value;
 
     protected abstract ScreenRenderer CreateRenderer();
 
-    public async Task<RenderOutput> Render()
+    /// <inheritdoc/>
+    public async Task<RenderOutput> RenderAsync()
     {
         Clear();
 
-        Renderer.Toolbar();
-        Renderer.Info();
+        this.Renderer.Toolbar();
+        this.Renderer.Info();
 
         using var renderCts = new CancellationTokenSource();
         using var keyPressedCts = new CancellationTokenSource();
 
-        var interuptRenderByKeyTask = InteruptRenderByKeyAsync(renderCts, keyPressedCts.Token);
-        var output = Renderer.Main(renderCts.Token);
+        var interuptRenderByKeyTask = this.InteruptRenderByKeyAsync(renderCts, keyPressedCts.Token);
+        var output = await this.Renderer.Main(renderCts.Token);
 
         foreach (var cts in new[] { renderCts, keyPressedCts })
         {
             await cts.CancelAsync();
         }
 
-        return output.Interrupted
-            ? new RenderOutput
-            {
-                Interrupted = true,
-                InterruptionCommand = InterruptionCommands.FirstOrDefault(command => command.Key == interuptRenderByKeyTask.Result)
-                                      ?? throw new InvalidOperationException(
-                                          $"Interruption command not found for key '{interuptRenderByKeyTask.Result}'")
-            }
-            : output;
+        var interuptRenderByKeyTaskResult = await interuptRenderByKeyTask;
+
+        return output switch
+        {
+            InterruptedShowPrompt => new RenderOutput(
+                NextScreen: this.InterruptionCommands
+                    .FirstOrDefault(command => command.Key == interuptRenderByKeyTaskResult)
+                    .CheckIsNotNull($"Interruption command not found for key '{interuptRenderByKeyTaskResult}'")
+                    .NextScreen),
+            CompletedShowPrompt completedRenderOutput => completedRenderOutput.RenderOutput,
+            _ => throw new NotSupportedException($"Unknown show prompt result type '{output.GetType().Name}'"),
+        };
     }
 
-    protected static RenderOutput ShowPrompt<T>(IPrompt<T> prompt, Func<T, RenderOutput> onSucces, CancellationToken ct)
-        => ConsoleUtils.ShowPrompt(prompt, ct, out var result)
-            ? new RenderOutput { Interrupted = true }
-            : onSucces(result);
+    protected static async Task<ShowPromptResult> ShowPromptAsync<T>(IPrompt<T> prompt, Func<T, RenderOutput> onSucces, CancellationToken ct)
+        => await ConsoleUtils.ShowPromptAsync(prompt, ct) switch
+        {
+            (true, var promptResult) => new CompletedShowPrompt(onSucces(promptResult!)),
+            (false, _) => new InterruptedShowPrompt(),
+        };
 
     private async Task<VirtualKeyCode> InteruptRenderByKeyAsync(CancellationTokenSource renderCts, CancellationToken ct)
     {
-        VirtualKeyCode GetPressedKey()
-            => Enum.GetValues<VirtualKeyCode>()
-                .Cast<VirtualKeyCode>()
-                .FirstOrDefault(inputSimulator.InputDeviceState.IsKeyDown);
-        
+        VirtualKeyCode GetPressedKey() => Enum
+            .GetValues<VirtualKeyCode>()
+            .FirstOrDefault(this.inputSimulator.InputDeviceState.IsKeyDown);
+
         const int waitTimeMs = 10;
 
         return await Task.Run(async () =>
         {
-            var interruptionKeys = InterruptionCommands.Select(command => command.Key).ToArray();
+            var interruptionKeys = this.InterruptionCommands
+                .Select(command => command.Key)
+                .ToArray();
 
-            while (!ct.IsCancellationRequested)
+            try
             {
-                var pressedKey = GetPressedKey();
-                if (!interruptionKeys.Contains(pressedKey))
+                while (!ct.IsCancellationRequested)
                 {
-                    await Task.Delay(waitTimeMs, ct);
-                    continue;
+                    var pressedKey = GetPressedKey();
+                    if (!interruptionKeys.Contains(pressedKey))
+                    {
+                        await Task.Delay(waitTimeMs, ct);
+                        continue;
+                    }
+
+                    await renderCts.CancelAsync();
+
+                    return pressedKey;
                 }
-
-                await renderCts.CancelAsync();
-
-                return pressedKey;
+            }
+            catch (TaskCanceledException)
+            {
+                // Ignore
             }
 
             return VirtualKeyCode.NONAME;
-        }, ct);
+        });
     }
 }

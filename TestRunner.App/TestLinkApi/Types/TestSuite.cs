@@ -1,5 +1,7 @@
 ﻿namespace TestRunner.App.TestLinkApi.Types;
 
+using System.Collections.Generic;
+
 /// <summary>
 ///  represent a folder in the test specification tree
 /// </summary>
@@ -40,32 +42,32 @@ public class TestSuite
 
     public TestSuite()
     {
-        TestCases = new List<TestCaseFromTestSuite>();
-        TestSuites = new List<TestSuite>();
+        this.TestCases = new List<TestCaseFromTestSuite>();
+        this.TestSuites = new List<TestSuite>();
     }
 
     public TestSuite(int id, string name, string details, int nodeOrder, int nodeTypeId, int parentId)
     {
-        _id = id;
-        _name = name;
-        _details = details;
-        _nodeOrder = nodeOrder;
-        _nodeTypeId = nodeTypeId;
-        _parentId = parentId;
+        this._id = id;
+        this._name = name;
+        this._details = details;
+        this._nodeOrder = nodeOrder;
+        this._nodeTypeId = nodeTypeId;
+        this._parentId = parentId;
 
-        TestCases = new List<TestCaseFromTestSuite>();
-        TestSuites = new List<TestSuite>();
+        this.TestCases = new List<TestCaseFromTestSuite>();
+        this.TestSuites = new List<TestSuite>();
     }
 
     public void AddTestSuite(TestSuite testSuite)
     {
-        TestSuites.Add(testSuite);
+        this.TestSuites.Add(testSuite);
     }
 
 
     // Add a test case to the suite
     public void AddTestCase(TestCaseFromTestSuite testCase)
     {
-        TestCases.Add(testCase);
+        this.TestCases.Add(testCase);
     }
 }

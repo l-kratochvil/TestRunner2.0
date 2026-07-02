@@ -1,5 +1,7 @@
 ﻿namespace TestRunner.App.TestLinkApi.Types;
 
+using System;
+
 /// <summary>
 /// The object returned from Testlinkt when requesting an attachment
 /// </summary>

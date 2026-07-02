@@ -9,5 +9,5 @@ public class TestAssemblyEntity(TestType testType, string name, string path, Tes
     public string Name { get; } = name;
     public string Path { get; } = path;
 
-    public static TestAssemblyEntity Default => new(TestType.Unknown, "", "");
+    public static TestAssemblyEntity Default => new(TestType.Unknown, string.Empty, string.Empty);
 }

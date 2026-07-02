@@ -1,15 +1,12 @@
 ﻿namespace TestRunner.App.Screens;
 
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-using WindowsInput.Native;
-
-/// <summary>
-/// 
-/// </summary>
 internal class ScreenRenderer
 {
-    public delegate RenderOutput MainRender(CancellationToken cancellationToken);
+    public delegate Task<InternalTypes.ShowPromptResult> MainRender(CancellationToken cancellationToken);
 
     public delegate void StatusRender();
 
@@ -27,7 +24,7 @@ internal class ScreenRenderer
     {
         Write(new Table().Pipe(table =>
         {
-            InterruptionCommands
+            this.InterruptionCommands
                 .Select(command => $"{command.Text} {$"[{command.Key}]".EscapeMarkup()}")
                 .ForEach(column => table.AddColumn(column));
             return table;

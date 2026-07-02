@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
     <File Path=".gitignore" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Build.targets" />
+    <File Path="StyleCop.json" />
   </Folder>
   <Project Path="../DevKit.Core/DevKit.Core/DevKit.Core.csproj" />
   <Project Path="TestRunner.App.Tests/TestRunner.App.Tests.csproj" />

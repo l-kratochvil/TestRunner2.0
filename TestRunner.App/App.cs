@@ -1,40 +1,35 @@
 namespace TestRunner.App;
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 using NUnit;
 using NUnit.Framework.Api;
 
-using DevKit.Core.Extensions.Types;
+using TestRunner.App.Screens;
 
-internal class Application
+internal class App
 {
-    public static IServiceProvider Services { get; set; }
-
-    /// <summary>
-    /// Registers the application's shared services. The out-of-process NUnit runner proxy is registered
-    /// separately by the composition root (or by tests, which can substitute a fake implementation).
-    /// </summary>
-    public static void ConfigureServices(IServiceCollection services)
-    {
-        services.AddSingleton<TestLinkApi.ITestLinkApiClient, TestLinkApi.TestLinkApiClient>();
-    }
-
-    public void Run()
+    public static async Task RunAsync(IHost host)
     {
         // TODO: create new empy config file
 
         try
         {
-            MainRender(new Screens.HomeScreen());
+            await MainRenderAsync(host.Services.GetRequiredService<HomeScreen>());
         }
         catch (Exception ex)
         {
             Clear();
 
-            WriteLine("Při běhu aplikace testrunner se vyskytla chyba:");
+            WriteLine("Při běhu aplikace testrunner se vyskytla chyba:"); // TODO: Localize text
             WriteException(ex);
-            WriteLine("Aplikaci ukončíte libovolnou klávesou...");
+            WriteLine("Aplikaci ukončíte libovolnou klávesou..."); // TODO: Localize text
 
             AnsiConsole.Console.Input.ReadKey(true);
         }
@@ -44,29 +39,30 @@ internal class Application
         }
     }
 
-    public static void MainRender(Screens.IScreen initScreen)
+    public static async Task MainRenderAsync(IScreen initScreen)
     {
         var currentScreen = initScreen;
 
-        while (currentScreen is not null)
-        {
-            var renderedScreen = CommonUtils.PickRef(ref currentScreen)
-                                 ?? throw new InvalidOperationException("Current screen is null thus there is none to render");
+        var screens = new Stack<IScreen>();
 
-            var renderOutput = renderedScreen.Render().Result;
+        while (true)
+        {
+            currentScreen ??= screens.TryPop(out var nextScreen)
+                ? nextScreen // Redirect one screen back if not next screen not provided
+                : initScreen; // Or return to the initial screen
+
+            var renderOutput = await currentScreen.RenderAsync();
             if (renderOutput.Exit)
             {
                 break;
             }
 
-            currentScreen = renderOutput switch
+            if (renderOutput.NextScreen is not null)
             {
-                { Interrupted: true }
-                    => renderOutput.InterruptionCommand?.NextScreen
-                       ?? throw new InvalidOperationException("Interrupted but no interruption command was supplied"),
-                { NextScreen: not null } => renderOutput.NextScreen,
-                _ => throw new InvalidOperationException("Unknown render output was supplied"),
-            };
+                screens.Push(currentScreen);
+            }
+
+            currentScreen = renderOutput.NextScreen;
         }
     }
 
@@ -88,7 +84,7 @@ internal class Application
 
         var settings = new Dictionary<string, object>()
         {
-            { FrameworkPackageSettings.WorkDirectory, testAssemblyDirPath }
+            { FrameworkPackageSettings.WorkDirectory, testAssemblyDirPath },
         };
         var tests = runner.Load(Path.Combine(testAssemblyDirPath, testAssemblyFileName), settings);
 

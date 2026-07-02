@@ -1,5 +1,7 @@
 ﻿namespace TestRunner.App.TestLinkApi.Types;
 
+using System;
+
 /// <summary>
 ///  Represent the recorded outcome of a test case execution.
 /// </summary>

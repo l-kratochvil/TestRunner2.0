@@ -7,9 +7,12 @@ public class TestCaseEntity(int id, string name)
 {
     private readonly int _id = id;
 
+    /// <inheritdoc/>
     public override ITestEntity.TypeKind Type => ITestEntity.TypeKind.TestCase;
 
-    public override bool Equals(object? obj) => GetHashCode() == obj?.GetHashCode();
+    /// <inheritdoc/>
+    public override bool Equals(object? obj) => this.GetHashCode() == obj?.GetHashCode();
 
-    public override int GetHashCode() => CommonUtils.CalculateHashCode(_id, Name.GetHashCode());
+    /// <inheritdoc/>
+    public override int GetHashCode() => CommonUtils.CalculateHashCode(this._id, this.Name.GetHashCode());
 }

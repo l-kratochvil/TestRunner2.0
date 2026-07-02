@@ -1,21 +1,21 @@
 namespace TestRunner.App.Screens;
 
+using System;
+
 using WindowsInput.Native;
 
 /// <summary>
 /// Base class for screens that are forwarded (redirected to) from another screen.
 /// </summary>
-internal abstract class BaseForwardedScreen : BaseScreen
+internal abstract class BaseForwardedScreen(Lazy<ExitScreen> exitScreen, Lazy<SettingsScreen> settingsScreen)
+    : BaseScreen(exitScreen, settingsScreen)
 {
-    private readonly Lazy<InterruptionCommand[]> lazyAdditionalInterruptionCommands;
+    private readonly Lazy<InterruptionCommand[]> lazyAdditionalInterruptionCommands = new(() =>
+    [
+        new InterruptionCommand(Key: VirtualKeyCode.F1, Text: "Back", NextScreen: null),
+    ]);
 
-    public BaseForwardedScreen(IScreen sourceScreen)
-    {
-        lazyAdditionalInterruptionCommands = new Lazy<InterruptionCommand[]>(() =>
-        [
-            new() { Key = VirtualKeyCode.F1, Text = "Back", NextScreen = sourceScreen }
-        ]);
-    }
-
-    protected override InterruptionCommand[] AdditionalInterruptionCommands => lazyAdditionalInterruptionCommands.Value;
+    /// <inheritdoc/>
+    protected override InterruptionCommand[] AdditionalInterruptionCommands
+        => this.lazyAdditionalInterruptionCommands.Value;
 }
