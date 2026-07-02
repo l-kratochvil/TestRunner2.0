@@ -3,7 +3,7 @@
 internal class ExitScreen(
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
-    : BaseForwardedScreen(exitScreen, settingsScreen)
+    : ForwardedScreenBase(exitScreen, settingsScreen)
 {
     // TODO:
     /// <inheritdoc/>

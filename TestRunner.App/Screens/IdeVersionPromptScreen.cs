@@ -6,7 +6,7 @@ internal class IdeVersionPromptScreen(
     TestRunConfigStore testRunConfigStore,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
-    : BaseForwardedScreen(exitScreen, settingsScreen)
+    : ForwardedScreenBase(exitScreen, settingsScreen)
 {
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()

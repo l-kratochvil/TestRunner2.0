@@ -7,10 +7,10 @@ using WindowsInput.Native;
 /// <summary>
 /// Base class for screens that are forwarded (redirected to) from another screen.
 /// </summary>
-internal abstract class BaseForwardedScreen(
+internal abstract class ForwardedScreenBase(
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
-    : BaseScreen(exitScreen, settingsScreen)
+    : ScreenBase(exitScreen, settingsScreen)
 {
     private readonly Lazy<InterruptionCommand[]> lazyAdditionalInterruptionCommands = new(() =>
     [

@@ -6,7 +6,7 @@ using TestRunner.App.Common;
 internal class EmptyScreen(
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
-    : BaseScreen(exitScreen, settingsScreen)
+    : ScreenBase(exitScreen, settingsScreen)
 {
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()

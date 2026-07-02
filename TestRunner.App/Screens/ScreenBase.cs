@@ -10,15 +10,14 @@ using DevKit.Core.Extensions;
 using WindowsInput;
 using WindowsInput.Native;
 
-internal abstract class BaseScreen : IScreen
+internal abstract class ScreenBase : IScreen
 {
     private readonly Lazy<InterruptionCommand[]> lazyInterruptionCommands;
     private readonly Lazy<ScreenRenderer> lazyRenderer;
 
-
     private readonly InputSimulator inputSimulator = new();
 
-    protected BaseScreen(Lazy<ExitScreen> exitScreen, Lazy<SettingsScreen> settingsScreen)
+    protected ScreenBase(Lazy<ExitScreen> exitScreen, Lazy<SettingsScreen> settingsScreen)
     {
         this.ExitScreenLazy = exitScreen;
         this.SettingsScreenLazy = settingsScreen;

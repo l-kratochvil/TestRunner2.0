@@ -16,7 +16,7 @@ internal sealed class HomeScreen(
     TestEntitiesFromTestsuitesPromptScreen testEntitiesFromTestsuitesPromptScreen,
     TestEntitiesFromTestCasesPromptScreen testEntitiesFromTestCasesPromptScreen,
     EmptyScreen emptyScreen)
-    : BaseScreen(exitScreen, settingsScreen)
+    : ScreenBase(exitScreen, settingsScreen)
 {
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()

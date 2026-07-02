@@ -11,7 +11,7 @@ internal class TestEntitiesFromTestsuitesPromptScreen(
     TestRunConfigStore testRunConfigStore,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
-    : BaseForwardedScreen(exitScreen, settingsScreen)
+    : ForwardedScreenBase(exitScreen, settingsScreen)
 {
     private readonly IEqualityComparer<ITestEntity> testEntityComparer = new TestEntitiesComparer();
 

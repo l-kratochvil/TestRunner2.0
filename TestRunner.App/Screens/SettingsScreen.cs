@@ -8,7 +8,7 @@ internal class SettingsScreen(
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen,
     EmptyScreen emptyScreen)
-    : BaseForwardedScreen(exitScreen, settingsScreen)
+    : ForwardedScreenBase(exitScreen, settingsScreen)
 {
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()
@@ -54,7 +54,7 @@ internal class SettingsScreen(
         AppUserSettingsStore appUserSettingsStore,
         Lazy<ExitScreen> exitScreen,
         Lazy<SettingsScreen> settingsScreen)
-        : BaseForwardedScreen(exitScreen, settingsScreen)
+        : ForwardedScreenBase(exitScreen, settingsScreen)
     {
         /// <inheritdoc/>
         protected override ScreenRenderer CreateRenderer()
