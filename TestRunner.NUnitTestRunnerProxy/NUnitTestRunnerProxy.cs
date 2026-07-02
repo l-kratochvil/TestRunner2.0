@@ -13,8 +13,8 @@ using NUnit.Framework.Internal;
 using TestRunner.Common.ComplexTypes;
 using TestRunner.Common.Services;
 
-using TestResult = Common.TestResult;
-using TestStatus = Common.ComplexTypes.TestStatus;
+using TestResult = TestRunner.Common.TestResult;
+using TestStatus = TestRunner.Common.ComplexTypes.TestStatus;
 
 /// <summary>
 /// Out-of-process NUnit test runner. Hosts the .NET Framework <see cref="ITestAssemblyRunner"/>
