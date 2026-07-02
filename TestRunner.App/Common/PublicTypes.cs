@@ -1,4 +1,4 @@
-﻿namespace TestRunner.App;
+﻿namespace TestRunner.App.Common;
 
 public static class PublicTypes
 {

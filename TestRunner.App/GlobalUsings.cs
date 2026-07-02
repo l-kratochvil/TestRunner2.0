@@ -11,5 +11,5 @@ global using TestRunner.Common.Extensions;
 
 global using static Spectre.Console.AnsiConsole;
 
-global using static TestRunner.App.InternalTypes;
-global using static TestRunner.App.PublicTypes;
+global using static TestRunner.App.Common.InternalTypes;
+global using static TestRunner.App.Common.PublicTypes;
