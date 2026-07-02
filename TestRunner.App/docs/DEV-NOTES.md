@@ -2,9 +2,6 @@
 
 ## HPrio
 
-- Zkusit vyrendrovat něco pod async bez await
-- Spectre.Console github issues
-- Implementovat model pro config
 - Integrace ostatních částí ze starého testrunneru
 - Integrace Testlink API
 - Zkopírovat docs ze starého testrunneru

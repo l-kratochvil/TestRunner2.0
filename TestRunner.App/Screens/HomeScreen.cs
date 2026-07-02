@@ -28,7 +28,7 @@ internal sealed class HomeScreen(
                 var prompt = new SelectionPrompt<Choice>()
                     .Title(string.Empty) // The console is buggy if no title is set
                     .PageSize(10)
-                    .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]")
+                    .MoreChoicesText($"[grey]({Properties.Resources.MoveUpAndDownToReveal_HelpText})[/]")
                     .AddChoices(choices)
                     .UseConverter(choice => choice.Text)
                     .HighlightStyle(new Style(foreground: Color.Aqua, decoration: Spectre.Console.Decoration.Bold));

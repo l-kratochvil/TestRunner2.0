@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
+using DevKit.Core.Utils;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -35,7 +37,7 @@ internal class App
         }
         finally
         {
-            // TODO: FileSystemUtils.DeleteFile(TestEnvironmentConfiguration.TestRunnerConfigFilePath);
+            File.Delete(Paths.Files.TestRunnerConfig);
         }
     }
 
