@@ -1,6 +1,8 @@
 ﻿namespace TestRunner.App.Screens;
 
-internal class ExitScreen(Lazy<ExitScreen> exitScreen, Lazy<SettingsScreen> settingsScreen)
+internal class ExitScreen(
+    Lazy<ExitScreen> exitScreen,
+    Lazy<SettingsScreen> settingsScreen)
     : BaseForwardedScreen(exitScreen, settingsScreen)
 {
     // TODO:

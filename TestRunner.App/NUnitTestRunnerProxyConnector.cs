@@ -53,8 +53,11 @@ internal sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
 
         var pipeName = $"TestRunnerProxy_{Guid.NewGuid():N}";
         var pipe = new NamedPipeServerStream(
-            pipeName, PipeDirection.InOut, maxNumberOfServerInstances: 1,
-            PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+            pipeName,
+            PipeDirection.InOut,
+            maxNumberOfServerInstances: 1,
+            PipeTransmissionMode.Byte,
+            PipeOptions.Asynchronous);
 
         Process? serverProcess = null;
         try

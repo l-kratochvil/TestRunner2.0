@@ -29,7 +29,6 @@ public class TestLinkApiClientTests
     [TestCase, Order(CtorTestCaseOrderNumber)]
     public void TestLinkApiClientCtor_WhenCalledWithUriEmpty_ThenTestLinkApiExceptionIsThrown()
     {
-        // ReSharper disable once WithExpressionModifiesAllMembers
         var currentConfig = DefaultAppSystemConfig with
         {
             TestLinkConfig = DefaultAppSystemConfig.TestLinkConfig with
@@ -43,7 +42,6 @@ public class TestLinkApiClientTests
     [TestCase, Order(CtorTestCaseOrderNumber)]
     public void TestLinkApiClientCtor_WhenCalledWithApiKeyEmpty_ThenTestLinkApiExceptionIsThrown()
     {
-        // ReSharper disable once WithExpressionModifiesAllMembers
         var currentConfig = DefaultAppSystemConfig with
         {
             TestLinkConfig = DefaultAppSystemConfig.TestLinkConfig with

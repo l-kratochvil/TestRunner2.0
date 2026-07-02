@@ -13,7 +13,8 @@ internal static class ConsoleUtils
     /// <param name="prompt">Prompt to show.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>False if the prompt was not sucessful (interrupted), true otherwise.</returns>
-    internal static async Task<(bool Completed, TResult? Result)> ShowPromptAsync<TResult>(IPrompt<TResult> prompt, CancellationToken ct)
+    public static async Task<(bool Completed, TResult? Result)> ShowPromptAsync<TResult>(
+        IPrompt<TResult> prompt, CancellationToken ct)
     {
         var result = default(TResult?);
 
@@ -34,5 +35,12 @@ internal static class ConsoleUtils
         }
 
         return (Completed: completed, Result: result);
+    }
+
+    public static void WaitForAnyKeyPress(string text)
+    {
+        WriteLine(text);
+        WriteLine(Properties.Resources.PressAnyKeyToContinue_Message);
+        AnsiConsole.Console.Input.ReadKey(true);
     }
 }

@@ -61,11 +61,56 @@ namespace TestRunner.App.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter IDE install folder pat.
+        /// </summary>
+        public static string EnterIdeInstallFolderPath_ChoiceText {
+            get {
+                return ResourceManager.GetString("EnterIdeInstallFolderPath_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Move up and down to reveal more choices.
         /// </summary>
         public static string MoveUpAndDownToReveal_HelpText {
             get {
                 return ResourceManager.GetString("MoveUpAndDownToReveal_HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No runtimes found under IDE install folder.
+        /// </summary>
+        public static string NoRuntimesFoundUnderIdeInstallFolder_Message {
+            get {
+                return ResourceManager.GetString("NoRuntimesFoundUnderIdeInstallFolder_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Path cannot be empty or does not exist.
+        /// </summary>
+        public static string PathCanNotBeEmpty_ErrorMessage {
+            get {
+                return ResourceManager.GetString("PathCanNotBeEmpty_ErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Path doesn&apos;t exist.
+        /// </summary>
+        public static string PathDoesNotExist_ErrorMessage {
+            get {
+                return ResourceManager.GetString("PathDoesNotExist_ErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Press any key to continue ....
+        /// </summary>
+        public static string PressAnyKeyToContinue_Message {
+            get {
+                return ResourceManager.GetString("PressAnyKeyToContinue_Message", resourceCulture);
             }
         }
     }

@@ -5,7 +5,6 @@ using System.Text.Json;
 using TestRunner.App;
 using TestRunner.App.Model;
 
-// TODO: Get settings from config file
 internal class AppUserSettingsStore
 {
     private const string DefaultIdeInstallationDirPath = @"C:\Program Files (x86)\Pertinax6";
@@ -23,11 +22,14 @@ internal class AppUserSettingsStore
 
     public AppUserSettings Current { get; private set; }
 
+    public void Update(Func<AppUserSettings, AppUserSettings> updator)
+        => this.Update(updator(this.Current));
+
     public void Update(AppUserSettings currentSettings)
     {
         this.Current = currentSettings;
         JsonSerializer
-            .Serialize(currentSettings, JsonSerializerOptions)
+            .Serialize(this.Current, JsonSerializerOptions)
             .Visit(serialized => File.WriteAllText(Paths.Files.AppSettings, serialized));
     }
 

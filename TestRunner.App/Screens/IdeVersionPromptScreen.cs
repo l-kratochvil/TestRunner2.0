@@ -13,7 +13,7 @@ internal class IdeVersionPromptScreen(
         => new()
         {
             Main = ct => ShowPromptAsync(
-                new TextPrompt<string>("# Enter IDE version: "),
+                new TextPrompt<string>("Enter IDE version: "),
                 version =>
                 {
                     testRunConfigStore.IdeVersion = version;

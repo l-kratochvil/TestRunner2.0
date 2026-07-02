@@ -15,10 +15,14 @@ internal abstract class BaseScreen : IScreen
     private readonly Lazy<InterruptionCommand[]> lazyInterruptionCommands;
     private readonly Lazy<ScreenRenderer> lazyRenderer;
 
+
     private readonly InputSimulator inputSimulator = new();
 
     protected BaseScreen(Lazy<ExitScreen> exitScreen, Lazy<SettingsScreen> settingsScreen)
     {
+        this.ExitScreenLazy = exitScreen;
+        this.SettingsScreenLazy = settingsScreen;
+
         this.lazyInterruptionCommands = new Lazy<InterruptionCommand[]>(() =>
         [
             new InterruptionCommand(Key: VirtualKeyCode.ESCAPE, Text: "Exit", NextScreen: exitScreen.Value),
@@ -35,6 +39,10 @@ internal abstract class BaseScreen : IScreen
     }
 
     protected virtual InterruptionCommand[] AdditionalInterruptionCommands { get; } = [];
+
+    protected Lazy<ExitScreen> ExitScreenLazy { get; }
+
+    protected Lazy<SettingsScreen> SettingsScreenLazy { get; }
 
     protected InterruptionCommand[] InterruptionCommands
         => this.lazyInterruptionCommands.Value;
@@ -90,8 +98,10 @@ internal abstract class BaseScreen : IScreen
             .GetValues<VirtualKeyCode>()
             .FirstOrDefault(this.inputSimulator.InputDeviceState.IsKeyDown);
 
-        const int waitTimeMs = 10;
+        const int waitTimeMs = 100;
+        var currentPressedKey = default(VirtualKeyCode);
 
+        // ReSharper disable once MethodSupportsCancellation
         return await Task.Run(async () =>
         {
             var interruptionKeys = this.InterruptionCommands
@@ -103,6 +113,13 @@ internal abstract class BaseScreen : IScreen
                 while (!ct.IsCancellationRequested)
                 {
                     var pressedKey = GetPressedKey();
+                    if (pressedKey == currentPressedKey)
+                    {
+                        continue;
+                    }
+
+                    currentPressedKey = pressedKey;
+
                     if (!interruptionKeys.Contains(pressedKey))
                     {
                         await Task.Delay(waitTimeMs, ct);

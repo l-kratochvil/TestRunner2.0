@@ -3,11 +3,10 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TestRunner.App.Common;
 
 internal class ScreenRenderer
 {
-    public delegate Task<InternalTypes.ShowPromptResult> MainRender(CancellationToken cancellationToken);
+    public delegate Task<ShowPromptResult> MainRender(CancellationToken cancellationToken);
 
     public delegate void StatusRender();
 

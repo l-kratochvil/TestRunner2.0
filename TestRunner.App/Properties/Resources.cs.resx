@@ -117,7 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="EnterIdeInstallFolderPath_ChoiceText" xml:space="preserve">
+    <value>Zadej cestu k instalaci IDE</value>
+  </data>
   <data name="MoveUpAndDownToReveal_HelpText" xml:space="preserve">
     <value>Pro zobrazení dalších možnosti se pohybuje nahoru nebo dolů</value>
+  </data>
+  <data name="NoRuntimesFoundUnderIdeInstallFolder_Message" xml:space="preserve">
+    <value>V adresáři instalace IDE nebyl nalezen žádný runtime </value>
+  </data>
+  <data name="PathCanNotBeEmpty_ErrorMessage" xml:space="preserve">
+    <value>Cesta nemůže být prázdná</value>
+  </data>
+  <data name="PathDoesNotExist_ErrorMessage" xml:space="preserve">
+    <value>Cesta neexistuje</value>
+  </data>
+  <data name="PressAnyKeyToContinue_Message" xml:space="preserve">
+    <value>Pro pokračování stiskněte libovolnou klávesu ...</value>
   </data>
 </root>

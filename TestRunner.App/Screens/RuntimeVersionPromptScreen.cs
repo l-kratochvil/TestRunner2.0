@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
+using TestRunner.App.Common;
 using TestRunner.App.Stores;
 
 internal partial class RuntimeVersionPromptScreen(
@@ -19,18 +20,25 @@ internal partial class RuntimeVersionPromptScreen(
         {
             Main = ct =>
             {
+                var installedRuntimeVersions = GetInstalledRuntimeVersions(appUserSettingsStore);
+                if (installedRuntimeVersions.Length == 0)
+                {
+                    ConsoleUtils.WaitForAnyKeyPress(Properties.Resources.NoRuntimesFoundUnderIdeInstallFolder_Message);
+                    return Task.FromResult<ShowPromptResult>(CompletedShowPrompt.Default);
+                }
+
                 var prompt = new SelectionPrompt<string>()
                     .Title("# Select runtime version:")
                     .PageSize(10)
                     .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]")
-                    .AddChoices(GetInstalledRuntimeVersions(appUserSettingsStore));
+                    .AddChoices(installedRuntimeVersions);
 
                 return ShowPromptAsync(
                     prompt,
                     version =>
                     {
                         testRunConfigStore.RuntimeVersion = version;
-                        return new RenderOutput();
+                        return RenderOutput.Default;
                     },
                     ct);
             },

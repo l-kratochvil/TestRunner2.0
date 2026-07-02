@@ -86,20 +86,16 @@ internal sealed class HomeScreen(
             },
         };
 
-    private static List<Choice> GetChoices(TestRunConfigStore testRunConfigStore)
+    private static Choice[] GetChoices(TestRunConfigStore testRunConfigStore)
     {
-        // TODO: Refactor using CHoR pattern
-
         List<Choice> choices = [];
 
         bool InitChoices(
             string identifier, string? value, Func<bool> returnPredicate, Choice.TypeKind typeKind)
         {
-            choices.Add(new Choice
-            {
-                Type = typeKind,
-                Text = value is null ? $"[italic]{identifier}?[/]" : $"{identifier}: [yellow]{value}[/]",
-            });
+            choices.Add(new Choice(
+                Type: typeKind,
+                Text: TextFormattors.AsTextValuePair(text: identifier, value: value)));
 
             return returnPredicate();
         }
@@ -117,26 +113,22 @@ internal sealed class HomeScreen(
                 () => config.IdeVersion is null,
                 Choice.TypeKind.IdeVersionPromptScreen))
         {
-            return choices;
+            return [..choices];
         }
 
         choices.AddRange(
         [
-            new Choice
-            {
-                Type = Choice.TypeKind.TestEntitiesFromTestsuitesOnlyPromptScreen,
-                Text = "Select test suites",
-            },
-            new Choice
-            {
-                Type = Choice.TypeKind.TestEntitiesFromTestCasesPromptScreen,
-                Text = "Select test cases",
-            }
+            new Choice(
+                Type: Choice.TypeKind.TestEntitiesFromTestsuitesOnlyPromptScreen,
+                Text: "Select test suites"),
+            new Choice(
+                Type: Choice.TypeKind.TestEntitiesFromTestCasesPromptScreen,
+                Text: "Select test cases")
         ]);
 
         if (!config.TestEntities.Any())
         {
-            return choices;
+            return [..choices];
         }
 
         if (
@@ -148,21 +140,15 @@ internal sealed class HomeScreen(
         }
 
         choices.Add(
-            new Choice
-            {
-                Type = Choice.TypeKind.RunTest,
-                Text = "[italic]Run test?[/]",
-            });
+            new Choice(
+                Type: Choice.TypeKind.RunTest,
+                Text: "[italic]Run test?[/]"));
 
-        return choices;
+        return [..choices];
     }
 
-    private record Choice
+    private record Choice(Choice.TypeKind Type, string Text)
     {
-        public required TypeKind Type { get; init; }
-
-        public required string Text { get; init; }
-
         public enum TypeKind
         {
             RuntimeVersionPromptScreen,

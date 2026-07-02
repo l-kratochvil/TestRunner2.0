@@ -17,14 +17,23 @@ internal static class InternalTypes
     /// </summary>
     public record RenderOutput(
         IScreen? NextScreen = null,
-        bool Exit = false);
+        bool Exit = false)
+    {
+        public static RenderOutput Default
+            => new();
+    }
 
     public record InterruptionCommand(
         VirtualKeyCode Key,
         string Text,
         IScreen? NextScreen);
 
-    public record CompletedShowPrompt(RenderOutput RenderOutput) : ShowPromptResult;
+    public record CompletedShowPrompt(RenderOutput RenderOutput)
+        : ShowPromptResult
+    {
+        public static CompletedShowPrompt Default
+            => new(RenderOutput.Default);
+    }
 
     public record InterruptedShowPrompt : ShowPromptResult;
 

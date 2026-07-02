@@ -1,8 +1,11 @@
 namespace TestRunner.App.Screens;
 
 using System.Threading.Tasks;
+using TestRunner.App.Common;
 
-internal class EmptyScreen(Lazy<ExitScreen> exitScreen, Lazy<SettingsScreen> settingsScreen)
+internal class EmptyScreen(
+    Lazy<ExitScreen> exitScreen,
+    Lazy<SettingsScreen> settingsScreen)
     : BaseScreen(exitScreen, settingsScreen)
 {
     /// <inheritdoc/>
@@ -22,7 +25,7 @@ internal class EmptyScreen(Lazy<ExitScreen> exitScreen, Lazy<SettingsScreen> set
                 AnsiConsole.Console.Input.ReadKey(true);
 
                 return Task.FromResult<ShowPromptResult>(
-                    new CompletedShowPrompt(RenderOutput: new RenderOutput()));
+                    new CompletedShowPrompt(RenderOutput: RenderOutput.Default));
             },
         };
 }
