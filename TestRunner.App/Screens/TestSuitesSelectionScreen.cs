@@ -7,7 +7,7 @@ using TestRunner.App.Common;
 using TestRunner.App.Stores;
 using TestRunner.Common.Interfaces;
 
-internal class TestEntitiesFromTestsuitesPromptScreen(
+internal class TestSuitesSelectionScreen(
     TestRunConfigStore testRunConfigStore,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)

@@ -118,7 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="EnterIdeInstallFolderPath_ChoiceText" xml:space="preserve">
-    <value>Zadej cestu k instalaci IDE</value>
+    <value>Zadej cestu k adresáři instalace IDE</value>
+  </data>
+  <data name="IdeInstallFolderPath_ChoiceText" xml:space="preserve">
+    <value>Cesta k adresáři instalace IDE</value>
   </data>
   <data name="MoveUpAndDownToReveal_HelpText" xml:space="preserve">
     <value>Pro zobrazení dalších možnosti se pohybuje nahoru nebo dolů</value>

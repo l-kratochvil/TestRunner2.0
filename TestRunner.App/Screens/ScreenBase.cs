@@ -84,7 +84,8 @@ internal abstract class ScreenBase : IScreen
         };
     }
 
-    protected static async Task<ShowPromptResult> ShowPromptAsync<T>(IPrompt<T> prompt, Func<T, RenderOutput> onSucces, CancellationToken ct)
+    protected static async Task<ShowPromptResult> ShowPromptAsync<T>(
+        IPrompt<T> prompt, Func<T, RenderOutput> onSucces, CancellationToken ct)
         => await ConsoleUtils.ShowPromptAsync(prompt, ct) switch
         {
             (true, var promptResult) => new CompletedShowPrompt(onSucces(promptResult!)),
@@ -97,8 +98,7 @@ internal abstract class ScreenBase : IScreen
             .GetValues<VirtualKeyCode>()
             .FirstOrDefault(this.inputSimulator.InputDeviceState.IsKeyDown);
 
-        const int waitTimeMs = 100;
-        var currentPressedKey = default(VirtualKeyCode);
+        const int waitTimeMs = 10;
 
         // ReSharper disable once MethodSupportsCancellation
         return await Task.Run(async () =>
@@ -112,12 +112,10 @@ internal abstract class ScreenBase : IScreen
                 while (!ct.IsCancellationRequested)
                 {
                     var pressedKey = GetPressedKey();
-                    if (pressedKey == currentPressedKey)
+                    while (pressedKey == GetPressedKey()) // Wait for key release
                     {
-                        continue;
+                        await Task.Delay(waitTimeMs, ct);
                     }
-
-                    currentPressedKey = pressedKey;
 
                     if (!interruptionKeys.Contains(pressedKey))
                     {

@@ -118,7 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="EnterIdeInstallFolderPath_ChoiceText" xml:space="preserve">
-    <value>Enter IDE install folder pat</value>
+    <value>Enter IDE install folder path</value>
+  </data>
+  <data name="IdeInstallFolderPath_ChoiceText" xml:space="preserve">
+    <value>IDE install folder path</value>
   </data>
   <data name="MoveUpAndDownToReveal_HelpText" xml:space="preserve">
     <value>Move up and down to reveal more choices</value>

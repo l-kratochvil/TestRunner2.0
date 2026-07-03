@@ -11,7 +11,7 @@ using TestRunner.App.Stores;
 using TestRunner.Common.ComplexTypes;
 using TestRunner.Common.Interfaces;
 
-internal class TestEntitiesFromTestCasesPromptScreen(
+internal class TestCasesSelectionScreen(
     TestRunConfigStore testRunConfigStore,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -87,7 +87,7 @@ internal class TestEntitiesFromTestCasesPromptScreen(
                             return RenderOutput.Default;
                         },
                         ct);
-                    },
+                },
             };
     }
 }

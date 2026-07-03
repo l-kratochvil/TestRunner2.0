@@ -45,9 +45,7 @@ internal class SettingsScreen(
         yield return new Choice(
             Type: Choice.TypeKind.EnterIdeInstallFolderPathScreen,
             Value: appUserSettingsStore.Current.IdeInstallFolderPath,
-            Text: TextFormattors.AsTextValuePair(
-                text: "IDE install folder path",
-                value: appUserSettingsStore.Current.IdeInstallFolderPath));
+            Text: Properties.Resources.IdeInstallFolderPath_ChoiceText);
     }
 
     private class EnterIdeInstallFolderPathScreen(

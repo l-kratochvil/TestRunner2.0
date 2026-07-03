@@ -61,11 +61,20 @@ namespace TestRunner.App.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enter IDE install folder pat.
+        ///   Looks up a localized string similar to Enter IDE install folder path.
         /// </summary>
         public static string EnterIdeInstallFolderPath_ChoiceText {
             get {
                 return ResourceManager.GetString("EnterIdeInstallFolderPath_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IDE install folder path.
+        /// </summary>
+        public static string IdeInstallFolderPath_ChoiceText {
+            get {
+                return ResourceManager.GetString("IdeInstallFolderPath_ChoiceText", resourceCulture);
             }
         }
         

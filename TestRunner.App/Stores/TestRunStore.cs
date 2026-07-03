@@ -7,8 +7,6 @@ using TestRunner.Common.Interfaces;
 
 internal class TestRunConfigStore
 {
-    private static readonly Lock currentConfigLock = new();
-
     public string? RuntimeVersion { get; set; } = null;
 
     public string? IdeVersion { get; set; } = null;

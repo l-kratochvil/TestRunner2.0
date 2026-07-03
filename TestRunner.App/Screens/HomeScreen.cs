@@ -13,8 +13,8 @@ internal sealed class HomeScreen(
     Lazy<SettingsScreen> settingsScreen,
     RuntimeVersionPromptScreen runtimeVersionPromptScreen,
     IdeVersionPromptScreen ideVersionPromptScreen,
-    TestEntitiesFromTestsuitesPromptScreen testEntitiesFromTestsuitesPromptScreen,
-    TestEntitiesFromTestCasesPromptScreen testEntitiesFromTestCasesPromptScreen,
+    TestSuitesSelectionScreen testEntitiesFromTestsuitesPromptScreen,
+    TestCasesSelectionScreen testEntitiesFromTestCasesPromptScreen,
     EmptyScreen emptyScreen)
     : ScreenBase(exitScreen, settingsScreen)
 {

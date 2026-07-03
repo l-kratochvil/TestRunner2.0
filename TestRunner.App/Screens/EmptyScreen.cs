@@ -1,6 +1,7 @@
 namespace TestRunner.App.Screens;
 
 using System.Threading.Tasks;
+
 using TestRunner.App.Common;
 
 internal class EmptyScreen(

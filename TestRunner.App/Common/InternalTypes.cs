@@ -35,6 +35,8 @@ internal static class InternalTypes
             => new(RenderOutput.Default);
     }
 
+    public record IntermediateShowPrompt : ShowPromptResult;
+
     public record InterruptedShowPrompt : ShowPromptResult;
 
     public record ShowPromptResult;
