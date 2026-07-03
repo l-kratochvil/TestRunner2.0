@@ -54,7 +54,9 @@ internal class RunTestScreen(
                     state,
                     async (table, data, ctx, ct) =>
                     {
-                        while (!ct.IsCancellationRequested && !this.testRunCts.IsCancellationRequested)
+                        while (!ct.IsCancellationRequested &&
+                               !this.testRunCts.IsCancellationRequested &&
+                               runner.IsRunning)
                         {
                             // TODO: Show test logs?
                             table.Rows.Clear();
@@ -77,6 +79,8 @@ internal class RunTestScreen(
                 // TODO: Display test result
                 // TODO: Prompt whether to send result to TestLink (it will redirect to the TestLinkInfoPromptScreen)
                 // TODO: Save the test result to XML file (that can be imported to TestLink) just in case
+                Write("TODO");
+
                 await AnsiConsole.Console.Input.ReadKeyAsync(true, ct);
 
                 return CompletedShowPrompt.Default;
