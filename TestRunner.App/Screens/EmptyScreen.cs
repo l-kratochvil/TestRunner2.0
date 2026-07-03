@@ -5,9 +5,10 @@ using System.Threading.Tasks;
 using TestRunner.App.Common;
 
 internal class EmptyScreen(
+    Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
-    : ScreenBase(exitScreen, settingsScreen)
+    : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()

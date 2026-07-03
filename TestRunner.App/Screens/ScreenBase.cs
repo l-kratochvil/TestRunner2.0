@@ -21,23 +21,16 @@ internal abstract class ScreenBase : IScreen
 
     private readonly InputSimulator inputSimulator = new();
 
-    protected ScreenBase(Lazy<ExitScreen> exitScreen, Lazy<SettingsScreen> settingsScreen)
+    protected ScreenBase(
+        Lazy<HomeScreen> homeScreen,
+        Lazy<ExitScreen> exitScreen,
+        Lazy<SettingsScreen> settingsScreen)
     {
+        this.HomeScreenLazy = homeScreen;
         this.ExitScreenLazy = exitScreen;
         this.SettingsScreenLazy = settingsScreen;
 
-        this.lazyCommands = new Lazy<ICommand[]>(() =>
-        [
-            new InterruptionCommand(
-                Key: VirtualKeyCode.ESCAPE,
-                Text: Resources.Exit_CommandText,
-                NextScreen: exitScreen.Value),
-            ..this.AdditionalCommands,
-            new InterruptionCommand(
-                Key: VirtualKeyCode.F12,
-                Text: Resources.Settings_CommandText,
-                NextScreen: settingsScreen.Value)
-        ]);
+        this.lazyCommands = new Lazy<ICommand[]>(() => [..this.InitCommands()]);
 
         this.lazyRenderer = new Lazy<ScreenRenderer>(
             () => this.CreateRenderer().Pipe(renderer =>
@@ -49,6 +42,8 @@ internal abstract class ScreenBase : IScreen
 
     protected virtual ICommand[] AdditionalCommands { get; } = [];
 
+    protected Lazy<HomeScreen> HomeScreenLazy { get; }
+
     protected Lazy<ExitScreen> ExitScreenLazy { get; }
 
     protected Lazy<SettingsScreen> SettingsScreenLazy { get; }
@@ -58,6 +53,8 @@ internal abstract class ScreenBase : IScreen
 
     protected ScreenRenderer Renderer
         => this.lazyRenderer.Value;
+
+    protected virtual Configuration Config { get; init; } = new();
 
     protected abstract ScreenRenderer CreateRenderer();
 
@@ -115,6 +112,40 @@ internal abstract class ScreenBase : IScreen
             (true, { } promptResult) => new CompletedShowPrompt(onSucces(promptResult)),
             (false, _) => new InterruptedShowPrompt(),
         };
+
+    private IEnumerable<ICommand> InitCommands()
+    {
+        yield return new InterruptionCommand(
+            Key: VirtualKeyCode.ESCAPE,
+            Text: Resources.Exit_CommandText,
+            NextScreen: this.ExitScreenLazy.Value);
+
+        if (this.Config.IsHomeCommandEnabled)
+        {
+            yield return new InterruptionCommand(
+                Key: VirtualKeyCode.F1,
+                Text: Resources.Home_CommandText,
+                NextScreen: this.HomeScreenLazy.Value);
+        }
+
+        if (this.Config.IsBackCommandEnabled)
+        {
+            yield return new InterruptionCommand(
+                Key: VirtualKeyCode.F2,
+                Text: Resources.Back_CommandText,
+                NextScreen: null);
+        }
+
+        foreach (var command in this.AdditionalCommands)
+        {
+            yield return command;
+        }
+
+        yield return new InterruptionCommand(
+            Key: VirtualKeyCode.F12,
+            Text: Resources.Settings_CommandText,
+            NextScreen: this.SettingsScreenLazy.Value);
+    }
 
     /// <summary>
     /// Handles the commands and returns the key that interrupted the render.
@@ -175,4 +206,8 @@ internal abstract class ScreenBase : IScreen
             return VirtualKeyCode.NONAME;
         });
     }
+
+    public record Configuration(
+        bool IsBackCommandEnabled = true,
+        bool IsHomeCommandEnabled = true);
 }

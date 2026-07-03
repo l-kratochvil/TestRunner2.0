@@ -9,9 +9,10 @@ using TestRunner.Common.Interfaces;
 
 internal class TestSuitesSelectionScreen(
     TestRunConfigStore testRunConfigStore,
+    Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
-    : ForwardedScreenBase(exitScreen, settingsScreen)
+    : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
     private readonly IEqualityComparer<ITestEntity> testEntityComparer = new TestEntitiesComparer();
 

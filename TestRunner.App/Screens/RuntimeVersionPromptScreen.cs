@@ -9,9 +9,10 @@ using TestRunner.App.Stores;
 internal partial class RuntimeVersionPromptScreen(
     TestRunConfigStore testRunConfigStore,
     AppUserSettingsStore appUserSettingsStore,
+    Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
-    : ForwardedScreenBase(exitScreen, settingsScreen)
+    : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()

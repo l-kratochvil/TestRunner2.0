@@ -13,9 +13,10 @@ using TestRunner.Common.Interfaces;
 
 internal class TestCasesSelectionScreen(
     TestRunConfigStore testRunConfigStore,
+    Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
-    : ForwardedScreenBase(exitScreen, settingsScreen)
+    : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
     private const string InstructionsText = "[grey](Press [blue]<space>[/] to select an item, [green]<enter>[/] to accept)[/]";
 
@@ -39,6 +40,7 @@ internal class TestCasesSelectionScreen(
                         NextScreen: new SelectTestCasesScreen(
                             testSuiteEntities: selectedTestSuites,
                             testRunConfigStore: testRunConfigStore,
+                            homeScreen: this.HomeScreenLazy,
                             exitScreen: this.ExitScreenLazy,
                             settingsScreen: this.SettingsScreenLazy)),
                     ct);
@@ -50,9 +52,10 @@ internal class TestCasesSelectionScreen(
     private class SelectTestCasesScreen(
         IEnumerable<TestSuiteEntity> testSuiteEntities,
         TestRunConfigStore testRunConfigStore,
+        Lazy<HomeScreen> homeScreen,
         Lazy<ExitScreen> exitScreen,
         Lazy<SettingsScreen> settingsScreen)
-        : ForwardedScreenBase(exitScreen, settingsScreen)
+        : ScreenBase(homeScreen, exitScreen, settingsScreen)
     {
         private static readonly IEqualityComparer<ITestEntity> TestEntityComparer = new TestEntitiesComparer();
 

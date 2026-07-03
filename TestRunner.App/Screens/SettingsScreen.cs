@@ -5,9 +5,10 @@ using TestRunner.App.Stores;
 
 internal class SettingsScreen(
     AppUserSettingsStore appUserSettingsStore,
+    Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
-    : ForwardedScreenBase(exitScreen, settingsScreen)
+    : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()
@@ -35,16 +36,20 @@ internal class SettingsScreen(
     {
         yield return new Choice<IScreen>(
             value: new EnterIdeInstallFolderPathScreen(
-                appUserSettingsStore, this.ExitScreenLazy, this.SettingsScreenLazy),
+                appUserSettingsStore,
+                this.HomeScreenLazy,
+                this.ExitScreenLazy,
+                this.SettingsScreenLazy),
             displayText: Resources.IdeInstallFolderPath_ChoiceText,
             displayValue: appUserSettingsStore.Current.IdeInstallFolderPath);
     }
 
     private class EnterIdeInstallFolderPathScreen(
         AppUserSettingsStore appUserSettingsStore,
+        Lazy<HomeScreen> homeScreen,
         Lazy<ExitScreen> exitScreen,
         Lazy<SettingsScreen> settingsScreen)
-        : ForwardedScreenBase(exitScreen, settingsScreen)
+        : ScreenBase(homeScreen, exitScreen, settingsScreen)
     {
         /// <inheritdoc/>
         protected override ScreenRenderer CreateRenderer()

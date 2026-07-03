@@ -1,9 +1,10 @@
 ﻿namespace TestRunner.App.Screens;
 
 internal class ExitScreen(
+    Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
-    : ForwardedScreenBase(exitScreen, settingsScreen)
+    : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
     // TODO:
     /// <inheritdoc/>

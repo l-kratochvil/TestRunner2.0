@@ -106,6 +106,15 @@ namespace TestRunner.App.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Home.
+        /// </summary>
+        public static string Home_CommandText {
+            get {
+                return ResourceManager.GetString("Home_CommandText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to IDE install folder path: .
         /// </summary>
         public static string IdeInstallFolderPath_ChoiceText {

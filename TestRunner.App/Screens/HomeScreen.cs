@@ -10,16 +10,23 @@ using TestRunner.Common.Interfaces;
 
 internal sealed class HomeScreen(
     TestRunConfigStore testRunConfigStore,
+    Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen,
     RuntimeVersionPromptScreen runtimeVersionPromptScreen,
     IdeVersionPromptScreen ideVersionPromptScreen,
     TestSuitesSelectionScreen testEntitiesFromTestsuitesPromptScreen,
     TestCasesSelectionScreen testEntitiesFromTestCasesPromptScreen,
-    RunTestScreen runTestScreen,
-    EmptyScreen emptyScreen)
-    : ScreenBase(exitScreen, settingsScreen)
+    RunTestScreen runTestScreen)
+    : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
+    /// <inheritdoc/>
+    protected override Configuration Config { get; init; } = new()
+    {
+        IsHomeCommandEnabled = false,
+        IsBackCommandEnabled = false,
+    };
+
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()
         => new()

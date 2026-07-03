@@ -171,4 +171,7 @@
   <data name="EnterIdeInstallFolderPath_PromptText" xml:space="preserve">
     <value>Enter IDE install folder path: </value>
   </data>
+  <data name="Home_CommandText" xml:space="preserve">
+    <value>Home</value>
+  </data>
 </root>
