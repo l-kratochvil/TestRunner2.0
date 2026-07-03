@@ -23,12 +23,12 @@ internal partial class RuntimeVersionPromptScreen(
                 var installedRuntimeVersions = GetInstalledRuntimeVersions(appUserSettingsStore);
                 if (installedRuntimeVersions.Length == 0)
                 {
-                    ConsoleUtils.WaitForAnyKeyPress(Properties.Resources.NoRuntimesFoundUnderIdeInstallFolder_Message);
+                    ConsoleUtils.WaitForAnyKeyPress(Resources.NoRuntimesFoundUnderIdeInstallFolder_Message);
                     return Task.FromResult<ShowPromptResult>(CompletedShowPrompt.Default);
                 }
 
                 var prompt = new SelectionPrompt<string>()
-                    .Title("# Select runtime version:")
+                    .Title("Select runtime version:")
                     .PageSize(10)
                     .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]")
                     .AddChoices(installedRuntimeVersions);

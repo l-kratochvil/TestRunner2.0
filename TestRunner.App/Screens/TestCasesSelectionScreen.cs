@@ -30,7 +30,7 @@ internal class TestCasesSelectionScreen(
                 return ShowPromptAsync(
                     new MultiSelectionPrompt<TestSuiteEntity>()
                         .Title("# Select testsuites to select testcases from: ")
-                        .MoreChoicesText($"[grey]({Properties.Resources.MoveUpAndDownToReveal_HelpText})[/]")
+                        .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
                         .InstructionsText(InstructionsText)
                         .PageSize(10)
                         .AddChoices(testSuites)
@@ -64,7 +64,7 @@ internal class TestCasesSelectionScreen(
                 {
                     var prompt = new MultiSelectionPrompt<ITestEntity>(TestEntityComparer)
                         .Title("# Select test cases: ")
-                        .MoreChoicesText($"[grey]({Properties.Resources.MoveUpAndDownToReveal_HelpText})[/]")
+                        .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
                         .InstructionsText(InstructionsText)
                         .NotRequired()
                         .PageSize(10)

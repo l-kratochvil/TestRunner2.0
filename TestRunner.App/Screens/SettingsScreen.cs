@@ -6,8 +6,7 @@ using TestRunner.App.Stores;
 internal class SettingsScreen(
     AppUserSettingsStore appUserSettingsStore,
     Lazy<ExitScreen> exitScreen,
-    Lazy<SettingsScreen> settingsScreen,
-    EmptyScreen emptyScreen)
+    Lazy<SettingsScreen> settingsScreen)
     : ForwardedScreenBase(exitScreen, settingsScreen)
 {
     /// <inheritdoc/>
@@ -16,36 +15,29 @@ internal class SettingsScreen(
         {
             Main = ct =>
             {
-                var choices = GetChoices(appUserSettingsStore);
-                var prompt = new SelectionPrompt<Choice>()
+                var choices = this.GetChoices();
+                var prompt = new SelectionPrompt<Choice<IScreen>>()
                     .Title(string.Empty) // The console is buggy if no title is set
                     .PageSize(10)
-                    .MoreChoicesText($"[grey]({Properties.Resources.MoveUpAndDownToReveal_HelpText})[/]")
+                    .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
                     .AddChoices(choices)
-                    .UseConverter(choice => TextFormattors.AsTextValuePair(
-                        text: choice.Text,
-                        value: choice.Value))
+                    .UseConverter(choice => choice.Text)
                     .HighlightStyle(new Style(foreground: Color.Aqua, decoration: Spectre.Console.Decoration.Bold));
 
                 return ShowPromptAsync(
                     prompt,
-                    choice => new RenderOutput(NextScreen: choice.Type switch
-                    {
-                        Choice.TypeKind.EnterIdeInstallFolderPathScreen
-                            => new EnterIdeInstallFolderPathScreen(
-                                appUserSettingsStore, this.ExitScreenLazy, this.SettingsScreenLazy),
-                        _ => emptyScreen,
-                    }),
+                    choice => new RenderOutput(NextScreen: choice.Value),
                     ct);
             },
         };
 
-    private static IEnumerable<Choice> GetChoices(AppUserSettingsStore appUserSettingsStore)
+    private IEnumerable<Choice<IScreen>> GetChoices()
     {
-        yield return new Choice(
-            Type: Choice.TypeKind.EnterIdeInstallFolderPathScreen,
-            Value: appUserSettingsStore.Current.IdeInstallFolderPath,
-            Text: Properties.Resources.IdeInstallFolderPath_ChoiceText);
+        yield return new Choice<IScreen>(
+            value: new EnterIdeInstallFolderPathScreen(
+                appUserSettingsStore, this.ExitScreenLazy, this.SettingsScreenLazy),
+            displayText: Resources.IdeInstallFolderPath_ChoiceText,
+            displayValue: appUserSettingsStore.Current.IdeInstallFolderPath);
     }
 
     private class EnterIdeInstallFolderPathScreen(
@@ -64,14 +56,14 @@ internal class SettingsScreen(
                         {
                             if (string.IsNullOrWhiteSpace(path))
                             {
-                                return Properties.Resources.PathCanNotBeEmpty_ErrorMessage
+                                return Resources.PathCanNotBeEmpty_ErrorMessage
                                     .Pipe(TextFormattors.AsErrorText)
                                     .Pipe(ValidationResult.Error);
                             }
 
                             if (!Directory.Exists(path))
                             {
-                                return Properties.Resources.PathDoesNotExist_ErrorMessage
+                                return Resources.PathDoesNotExist_ErrorMessage
                                     .Pipe(TextFormattors.AsErrorText)
                                     .Pipe(ValidationResult.Error);
                             }
@@ -89,16 +81,5 @@ internal class SettingsScreen(
                     },
                     ct),
             };
-    }
-
-    private record Choice(
-        Choice.TypeKind Type,
-        string Text,
-        string? Value)
-    {
-        public enum TypeKind
-        {
-            EnterIdeInstallFolderPathScreen,
-        }
     }
 }

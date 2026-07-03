@@ -138,4 +138,19 @@
   <data name="PressAnyKeyToContinue_Message" xml:space="preserve">
     <value>Pro pokračování stiskněte libovolnou klávesu ...</value>
   </data>
+  <data name="RuntimeVersion_ChoiceText" xml:space="preserve">
+    <value>Verze runtime</value>
+  </data>
+  <data name="IdeVersion_ChoiceText" xml:space="preserve">
+    <value>Verze IDE</value>
+  </data>
+  <data name="SelectTestSuites_ChoiceText" xml:space="preserve">
+    <value>Vyber testovací sady</value>
+  </data>
+  <data name="SelectTestCases_ChoiceText" xml:space="preserve">
+    <value>Vyber testovací případy</value>
+  </data>
+  <data name="RunTest_ChoiceText" xml:space="preserve">
+    <value>Spustit test</value>
+  </data>
 </root>

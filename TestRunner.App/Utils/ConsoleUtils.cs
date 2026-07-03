@@ -40,7 +40,7 @@ internal static class ConsoleUtils
     public static void WaitForAnyKeyPress(string text)
     {
         WriteLine(text);
-        WriteLine(Properties.Resources.PressAnyKeyToContinue_Message);
+        WriteLine(Resources.PressAnyKeyToContinue_Message);
         AnsiConsole.Console.Input.ReadKey(true);
     }
 }

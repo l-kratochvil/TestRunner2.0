@@ -138,4 +138,19 @@
   <data name="PressAnyKeyToContinue_Message" xml:space="preserve">
     <value>Press any key to continue ...</value>
   </data>
+  <data name="RuntimeVersion_ChoiceText" xml:space="preserve">
+    <value>Runtime version</value>
+  </data>
+  <data name="IdeVersion_ChoiceText" xml:space="preserve">
+    <value>IDE version</value>
+  </data>
+  <data name="SelectTestSuites_ChoiceText" xml:space="preserve">
+    <value>Select test suites</value>
+  </data>
+  <data name="SelectTestCases_ChoiceText" xml:space="preserve">
+    <value>Select test cases</value>
+  </data>
+  <data name="RunTest_ChoiceText" xml:space="preserve">
+    <value>Run test</value>
+  </data>
 </root>

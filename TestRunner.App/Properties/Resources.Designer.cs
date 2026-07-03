@@ -79,6 +79,15 @@ namespace TestRunner.App.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to IDE version.
+        /// </summary>
+        public static string IdeVersion_ChoiceText {
+            get {
+                return ResourceManager.GetString("IdeVersion_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Move up and down to reveal more choices.
         /// </summary>
         public static string MoveUpAndDownToReveal_HelpText {
@@ -120,6 +129,42 @@ namespace TestRunner.App.Properties {
         public static string PressAnyKeyToContinue_Message {
             get {
                 return ResourceManager.GetString("PressAnyKeyToContinue_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Run test.
+        /// </summary>
+        public static string RunTest_ChoiceText {
+            get {
+                return ResourceManager.GetString("RunTest_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Runtime version.
+        /// </summary>
+        public static string RuntimeVersion_ChoiceText {
+            get {
+                return ResourceManager.GetString("RuntimeVersion_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select test cases.
+        /// </summary>
+        public static string SelectTestCases_ChoiceText {
+            get {
+                return ResourceManager.GetString("SelectTestCases_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select test suites.
+        /// </summary>
+        public static string SelectTestSuites_ChoiceText {
+            get {
+                return ResourceManager.GetString("SelectTestSuites_ChoiceText", resourceCulture);
             }
         }
     }
