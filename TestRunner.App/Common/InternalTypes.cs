@@ -26,7 +26,19 @@ internal static class InternalTypes
     public record InterruptionCommand(
         VirtualKeyCode Key,
         string Text,
-        IScreen? NextScreen);
+        IScreen? NextScreen)
+        : CommandBase(Key, Text);
+
+    public record ActionCommand(
+        VirtualKeyCode Key,
+        string Text,
+        Action Action)
+        : CommandBase(Key, Text);
+
+    public record CommandBase(
+        VirtualKeyCode Key,
+        string Text)
+        : ICommand;
 
     public record CompletedShowPrompt(RenderOutput RenderOutput)
         : ShowPromptResult
@@ -34,8 +46,6 @@ internal static class InternalTypes
         public static CompletedShowPrompt Default
             => new(RenderOutput.Default);
     }
-
-    public record IntermediateShowPrompt : ShowPromptResult;
 
     public record InterruptedShowPrompt : ShowPromptResult;
 

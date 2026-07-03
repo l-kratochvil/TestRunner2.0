@@ -26,7 +26,9 @@ internal static class Paths
 
     public static class Files
     {
-        public static string AppSettings { get; } = Path.Combine(Directories.AppData, "settings.json");
+        public static string AppUserSettings { get; } = Path.Combine(Directories.AppData, "user-settings.json");
+
+        public static string AppState { get; } = Path.Combine(Directories.AppData, "app-state.json");
 
         // DEV-NOTE:
         // This is the path stored in TestEnvironment.TestEnvironmentConfiguration.TestRunnerConfigFilePath (zat-tests solution).

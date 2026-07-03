@@ -51,7 +51,7 @@ internal class SettingsScreen(
             => new()
             {
                 Main = ct => ShowPromptAsync(
-                    new TextPrompt<string>("Enter IDE install folder path: ")
+                    new TextPrompt<string>(Resources.EnterIdeInstallFolderPath_PromptText)
                         .Validate(static path =>
                         {
                             if (string.IsNullOrWhiteSpace(path))

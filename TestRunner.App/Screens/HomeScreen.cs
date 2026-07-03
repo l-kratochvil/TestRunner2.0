@@ -16,6 +16,7 @@ internal sealed class HomeScreen(
     IdeVersionPromptScreen ideVersionPromptScreen,
     TestSuitesSelectionScreen testEntitiesFromTestsuitesPromptScreen,
     TestCasesSelectionScreen testEntitiesFromTestCasesPromptScreen,
+    RunTestScreen runTestScreen,
     EmptyScreen emptyScreen)
     : ScreenBase(exitScreen, settingsScreen)
 {
@@ -81,18 +82,16 @@ internal sealed class HomeScreen(
 
     private IEnumerable<Choice<IScreen>> GetChoices()
     {
-        var config = testRunConfigStore;
-
         yield return new Choice<IScreen>(
             value: runtimeVersionPromptScreen,
             displayText: Resources.RuntimeVersion_ChoiceText,
-            displayValue: config.RuntimeVersion);
+            displayValue: testRunConfigStore.RuntimeVersion);
 
         if (Choice.InitChoice<IScreen>(
                 ideVersionPromptScreen,
                 Resources.IdeVersion_ChoiceText,
-                config.IdeVersion,
-                () => config.RuntimeVersion is not null)
+                testRunConfigStore.IdeVersion,
+                () => testRunConfigStore.RuntimeVersion is not null)
             .TryGetValue(out var ideVersionChoice))
         {
             yield return ideVersionChoice;
@@ -102,7 +101,7 @@ internal sealed class HomeScreen(
                 testEntitiesFromTestsuitesPromptScreen,
                 Resources.SelectTestSuites_ChoiceText,
                 null,
-                () => config.IdeVersion is not null)
+                () => testRunConfigStore.IdeVersion is not null)
             .TryGetValue(out var selectTestSuiteChoice))
         {
             yield return selectTestSuiteChoice;
@@ -112,26 +111,26 @@ internal sealed class HomeScreen(
                 testEntitiesFromTestCasesPromptScreen,
                 Resources.SelectTestCases_ChoiceText,
                 null,
-                () => config.IdeVersion is not null)
+                () => testRunConfigStore.IdeVersion is not null)
             .TryGetValue(out var selectTestCasesChoice))
         {
             yield return selectTestCasesChoice;
         }
 
-        if (!config.TestEntities.Any())
+        if (!testRunConfigStore.TestEntities.Any())
         {
             yield break;
         }
 
-        if (string.IsNullOrEmpty(config.IdeVersion) ||
-            string.IsNullOrEmpty(config.RuntimeVersion) ||
-            !config.TestEntities.Any())
+        if (string.IsNullOrEmpty(testRunConfigStore.IdeVersion) ||
+            string.IsNullOrEmpty(testRunConfigStore.RuntimeVersion) ||
+            !testRunConfigStore.TestEntities.Any())
         {
             throw new InvalidOperationException("Invalid config (some required values are missing)");
         }
 
         yield return new Choice<IScreen>(
-            emptyScreen,
+            runTestScreen,
             displayText: Resources.RunTest_ChoiceText);
     }
 }

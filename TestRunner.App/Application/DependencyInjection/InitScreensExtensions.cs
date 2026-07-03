@@ -19,6 +19,7 @@ internal static class InitScreensExtensions
                 .AddSingleton<RuntimeVersionPromptScreen>()
                 .AddSingleton<TestSuitesSelectionScreen>()
                 .AddSingleton<TestCasesSelectionScreen>()
+                .AddSingleton<RunTestScreen>()
                 .AddSingleton(static provider => new Lazy<ExitScreen>(provider.GetRequiredService<ExitScreen>))
                 .AddSingleton(static provider => new Lazy<SettingsScreen>(provider.GetRequiredService<SettingsScreen>)));
     }

@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-using TestRunner.App.Common;
 using TestRunner.App.Stores;
 
 internal partial class RuntimeVersionPromptScreen(

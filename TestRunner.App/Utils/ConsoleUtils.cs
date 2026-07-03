@@ -1,11 +1,45 @@
 namespace TestRunner.App.Utils;
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Spectre.Console.Rendering;
+
 internal static class ConsoleUtils
 {
+    public delegate Task ShowLiveDataUpdator<in TUpdateTarget, in TData>(
+        TUpdateTarget updateTarget,
+        TData data,
+        LiveDisplayContext context,
+        CancellationToken cancellationToken);
+
+    public static async Task<bool> ShowLiveDataAsync<TUpdateTarget, TData>(
+        TUpdateTarget updateTarget,
+        TData data,
+        ShowLiveDataUpdator<TUpdateTarget, TData> updator,
+        CancellationToken cancellationToken)
+        where TUpdateTarget : IRenderable
+    {
+        bool completed;
+
+        try
+        {
+            await Live(updateTarget).StartAsync(
+                async ctx => await updator(
+                    updateTarget, data, ctx, cancellationToken));
+            completed = true;
+        }
+        catch (Exception ex) when (ex is OperationCanceledException ||
+                                   ex.InnerException is OperationCanceledException ||
+                                   ex is TaskCanceledException ||
+                                   ex.InnerException is TaskCanceledException)
+        {
+            completed = false;
+        }
+
+        return completed;
+    }
+
     /// <summary>
     /// Shows the prompt and returns the result.
     /// </summary>

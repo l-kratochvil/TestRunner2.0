@@ -4,7 +4,9 @@ using TestRunner.App.Model;
 
 internal class AppStateStore : IJsonPersistanceStore<AppState>
 {
-    private readonly JsonPersistanceStore<AppState> jsonPersistanceStore = new(CreateDefaultAppState);
+    private static readonly string JsonPath = Paths.Files.AppState;
+
+    private readonly JsonPersistanceStore<AppState> jsonPersistanceStore = new(CreateDefaultAppState, JsonPath);
 
     private AppStateStore()
     {
@@ -16,9 +18,9 @@ internal class AppStateStore : IJsonPersistanceStore<AppState>
 
     public static AppStateStore Create()
         => JsonPersistanceStore<AppState>.InitStore(
-            Paths.Files.AppSettings,
+            JsonPath,
             CreateDefaultAppState,
-            _ => new AppStateStore());
+            model => new AppStateStore().Visit(x => x.Update(model)));
 
     private static AppState CreateDefaultAppState()
         => new(RuntimeVersion: null, IdeVersion: null);

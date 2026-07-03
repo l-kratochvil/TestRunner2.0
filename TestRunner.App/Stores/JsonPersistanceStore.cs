@@ -4,21 +4,22 @@ using System;
 using System.Text.Json;
 
 internal class JsonPersistanceStore<TJsonModel>(
-    Func<TJsonModel> defaultModelFactory)
+    Func<TJsonModel> defaultModelFactory,
+    string jsonModelPath)
     : IJsonPersistanceStore<TJsonModel>
 {
     /// <inheritdoc/>
     public TJsonModel Current { get; private set; } = defaultModelFactory();
 
     public static TStore InitStore<TStore>(
-        string jsonModelPath,
+        string jsonPath,
         Func<TJsonModel> defaultModelFactory,
         Func<TJsonModel, TStore> storeFactory)
     {
         TJsonModel jsonModel;
-        if (File.Exists(jsonModelPath))
+        if (File.Exists(jsonPath))
         {
-            jsonModel = File.ReadAllText(jsonModelPath)
+            jsonModel = File.ReadAllText(jsonPath)
                             .Pipe(json => JsonSerializer.Deserialize<TJsonModel>(
                                 json, JsonPersistanceStore.JsonSerializerOptions))
                         ?? defaultModelFactory();
@@ -26,7 +27,7 @@ internal class JsonPersistanceStore<TJsonModel>(
         else
         {
             jsonModel = defaultModelFactory();
-            Save(jsonModel);
+            Save(jsonModel, jsonPath);
         }
 
         return storeFactory(jsonModel);
@@ -40,15 +41,13 @@ internal class JsonPersistanceStore<TJsonModel>(
     public void Update(TJsonModel currentSettings)
     {
         this.Current = currentSettings;
-        JsonSerializer
-            .Serialize(this.Current, JsonPersistanceStore.JsonSerializerOptions)
-            .Visit(serialized => File.WriteAllText(Paths.Files.AppSettings, serialized));
+        Save(currentSettings, jsonModelPath);
     }
 
-    private static void Save(TJsonModel jsonModel)
+    private static void Save(TJsonModel jsonModel, string jsonPath)
         => JsonSerializer
             .Serialize(jsonModel, JsonPersistanceStore.JsonSerializerOptions)
-            .Visit(serialized => File.WriteAllText(Paths.Files.AppSettings, serialized));
+            .Visit(serialized => File.WriteAllText(jsonPath, serialized));
 }
 
 internal static class JsonPersistanceStore

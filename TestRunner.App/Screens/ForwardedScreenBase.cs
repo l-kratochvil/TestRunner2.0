@@ -2,6 +2,8 @@ namespace TestRunner.App.Screens;
 
 using System;
 
+using TestRunner.App.Common;
+
 using WindowsInput.Native;
 
 /// <summary>
@@ -12,12 +14,12 @@ internal abstract class ForwardedScreenBase(
     Lazy<SettingsScreen> settingsScreen)
     : ScreenBase(exitScreen, settingsScreen)
 {
-    private readonly Lazy<InterruptionCommand[]> lazyAdditionalInterruptionCommands = new(() =>
+    private readonly Lazy<ICommand[]> lazyAdditionalInterruptionCommands = new(() =>
     [
-        new InterruptionCommand(Key: VirtualKeyCode.F1, Text: "Back", NextScreen: null),
+        new InterruptionCommand(Key: VirtualKeyCode.F1, Text: Resources.Back_CommandText, NextScreen: null),
     ]);
 
     /// <inheritdoc/>
-    protected override InterruptionCommand[] AdditionalInterruptionCommands
+    protected override ICommand[] AdditionalCommands
         => this.lazyAdditionalInterruptionCommands.Value;
 }

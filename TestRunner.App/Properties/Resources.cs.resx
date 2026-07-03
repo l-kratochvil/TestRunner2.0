@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="EnterIdeInstallFolderPath_ChoiceText" xml:space="preserve">
-    <value>Zadej cestu k adresáři instalace IDE</value>
-  </data>
   <data name="IdeInstallFolderPath_ChoiceText" xml:space="preserve">
     <value>Cesta k adresáři instalace IDE</value>
   </data>
@@ -152,5 +149,26 @@
   </data>
   <data name="RunTest_ChoiceText" xml:space="preserve">
     <value>Spustit test</value>
+  </data>
+  <data name="StopTest_CommandText" xml:space="preserve">
+    <value>Zastavit test</value>
+  </data>
+  <data name="Back_CommandText" xml:space="preserve">
+    <value>Zpět</value>
+  </data>
+  <data name="Exit_CommandText" xml:space="preserve">
+    <value>Ukončit</value>
+  </data>
+  <data name="Settings_CommandText" xml:space="preserve">
+    <value>Nastavení</value>
+  </data>
+  <data name="ElapsedTime" xml:space="preserve">
+    <value>Uplynulý čas</value>
+  </data>
+  <data name="EnterIdeIVersion_PromptText" xml:space="preserve">
+    <value>Zadejte verzi IDE: </value>
+  </data>
+  <data name="EnterIdeInstallFolderPath_PromptText" xml:space="preserve">
+    <value>Zadejte cestu k adresáři instalace IDE: </value>
   </data>
 </root>

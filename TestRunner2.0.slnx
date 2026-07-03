@@ -8,6 +8,7 @@
   </Folder>
   <Folder Name="/Solution Items/docs/">
     <File Path="docs/DEV-NOTES.md" />
+    <File Path="docs/Issue-0002.docx" />
   </Folder>
   <Project Path="../DevKit.Core/DevKit.Core/DevKit.Core.csproj" />
   <Project Path="TestRunner.App.Tests/TestRunner.App.Tests.csproj" />

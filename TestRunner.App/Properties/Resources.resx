@@ -117,11 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="EnterIdeInstallFolderPath_ChoiceText" xml:space="preserve">
-    <value>Enter IDE install folder path</value>
-  </data>
   <data name="IdeInstallFolderPath_ChoiceText" xml:space="preserve">
-    <value>IDE install folder path</value>
+    <value>IDE install folder path: </value>
   </data>
   <data name="MoveUpAndDownToReveal_HelpText" xml:space="preserve">
     <value>Move up and down to reveal more choices</value>
@@ -152,5 +149,26 @@
   </data>
   <data name="RunTest_ChoiceText" xml:space="preserve">
     <value>Run test</value>
+  </data>
+  <data name="StopTest_CommandText" xml:space="preserve">
+    <value>Stop test</value>
+  </data>
+  <data name="Back_CommandText" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Exit_CommandText" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="Settings_CommandText" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="ElapsedTime" xml:space="preserve">
+    <value>Elapsed time</value>
+  </data>
+  <data name="EnterIdeIVersion_PromptText" xml:space="preserve">
+    <value>Enter IDE version: </value>
+  </data>
+  <data name="EnterIdeInstallFolderPath_PromptText" xml:space="preserve">
+    <value>Enter IDE install folder path: </value>
   </data>
 </root>

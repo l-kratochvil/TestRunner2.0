@@ -7,7 +7,9 @@ internal class AppUserSettingsStore : IJsonPersistanceStore<AppUserSettings>
 {
     private const string DefaultIdeInstallationDirPath = @"C:\Program Files (x86)\Pertinax6";
 
-    private readonly JsonPersistanceStore<AppUserSettings> jsonPersistanceStore = new(CreateDefaultAppUserSettings);
+    private static readonly string JsonPath = Paths.Files.AppUserSettings;
+
+    private readonly JsonPersistanceStore<AppUserSettings> jsonPersistanceStore = new(CreateDefaultAppUserSettings, JsonPath);
 
     private AppUserSettingsStore()
     {
@@ -19,9 +21,9 @@ internal class AppUserSettingsStore : IJsonPersistanceStore<AppUserSettings>
 
     public static AppUserSettingsStore Create()
         => JsonPersistanceStore<AppUserSettings>.InitStore(
-            Paths.Files.AppSettings,
+            JsonPath,
             CreateDefaultAppUserSettings,
-            _ => new AppUserSettingsStore());
+            model => new AppUserSettingsStore().Visit(x => x.Update(model)));
 
     /// <inheritdoc/>
     public void Update(Func<AppUserSettings, AppUserSettings> updator)

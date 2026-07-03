@@ -61,16 +61,52 @@ namespace TestRunner.App.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enter IDE install folder path.
+        ///   Looks up a localized string similar to Back.
         /// </summary>
-        public static string EnterIdeInstallFolderPath_ChoiceText {
+        public static string Back_CommandText {
             get {
-                return ResourceManager.GetString("EnterIdeInstallFolderPath_ChoiceText", resourceCulture);
+                return ResourceManager.GetString("Back_CommandText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to IDE install folder path.
+        ///   Looks up a localized string similar to Elapsed time.
+        /// </summary>
+        public static string ElapsedTime {
+            get {
+                return ResourceManager.GetString("ElapsedTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter IDE install folder path: .
+        /// </summary>
+        public static string EnterIdeInstallFolderPath_PromptText {
+            get {
+                return ResourceManager.GetString("EnterIdeInstallFolderPath_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter IDE version: .
+        /// </summary>
+        public static string EnterIdeIVersion_PromptText {
+            get {
+                return ResourceManager.GetString("EnterIdeIVersion_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Exit.
+        /// </summary>
+        public static string Exit_CommandText {
+            get {
+                return ResourceManager.GetString("Exit_CommandText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IDE install folder path: .
         /// </summary>
         public static string IdeInstallFolderPath_ChoiceText {
             get {
@@ -165,6 +201,24 @@ namespace TestRunner.App.Properties {
         public static string SelectTestSuites_ChoiceText {
             get {
                 return ResourceManager.GetString("SelectTestSuites_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        public static string Settings_CommandText {
+            get {
+                return ResourceManager.GetString("Settings_CommandText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stop test.
+        /// </summary>
+        public static string StopTest_CommandText {
+            get {
+                return ResourceManager.GetString("StopTest_CommandText", resourceCulture);
             }
         }
     }

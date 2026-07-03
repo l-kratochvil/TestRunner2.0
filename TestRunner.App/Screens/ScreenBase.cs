@@ -7,12 +7,16 @@ using System.Threading.Tasks;
 
 using DevKit.Core.Extensions;
 
+using Spectre.Console.Rendering;
+
+using TestRunner.App.Common;
+
 using WindowsInput;
 using WindowsInput.Native;
 
 internal abstract class ScreenBase : IScreen
 {
-    private readonly Lazy<InterruptionCommand[]> lazyInterruptionCommands;
+    private readonly Lazy<ICommand[]> lazyCommands;
     private readonly Lazy<ScreenRenderer> lazyRenderer;
 
     private readonly InputSimulator inputSimulator = new();
@@ -22,29 +26,35 @@ internal abstract class ScreenBase : IScreen
         this.ExitScreenLazy = exitScreen;
         this.SettingsScreenLazy = settingsScreen;
 
-        this.lazyInterruptionCommands = new Lazy<InterruptionCommand[]>(() =>
+        this.lazyCommands = new Lazy<ICommand[]>(() =>
         [
-            new InterruptionCommand(Key: VirtualKeyCode.ESCAPE, Text: "Exit", NextScreen: exitScreen.Value),
-            ..this.AdditionalInterruptionCommands,
-            new InterruptionCommand(Key: VirtualKeyCode.F12, Text: "Settings", NextScreen: settingsScreen.Value)
+            new InterruptionCommand(
+                Key: VirtualKeyCode.ESCAPE,
+                Text: Resources.Exit_CommandText,
+                NextScreen: exitScreen.Value),
+            ..this.AdditionalCommands,
+            new InterruptionCommand(
+                Key: VirtualKeyCode.F12,
+                Text: Resources.Settings_CommandText,
+                NextScreen: settingsScreen.Value)
         ]);
 
         this.lazyRenderer = new Lazy<ScreenRenderer>(
             () => this.CreateRenderer().Pipe(renderer =>
             {
-                renderer.InterruptionCommands = this.InterruptionCommands;
+                renderer.Commands = this.Commands;
                 return renderer;
             }));
     }
 
-    protected virtual InterruptionCommand[] AdditionalInterruptionCommands { get; } = [];
+    protected virtual ICommand[] AdditionalCommands { get; } = [];
 
     protected Lazy<ExitScreen> ExitScreenLazy { get; }
 
     protected Lazy<SettingsScreen> SettingsScreenLazy { get; }
 
-    protected InterruptionCommand[] InterruptionCommands
-        => this.lazyInterruptionCommands.Value;
+    protected ICommand[] Commands
+        => this.lazyCommands.Value;
 
     protected ScreenRenderer Renderer
         => this.lazyRenderer.Value;
@@ -62,7 +72,7 @@ internal abstract class ScreenBase : IScreen
         using var renderCts = new CancellationTokenSource();
         using var keyPressedCts = new CancellationTokenSource();
 
-        var interuptRenderByKeyTask = this.InteruptRenderByKeyAsync(renderCts, keyPressedCts.Token);
+        var interuptRenderByKeyTask = this.HandleCommandsAsync(renderCts, keyPressedCts.Token);
         var output = await this.Renderer.Main(renderCts.Token);
 
         foreach (var cts in new[] { renderCts, keyPressedCts })
@@ -75,7 +85,8 @@ internal abstract class ScreenBase : IScreen
         return output switch
         {
             InterruptedShowPrompt => new RenderOutput(
-                NextScreen: this.InterruptionCommands
+                NextScreen: this.Commands
+                    .OfType<InterruptionCommand>()
                     .FirstOrDefault(command => command.Key == interuptRenderByKeyTaskResult)
                     .CheckIsNotNull($"Interruption command not found for key '{interuptRenderByKeyTaskResult}'")
                     .NextScreen),
@@ -84,15 +95,34 @@ internal abstract class ScreenBase : IScreen
         };
     }
 
+    protected static async Task<ShowPromptResult> ShowLiveDataAsync<TUpdateTarget, TData>(
+        TUpdateTarget updateTarget,
+        TData data,
+        ConsoleUtils.ShowLiveDataUpdator<TUpdateTarget, TData> liveDataUpdator,
+        Func<TData, RenderOutput> onSucces,
+        CancellationToken ct)
+        where TUpdateTarget : IRenderable
+        => await ConsoleUtils.ShowLiveDataAsync(updateTarget, data, liveDataUpdator, ct) switch
+        {
+            true => new CompletedShowPrompt(onSucces(data)),
+            false => new InterruptedShowPrompt(),
+        };
+
     protected static async Task<ShowPromptResult> ShowPromptAsync<T>(
         IPrompt<T> prompt, Func<T, RenderOutput> onSucces, CancellationToken ct)
         => await ConsoleUtils.ShowPromptAsync(prompt, ct) switch
         {
-            (true, var promptResult) => new CompletedShowPrompt(onSucces(promptResult!)),
+            (true, { } promptResult) => new CompletedShowPrompt(onSucces(promptResult)),
             (false, _) => new InterruptedShowPrompt(),
         };
 
-    private async Task<VirtualKeyCode> InteruptRenderByKeyAsync(CancellationTokenSource renderCts, CancellationToken ct)
+    /// <summary>
+    /// Handles the commands and returns the key that interrupted the render.
+    /// </summary>
+    /// <param name="renderCts">The <see cref="CancellationTokenSource"/> for the render operation.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The pressed key that interrupted the render.</returns>
+    private async Task<VirtualKeyCode> HandleCommandsAsync(CancellationTokenSource renderCts, CancellationToken ct)
     {
         VirtualKeyCode GetPressedKey() => Enum
             .GetValues<VirtualKeyCode>()
@@ -103,9 +133,14 @@ internal abstract class ScreenBase : IScreen
         // ReSharper disable once MethodSupportsCancellation
         return await Task.Run(async () =>
         {
-            var interruptionKeys = this.InterruptionCommands
+            var interruptionKeys = this.Commands
+                .OfType<InterruptionCommand>()
                 .Select(command => command.Key)
                 .ToArray();
+
+            var actionCommands = this.Commands
+                .OfType<ActionCommand>()
+                .ToDictionary(x => x.Key, x => x);
 
             try
             {
@@ -117,15 +152,19 @@ internal abstract class ScreenBase : IScreen
                         await Task.Delay(waitTimeMs, ct);
                     }
 
-                    if (!interruptionKeys.Contains(pressedKey))
+                    if (actionCommands.TryGetValue(pressedKey, out var actionCommand))
                     {
-                        await Task.Delay(waitTimeMs, ct);
+                        actionCommand.Action();
                         continue;
                     }
 
-                    await renderCts.CancelAsync();
+                    if (interruptionKeys.Contains(pressedKey))
+                    {
+                        await renderCts.CancelAsync();
+                        return pressedKey;
+                    }
 
-                    return pressedKey;
+                    await Task.Delay(waitTimeMs, ct);
                 }
             }
             catch (TaskCanceledException)

@@ -11,7 +11,8 @@ internal static class InitStoresExtensions
     {
         public IHostBuilder InitStores()
             => hostBuilder.ConfigureServices(services => services
-                .AddSingleton<TestRunConfigStore>()
-                .AddSingleton(_ => AppUserSettingsStore.Create()));
+                .AddSingleton(_ => AppUserSettingsStore.Create())
+                .AddSingleton(_ => AppStateStore.Create())
+                .AddSingleton<TestRunConfigStore>());
     }
 }
