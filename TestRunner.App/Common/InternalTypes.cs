@@ -50,4 +50,8 @@ internal static class InternalTypes
     public record InterruptedShowPrompt : ShowPromptResult;
 
     public record ShowPromptResult;
+
+    public record TextValueItem<TValue>(
+        string Text,
+        TValue Value);
 }

@@ -6,10 +6,8 @@ using System.Linq;
 
 using Spectre.Console;
 
-using TestRunner.App.Common;
 using TestRunner.App.Stores;
-using TestRunner.Common.ComplexTypes;
-using TestRunner.Common.Interfaces;
+using TestRunner.Common.Model;
 
 internal class TestCasesSelectionScreen(
     TestRunConfigStore testRunConfigStore,
@@ -20,6 +18,9 @@ internal class TestCasesSelectionScreen(
 {
     private const string InstructionsText = "[grey](Press [blue]<space>[/] to select an item, [green]<enter>[/] to accept)[/]";
 
+    private static readonly EqualityComparer<TestEntity> TestEntityEqualityComparer =
+        EqualityComparer<TestEntity>.Create((x, y) => x?.Name == y?.Name);
+
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()
         => new()
@@ -27,18 +28,19 @@ internal class TestCasesSelectionScreen(
             Main = ct =>
             {
                 var testSuites = DATA.TestSuites;
+                var testSuiteItems = testSuites.Select(x => new TextValueItem<TestSuiteEntity>(x.Name, x));
 
                 return ShowPromptAsync(
-                    new MultiSelectionPrompt<TestSuiteEntity>()
+                    new MultiSelectionPrompt<TextValueItem<TestSuiteEntity>>()
                         .Title("# Select testsuites to select testcases from: ")
                         .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
                         .InstructionsText(InstructionsText)
                         .PageSize(10)
-                        .AddChoices(testSuites)
-                        .UseConverter((Func<ITestEntity, string>)TestEntityConverter),
+                        .AddChoices(testSuiteItems)
+                        .UseConverter(x => x.Text),
                     selectedTestSuites => new RenderOutput(
                         NextScreen: new SelectTestCasesScreen(
-                            testSuiteEntities: selectedTestSuites,
+                            testSuiteEntities: selectedTestSuites.Select(x => x.Value),
                             testRunConfigStore: testRunConfigStore,
                             homeScreen: this.HomeScreenLazy,
                             exitScreen: this.ExitScreenLazy,
@@ -46,8 +48,6 @@ internal class TestCasesSelectionScreen(
                     ct);
             },
         };
-
-    private static string TestEntityConverter(ITestEntity entity) => entity.Name;
 
     private class SelectTestCasesScreen(
         IEnumerable<TestSuiteEntity> testSuiteEntities,
@@ -57,21 +57,19 @@ internal class TestCasesSelectionScreen(
         Lazy<SettingsScreen> settingsScreen)
         : ScreenBase(homeScreen, exitScreen, settingsScreen)
     {
-        private static readonly IEqualityComparer<ITestEntity> TestEntityComparer = new TestEntitiesComparer();
-
         /// <inheritdoc/>
         protected override ScreenRenderer CreateRenderer()
             => new()
             {
                 Main = async ct =>
                 {
-                    var prompt = new MultiSelectionPrompt<ITestEntity>(TestEntityComparer)
+                    var prompt = new MultiSelectionPrompt<TestEntity>(TestEntityEqualityComparer)
                         .Title("# Select test cases: ")
                         .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
                         .InstructionsText(InstructionsText)
                         .NotRequired()
                         .PageSize(10)
-                        .UseConverter(TestEntityConverter);
+                        .UseConverter(x => x.Name);
 
                     testSuiteEntities.ForEach(testSuite => prompt.AddChoiceGroup(testSuite, testSuite.TestCases));
                     testRunConfigStore.TestEntities.ForEach(entity => prompt.Select(entity));

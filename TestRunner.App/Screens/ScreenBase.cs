@@ -120,18 +120,10 @@ internal abstract class ScreenBase : IScreen
             Text: Resources.Exit_CommandText,
             NextScreen: this.ExitScreenLazy.Value);
 
-        if (this.Config.IsHomeCommandEnabled)
-        {
-            yield return new InterruptionCommand(
-                Key: VirtualKeyCode.F1,
-                Text: Resources.Home_CommandText,
-                NextScreen: this.HomeScreenLazy.Value);
-        }
-
         if (this.Config.IsBackCommandEnabled)
         {
             yield return new InterruptionCommand(
-                Key: VirtualKeyCode.F2,
+                Key: VirtualKeyCode.F1,
                 Text: Resources.Back_CommandText,
                 NextScreen: null);
         }
@@ -142,9 +134,17 @@ internal abstract class ScreenBase : IScreen
         }
 
         yield return new InterruptionCommand(
-            Key: VirtualKeyCode.F12,
+            Key: VirtualKeyCode.F11,
             Text: Resources.Settings_CommandText,
             NextScreen: this.SettingsScreenLazy.Value);
+
+        if (this.Config.IsHomeCommandEnabled)
+        {
+            yield return new InterruptionCommand(
+                Key: VirtualKeyCode.F12,
+                Text: Resources.Home_CommandText,
+                NextScreen: this.HomeScreenLazy.Value);
+        }
     }
 
     /// <summary>

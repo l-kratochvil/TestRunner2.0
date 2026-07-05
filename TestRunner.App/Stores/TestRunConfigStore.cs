@@ -1,8 +1,7 @@
 ﻿namespace TestRunner.App.Stores;
 
 using System.Collections.Generic;
-
-using TestRunner.Common.Interfaces;
+using TestRunner.Common.Model;
 
 internal class TestRunConfigStore(AppStateStore appStateStore)
 {
@@ -18,7 +17,7 @@ internal class TestRunConfigStore(AppStateStore appStateStore)
         set => appStateStore.Update(current => current with { IdeVersion = value });
     }
 
-    public IEnumerable<ITestEntity> TestEntities { get; set; } = [];
+    public IEnumerable<TestEntity> TestEntities { get; set; } = [];
 
     public bool? IsRuntimeTest { get; set; } = false;
 }

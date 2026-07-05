@@ -1,6 +1,6 @@
 ﻿namespace TestRunner.App.Screens;
 
-using TestRunner.Common.ComplexTypes;
+using TestRunner.Common.Model;
 
 // TODO: Remove after loading real test entties data
 
@@ -10,19 +10,19 @@ internal static class DATA
 {
     public static TestSuiteEntity[] TestSuites =>
     [
-        new TestSuiteEntity(1, "TESTSUITE - A", TestCases),
-        new TestSuiteEntity(2, "TESTSUITE - B", []),
-        new TestSuiteEntity(3, "TESTSUITE - C", []),
-        new TestSuiteEntity(4, "TESTSUITE - D", []),
-        new TestSuiteEntity(5, "TESTSUITE - E", []),
+        new(TestCases, TestType.ApplicationTest, "TESTSUITE - A", "Path1"),
+        new([], TestType.ApplicationTest, "TESTSUITE - B", "Path2"),
+        new([], TestType.ApplicationTest, "TESTSUITE - C", "Path3"),
+        new([], TestType.ApplicationTest, "TESTSUITE - D", "Path4"),
+        new([], TestType.ApplicationTest, "TESTSUITE - E", "Path5"),
     ];
 
     public static TestCaseEntity[] TestCases { get; } =
     [
-        new TestCaseEntity(1, "Z200_170"),
-        new TestCaseEntity(2, "Z200_171"),
-        new TestCaseEntity(3, "Z200_180"),
-        new TestCaseEntity(4, "Z200_90"),
-        new TestCaseEntity(5, "Z200_87"),
+        new(TestType.RuntimeTest, "Z200_170", "Path"),
+        new(TestType.RuntimeTest, "Z200_171", "Path"),
+        new(TestType.RuntimeTest, "Z200_180", "Path"),
+        new(TestType.RuntimeTest, "Z200_90", "Path"),
+        new(TestType.RuntimeTest, "Z200_87", "Path"),
     ];
 }

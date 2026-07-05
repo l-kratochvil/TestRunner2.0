@@ -1,4 +1,4 @@
-﻿namespace TestRunner.Common.ComplexTypes;
+﻿namespace TestRunner.Common.Model;
 
 public enum TestStatus
 {

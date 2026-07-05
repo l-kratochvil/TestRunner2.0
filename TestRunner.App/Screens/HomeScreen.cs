@@ -6,7 +6,7 @@ using System.Linq;
 
 using TestRunner.App.Common;
 using TestRunner.App.Stores;
-using TestRunner.Common.Interfaces;
+using TestRunner.Common.Model;
 
 internal sealed class HomeScreen(
     TestRunConfigStore testRunConfigStore,
@@ -49,12 +49,12 @@ internal sealed class HomeScreen(
             },
             Info = () =>
             {
-                var testSuites = testRunConfigStore.TestEntities.Where(e => e.Type == ITestEntity.TypeKind.TestSuite)
-                    .ToArray();
-                var testCases = testRunConfigStore.TestEntities.Where(e => e.Type == ITestEntity.TypeKind.TestCase)
-                    .ToArray();
+                var testSuites = testRunConfigStore
+                    .TestEntities.OfType<TestSuiteEntity>().ToArray();
+                var testCases = testRunConfigStore
+                    .TestEntities.OfType<TestCaseEntity>().ToArray();
 
-                ITestEntity[] testEntities = [];
+                TestEntity[] testEntities = [];
 
                 if (testSuites.Length != 0)
                 {

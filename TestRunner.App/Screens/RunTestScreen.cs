@@ -26,7 +26,7 @@ internal class RunTestScreen(
         [
             ..base.AdditionalCommands,
             new ActionCommand(
-                Key: VirtualKeyCode.F3,
+                Key: VirtualKeyCode.F2,
                 Text: Resources.StopTest_CommandText,
                 Action: () => this.testRunCts?.Cancel())
         ];

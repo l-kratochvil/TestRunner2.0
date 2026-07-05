@@ -1,6 +1,6 @@
 ﻿namespace TestRunner.Common;
 
-using TestRunner.Common.ComplexTypes;
+using TestRunner.Common.Model;
 
 public record TestResult(TestStatus Status)
 {
