@@ -1,8 +1,9 @@
 ﻿namespace TestRunner.App.Stores;
 
-using System.Collections.Generic;
-using TestRunner.Common.Model;
-
+/// <summary>
+/// This is the store for test run config that is used by the running test.
+/// </summary>
+/// <param name="appStateStore"></param>
 internal class TestRunConfigStore(AppStateStore appStateStore)
 {
     public string? RuntimeVersion
@@ -16,8 +17,4 @@ internal class TestRunConfigStore(AppStateStore appStateStore)
         get => appStateStore.Current.IdeVersion;
         set => appStateStore.Update(current => current with { IdeVersion = value });
     }
-
-    public IEnumerable<TestEntity> TestEntities { get; set; } = [];
-
-    public bool? IsRuntimeTest { get; set; } = false;
 }

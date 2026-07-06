@@ -37,8 +37,10 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
         => Task.Run<TestSuiteEntity[]>(
             () =>
             {
+                // TODO:
+                // Tests property is allways empty! Why? Maybe the nunit version doesn't match ...
+                // Also look into TestRunner3.0 app logic 
                 var testAssemblyElement = this.runner.Load(path, new Dictionary<string, object>());
-
                 if (!testAssemblyElement.Tests.Any())
                 {
                     return [];

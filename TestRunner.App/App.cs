@@ -14,6 +14,8 @@ using NUnit;
 using NUnit.Framework.Api;
 
 using TestRunner.App.Screens;
+using TestRunner.App.Stores;
+using TestRunner.Common.Services;
 
 internal class App
 {
@@ -23,6 +25,10 @@ internal class App
 
         try
         {
+            var nunitTestRunnerProxy = host.Services.GetRequiredService<INUnitTestRunnerProxy>();
+            var testRunStore = host.Services.GetRequiredService<TestRunStore>();
+            testRunStore.LoadedTestSuites = await nunitTestRunnerProxy.LoadTestAssemblyAsync(Paths.Files.TestAssemblyFilePath);
+
             await MainRenderAsync(host.Services.GetRequiredService<HomeScreen>());
         }
         catch (Exception ex)

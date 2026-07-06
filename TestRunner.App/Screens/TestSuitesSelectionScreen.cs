@@ -2,20 +2,20 @@ namespace TestRunner.App.Screens;
 
 using System.Linq;
 
+using TestRunner.App.Extensions;
 using TestRunner.App.Stores;
 using TestRunner.Common.Model;
 using TestRunner.Common.Services;
 
 internal class TestSuitesSelectionScreen(
-    TestRunConfigStore testRunConfigStore,
+    TestRunStore testRunStore,
     INUnitTestRunnerProxy nunitTestRunnerProxy,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
     : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
-    private static readonly EqualityComparer<TestEntity> TestEntityEqualityComparer =
-        EqualityComparer<TestEntity>.Create((x, y) => x?.Name == y?.Name);
+    private static readonly EqualityComparer<TestEntity> TestEntityEqualityComparer = TestEntity.CreateEqualityComparerByName();
 
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()
@@ -35,8 +35,8 @@ internal class TestSuitesSelectionScreen(
                     .AddChoices(testsuites)
                     .UseConverter(x => x.Name);
 
-                testRunConfigStore
-                    .TestEntities
+                testRunStore
+                    .SelectedTestEntities
                     .OfType<TestSuiteEntity>()
                     .ForEach(entity => prompt.Select(entity));
 
@@ -44,7 +44,7 @@ internal class TestSuitesSelectionScreen(
                     prompt,
                     selectedTestSuites =>
                     {
-                        testRunConfigStore.TestEntities = [..selectedTestSuites];
+                        testRunStore.SelectedTestEntities = [..selectedTestSuites];
                         return new RenderOutput();
                     },
                     ct);

@@ -2,13 +2,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using TestRunner.App.Common;
 using TestRunner.App.Stores;
 using TestRunner.Common.Model;
 
 internal sealed class HomeScreen(
+    TestRunStore testRunStore,
     TestRunConfigStore testRunConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
@@ -49,10 +49,10 @@ internal sealed class HomeScreen(
             },
             Info = () =>
             {
-                var testSuites = testRunConfigStore
-                    .TestEntities.OfType<TestSuiteEntity>().ToArray();
-                var testCases = testRunConfigStore
-                    .TestEntities.OfType<TestCaseEntity>().ToArray();
+                var testSuites = testRunStore
+                    .SelectedTestEntities.OfType<TestSuiteEntity>().ToArray();
+                var testCases = testRunStore
+                    .SelectedTestEntities.OfType<TestCaseEntity>().ToArray();
 
                 TestEntity[] testEntities = [];
 
@@ -124,14 +124,14 @@ internal sealed class HomeScreen(
             yield return selectTestCasesChoice;
         }
 
-        if (!testRunConfigStore.TestEntities.Any())
+        if (!testRunStore.SelectedTestEntities.Any())
         {
             yield break;
         }
 
         if (string.IsNullOrEmpty(testRunConfigStore.IdeVersion) ||
             string.IsNullOrEmpty(testRunConfigStore.RuntimeVersion) ||
-            !testRunConfigStore.TestEntities.Any())
+            !testRunStore.SelectedTestEntities.Any())
         {
             throw new InvalidOperationException("Invalid config (some required values are missing)");
         }

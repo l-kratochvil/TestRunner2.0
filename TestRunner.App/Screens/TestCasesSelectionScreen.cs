@@ -6,20 +6,21 @@ using System.Linq;
 
 using Spectre.Console;
 
+using TestRunner.App.Extensions;
 using TestRunner.App.Stores;
 using TestRunner.Common.Model;
 
 internal class TestCasesSelectionScreen(
-    TestRunConfigStore testRunConfigStore,
+    TestRunStore testRunStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
     : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
+    // TODO: Localize
     private const string InstructionsText = "[grey](Press [blue]<space>[/] to select an item, [green]<enter>[/] to accept)[/]";
 
-    private static readonly EqualityComparer<TestEntity> TestEntityEqualityComparer =
-        EqualityComparer<TestEntity>.Create((x, y) => x?.Name == y?.Name);
+    private static readonly EqualityComparer<TestEntity> TestEntityEqualityComparer = TestEntity.CreateEqualityComparerByName();
 
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()
@@ -29,18 +30,24 @@ internal class TestCasesSelectionScreen(
             {
                 var testSuites = DATA.TestSuites;
 
+                var prompt = new MultiSelectionPrompt<TestSuiteEntity>(TestEntityEqualityComparer)
+                    .Title("# Select testsuites to select testcases from: ")
+                    .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
+                    .InstructionsText(InstructionsText)
+                    .PageSize(10)
+                    .AddChoices(testSuites)
+                    .UseConverter(x => x.Name);
+                testRunStore
+                    .SelectedTestEntities
+                    .OfType<TestSuiteEntity>()
+                    .ForEach(entity => prompt.Select(entity));
+
                 return ShowPromptAsync(
-                    new MultiSelectionPrompt<TestSuiteEntity>(TestEntityEqualityComparer)
-                        .Title("# Select testsuites to select testcases from: ")
-                        .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
-                        .InstructionsText(InstructionsText)
-                        .PageSize(10)
-                        .AddChoices(testSuites)
-                        .UseConverter(x => x.Name),
+                    prompt,
                     selectedTestSuites => new RenderOutput(
                         NextScreen: new SelectTestCasesScreen(
-                            testSuiteEntities: selectedTestSuites,
-                            testRunConfigStore: testRunConfigStore,
+                            testSuites: selectedTestSuites,
+                            testRunStore: testRunStore,
                             homeScreen: this.HomeScreenLazy,
                             exitScreen: this.ExitScreenLazy,
                             settingsScreen: this.SettingsScreenLazy)),
@@ -49,8 +56,8 @@ internal class TestCasesSelectionScreen(
         };
 
     private class SelectTestCasesScreen(
-        IEnumerable<TestSuiteEntity> testSuiteEntities,
-        TestRunConfigStore testRunConfigStore,
+        IEnumerable<TestSuiteEntity> testSuites,
+        TestRunStore testRunStore,
         Lazy<HomeScreen> homeScreen,
         Lazy<ExitScreen> exitScreen,
         Lazy<SettingsScreen> settingsScreen)
@@ -70,16 +77,16 @@ internal class TestCasesSelectionScreen(
                         .PageSize(10)
                         .UseConverter(x => x.Name);
 
-                    testSuiteEntities.ForEach(testSuite => prompt.AddChoiceGroup(testSuite, testSuite.TestCases));
-                    testRunConfigStore.TestEntities.ForEach(entity => prompt.Select(entity));
+                    testSuites.ForEach(testSuite => prompt.AddChoiceGroup(testSuite, testSuite.TestCases));
+                    testRunStore.SelectedTestEntities.ForEach(entity => prompt.Select(entity));
 
                     return await ShowPromptAsync(
                         prompt,
                         selectedTestCases =>
                         {
-                            testRunConfigStore.TestEntities =
+                            testRunStore.SelectedTestEntities =
                             [
-                                ..testRunConfigStore.TestEntities
+                                ..testRunStore.SelectedTestEntities
                                     .Where(currentEntity => selectedTestCases.Any(currentEntity.Equals))
                                     .Union(selectedTestCases)
                             ];

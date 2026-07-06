@@ -1,0 +1,18 @@
+﻿namespace TestRunner.App.Stores;
+
+using System.Collections.Generic;
+
+using TestRunner.Common.Model;
+
+// TODO: Improve the name
+/// <summary>
+/// The store the test run used by application.
+/// </summary>
+internal class TestRunStore
+{
+    public IEnumerable<TestSuiteEntity> LoadedTestSuites { get; set; } = [];
+
+    public IEnumerable<TestEntity> SelectedTestEntities { get; set; } = [];
+
+    public bool? IsRuntimeTest { get; set; } = false;
+}

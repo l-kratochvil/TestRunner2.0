@@ -1,6 +1,6 @@
 namespace TestRunner.Common.Extensions;
 
-public static class ArrayExtensions
+public static class IEnumerableExtensions
 {
     /// <summary>
     /// NOTE: This should not be used on big data (it's allegedly inefficient)

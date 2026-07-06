@@ -34,5 +34,7 @@ internal static class Paths
         // This is the path stored in TestEnvironment.TestEnvironmentConfiguration.TestRunnerConfigFilePath (zat-tests solution).
         // The file is used to configure tests run (the file is read before running a test).
         public static string TestRunnerConfig { get; } = Path.Combine(Directories.AutomizedTests, "testrunner-config.xml");
+
+        public static string TestAssemblyFilePath { get; } = Path.Combine(Directories.AutomizedTests, "Test libs", "Z200Tests.dll");
     }
 }

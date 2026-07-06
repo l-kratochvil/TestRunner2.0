@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO.Pipes;
 
 using StreamJsonRpc;
@@ -13,6 +14,11 @@ internal static class Program
     /// </summary>
     private static async Task<int> Main(string[] args)
     {
+        if (!Debugger.IsAttached)
+        {
+            Debugger.Launch();
+        }
+
         if (args.Length < 1 || string.IsNullOrWhiteSpace(args[0]))
         {
             Console.Error.WriteLine("Usage: TestRunner.NUnitTestRunnerProxy.Server <pipe-name>");
