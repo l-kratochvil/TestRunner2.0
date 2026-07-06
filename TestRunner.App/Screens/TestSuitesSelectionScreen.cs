@@ -4,9 +4,11 @@ using System.Linq;
 
 using TestRunner.App.Stores;
 using TestRunner.Common.Model;
+using TestRunner.Common.Services;
 
 internal class TestSuitesSelectionScreen(
     TestRunConfigStore testRunConfigStore,
+    INUnitTestRunnerProxy nunitTestRunnerProxy,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -21,7 +23,7 @@ internal class TestSuitesSelectionScreen(
         {
             Main = ct =>
             {
-                // TODO: Fetch from TestLink
+                // TODO: Load from test assembly
                 var testsuites = DATA.TestSuites;
 
                 var prompt = new MultiSelectionPrompt<TestSuiteEntity>(TestEntityEqualityComparer)

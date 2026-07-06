@@ -28,19 +28,18 @@ internal class TestCasesSelectionScreen(
             Main = ct =>
             {
                 var testSuites = DATA.TestSuites;
-                var testSuiteItems = testSuites.Select(x => new TextValueItem<TestSuiteEntity>(x.Name, x));
 
                 return ShowPromptAsync(
-                    new MultiSelectionPrompt<TextValueItem<TestSuiteEntity>>()
+                    new MultiSelectionPrompt<TestSuiteEntity>(TestEntityEqualityComparer)
                         .Title("# Select testsuites to select testcases from: ")
                         .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
                         .InstructionsText(InstructionsText)
                         .PageSize(10)
-                        .AddChoices(testSuiteItems)
-                        .UseConverter(x => x.Text),
+                        .AddChoices(testSuites)
+                        .UseConverter(x => x.Name),
                     selectedTestSuites => new RenderOutput(
                         NextScreen: new SelectTestCasesScreen(
-                            testSuiteEntities: selectedTestSuites.Select(x => x.Value),
+                            testSuiteEntities: selectedTestSuites,
                             testRunConfigStore: testRunConfigStore,
                             homeScreen: this.HomeScreenLazy,
                             exitScreen: this.ExitScreenLazy,
