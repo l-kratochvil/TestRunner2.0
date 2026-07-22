@@ -134,7 +134,7 @@ internal abstract class ScreenBase : IScreen
         }
 
         yield return new InterruptionCommand(
-            Key: VirtualKeyCode.F11,
+            Key: VirtualKeyCode.F10,
             Text: Resources.Settings_CommandText,
             NextScreen: this.SettingsScreenLazy.Value);
 

@@ -22,25 +22,23 @@ internal class TestSuitesSelectionScreen(
         {
             Main = ct =>
             {
-                var testsuites = testRunStore.LoadedTestSuites;
+                var testSuites = testRunStore.LoadedTestSuites.ToArray();
 
-                var prompt = new MultiSelectionPrompt<TestSuiteEntity>(TestEntityEqualityComparer)
+                var prompt = new MultiSelectionPrompt<TestEntity>(TestEntityEqualityComparer)
                     .Title("# Select test suites: ")
                     .MoreChoicesText("[grey](Move up and down to reveal more)[/]")
                     .InstructionsText("[grey](Press [blue]<space>[/] to select an item, [green]<enter>[/] to accept)[/]")
                     .PageSize(10)
                     .NotRequired()
-                    .AddChoices(testsuites)
                     .UseConverter(x => x.Name);
 
-                foreach (var testsuite in testsuites)
+                foreach (var testsuite in testSuites)
                 {
                     prompt.AddChoiceGroup(testsuite, testsuite.TestFixtures);
                 }
 
                 testRunStore
                     .SelectedTestEntities
-                    .OfType<TestSuiteEntity>()
                     .ForEach(entity => prompt.Select(entity));
 
                 return ShowPromptAsync(
