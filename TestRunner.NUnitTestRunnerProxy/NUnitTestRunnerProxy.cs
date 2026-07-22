@@ -2,10 +2,11 @@ namespace TestRunner.NUnitTestRunnerProxy;
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
+using NUnit;
+using NUnit.Engine;
 using NUnit.Framework.Api;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
@@ -13,6 +14,7 @@ using NUnit.Framework.Internal;
 using TestRunner.Common.Model;
 using TestRunner.Common.Services;
 
+using TestFilter = NUnit.Framework.Internal.TestFilter;
 using TestResult = TestRunner.Common.TestResult;
 using TestStatus = TestRunner.Common.Model.TestStatus;
 
@@ -22,7 +24,7 @@ using TestStatus = TestRunner.Common.Model.TestStatus;
 /// </summary>
 public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 {
-    private readonly ITestAssemblyRunner runner = new NUnitTestAssemblyRunner(new DefaultTestAssemblyBuilder());
+    private readonly NUnitTestAssemblyRunner runner = new(new DefaultTestAssemblyBuilder());
 
     /// <inheritdoc/>
     public Task<bool> GetIsAssemblyLoadedAsync(CancellationToken cancellationToken = default)
@@ -33,26 +35,71 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
         => Task.FromResult(this.runner.IsTestRunning);
 
     /// <inheritdoc/>
-    public Task<TestSuiteEntity[]> LoadTestAssemblyAsync(string path, CancellationToken cancellationToken = default)
+    public Task<TestSuiteEntity[]> LoadTestAssemblyAsync(
+        string path, CancellationToken cancellationToken = default)
         => Task.Run<TestSuiteEntity[]>(
             () =>
             {
+                // USING ENGINE
+                var testEngine = TestEngineActivator.CreateInstance();
+                var package = new TestPackage(path);
+
+                // Run in-process: the NUnit.Engine package does not ship/copy an
+                // out-of-process agent (nunit-agent.exe) into this host's output,
+                // so the default ProcessRunner fails with a Win32Exception
+                // ("cannot find the file") when it tries to launch an agent.
+                package.AddSetting("ProcessModel", "InProcess");
+                package.AddSetting("DomainUsage", "Single");
+
+                var runner = testEngine.GetRunner(package);
+                runner.Load();
+                var explored = runner.Explore(NUnit.Engine.TestFilter.Empty);
+
                 // TODO:
                 // Tests property is allways empty! Why? Maybe the nunit version doesn't match ...
-                // Also look into TestRunner3.0 app logic 
-                var testAssemblyElement = this.runner.Load(path, new Dictionary<string, object>());
+                // Also look into TestRunner3.0 app logic
+                var testAssemblyDirPath = System.IO.Path.GetDirectoryName(path);
+                var testAssemblyElement = this.runner.Load(path, new Dictionary<string, object>
+                {
+                    { FrameworkPackageSettings.WorkDirectory, testAssemblyDirPath },
+                    { "ProcessModel", "InProcess" },
+                    { "DomainUsage", "Single" },
+                });
+
+                var temp = this.runner.ExploreTests(TestFilter.Empty);
                 if (!testAssemblyElement.Tests.Any())
                 {
                     return [];
                 }
 
                 var rootTestSuiteElement = testAssemblyElement.Tests[0]; // Root test element = namespace
-                return []; // TODO: Transform to test suites
+
+                // TODO: Transform to test suites
+
+                return
+                [
+                    new TestSuiteEntity(
+                        [
+                            new TestCaseEntity(TestType.RuntimeTest, "Z200_170", "Path"),
+                            new TestCaseEntity(TestType.RuntimeTest, "Z200_171", "Path"),
+                            new TestCaseEntity(TestType.RuntimeTest, "Z200_180", "Path"),
+                            new TestCaseEntity(TestType.RuntimeTest, "Z200_90", "Path"),
+                            new TestCaseEntity(TestType.RuntimeTest, "Z200_87", "Path"),
+                        ],
+                        TestType.ApplicationTest,
+                        "TESTSUITE - A",
+                        "Path1"),
+                    new TestSuiteEntity([], TestType.ApplicationTest, "TESTSUITE - B", "Path2"),
+                    new TestSuiteEntity([], TestType.ApplicationTest, "TESTSUITE - C", "Path3"),
+                    new TestSuiteEntity([], TestType.ApplicationTest, "TESTSUITE - D", "Path4"),
+                    new TestSuiteEntity([], TestType.ApplicationTest, "TESTSUITE - E", "Path5"),
+                ];
             },
             cancellationToken);
 
     /// <inheritdoc/>
-    public Task<TestResult> RunTestAsync(IEnumerable<TestEntity> testsToRun, CancellationToken cancellationToken = default)
+    public Task<TestResult> RunTestAsync(
+        IEnumerable<TestEntity> testsToRun, CancellationToken cancellationToken = default)
     {
         if (!this.runner.IsTestLoaded)
         {
@@ -120,4 +167,22 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
             filterNode.AddElement("test", testEntity.Path);
         }
     }
+
+    public Task<TestSuiteEntity[]> _LoadTestAssemblyAsync(string path, CancellationToken cancellationToken = default)
+        => Task.Run<TestSuiteEntity[]>(
+            () =>
+            {
+                // TODO:
+                // Tests property is allways empty! Why? Maybe the nunit version doesn't match ...
+                // Also look into TestRunner3.0 app logic 
+                var testAssemblyElement = this.runner.Load(path, new Dictionary<string, object>());
+                if (!testAssemblyElement.Tests.Any())
+                {
+                    return [];
+                }
+
+                var rootTestSuiteElement = testAssemblyElement.Tests[0]; // Root test element = namespace
+                return []; // TODO: Transform to test suites
+            },
+            cancellationToken);
 }

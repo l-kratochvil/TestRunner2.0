@@ -10,8 +10,13 @@
     <File Path="docs/DEV-NOTES.md" />
     <File Path="docs/Issue-0002.docx" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/NUnitTestAssembly.Net461/NUnitTestAssembly.Net461.csproj" />
+    <Project Path="Tests/NUnitTestAssembly.Net481/NUnitTestAssembly.Net481.csproj" />
+    <Project Path="Tests/TestRunner.App.Tests/TestRunner.App.Tests.csproj" />
+    <Project Path="Tests/TestRunner.NUnitTestRunnerProxy.Tests/TestRunner.NUnitTestRunnerProxy.Tests.csproj" Id="82ad2fa9-69d8-4a6d-9b39-56276ff807bd" />
+  </Folder>
   <Project Path="../DevKit.Core/DevKit.Core/DevKit.Core.csproj" />
-  <Project Path="TestRunner.App.Tests/TestRunner.App.Tests.csproj" />
   <Project Path="TestRunner.App/TestRunner.App.csproj">
     <BuildDependency Project="TestRunner.NUnitTestRunnerProxy/TestRunner.NUnitTestRunnerProxy.csproj" />
   </Project>

@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TestRunner.App\TestRunner.App.csproj" />
+    <ProjectReference Include="..\..\TestRunner.App\TestRunner.App.csproj" />
   </ItemGroup>
 
 </Project>

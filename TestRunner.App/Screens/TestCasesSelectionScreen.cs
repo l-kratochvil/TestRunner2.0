@@ -28,8 +28,7 @@ internal class TestCasesSelectionScreen(
         {
             Main = ct =>
             {
-                var testSuites = DATA.TestSuites;
-
+                var testSuites = testRunStore.LoadedTestSuites;
                 var prompt = new MultiSelectionPrompt<TestSuiteEntity>(TestEntityEqualityComparer)
                     .Title("# Select testsuites to select testcases from: ")
                     .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
@@ -37,6 +36,7 @@ internal class TestCasesSelectionScreen(
                     .PageSize(10)
                     .AddChoices(testSuites)
                     .UseConverter(x => x.Name);
+
                 testRunStore
                     .SelectedTestEntities
                     .OfType<TestSuiteEntity>()

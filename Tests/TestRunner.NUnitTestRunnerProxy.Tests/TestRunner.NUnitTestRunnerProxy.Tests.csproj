@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <!-- Z2xxTests.dll (and other runtime test assemblies) are x86. The test
+         host must run as a 32-bit process to load them in-process; otherwise
+         NUnit reports the assembly as NotRunnable (BadImageFormatException). -->
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
+    <ProjectReference Include="..\..\TestRunner.NUnitTestRunnerProxy\TestRunner.NUnitTestRunnerProxy.csproj" />
+  </ItemGroup>
+
+  <!--
+    Reference the NUnit test-assembly fixtures only to enforce build ordering:
+    they must be built (and staged to Exchange) before this project's output is
+    assembled. Their assemblies are test data, not compile-time dependencies.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\NUnitTestAssembly.Net481\NUnitTestAssembly.Net481.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\NUnitTestAssembly.Net461\NUnitTestAssembly.Net461.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <!-- Copy the staged NUnit test assemblies into this project's output directory. -->
+  <Target Name="IncludeNUnitTestAssemblies" BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <_NUnitTestAssemblyFile Include="$(NUnitTestAssembliesDir)**\*" />
+      <Content Include="@(_NUnitTestAssemblyFile)" Link="NUnitTestAssemblies\%(_NUnitTestAssemblyFile.RecursiveDir)%(_NUnitTestAssemblyFile.Filename)%(_NUnitTestAssemblyFile.Extension)" CopyToOutputDirectory="Always" />
+    </ItemGroup>
+  </Target>
+
+</Project>

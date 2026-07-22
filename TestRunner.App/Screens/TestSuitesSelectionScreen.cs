@@ -9,7 +9,6 @@ using TestRunner.Common.Services;
 
 internal class TestSuitesSelectionScreen(
     TestRunStore testRunStore,
-    INUnitTestRunnerProxy nunitTestRunnerProxy,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -23,8 +22,7 @@ internal class TestSuitesSelectionScreen(
         {
             Main = ct =>
             {
-                // TODO: Load from test assembly
-                var testsuites = DATA.TestSuites;
+                var testsuites = testRunStore.LoadedTestSuites;
 
                 var prompt = new MultiSelectionPrompt<TestSuiteEntity>(TestEntityEqualityComparer)
                     .Title("# Select test suites: ")

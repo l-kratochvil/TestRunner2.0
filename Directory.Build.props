@@ -5,9 +5,12 @@
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\Key.snk</AssemblyOriginatorKeyFile>
 		<!-- Output exchange props -->
 		<ExchangeDir>$(SolutionDir)Exchange\</ExchangeDir>
 		<NUnitTestRunnerProxyDir>$(ExchangeDir)NUnitTestRunnerProxy\</NUnitTestRunnerProxyDir>
+		<NUnitTestAssembliesDir>$(ExchangeDir)NUnitTestAssemblies\</NUnitTestAssembliesDir>
 		<IncludeNUnitTestRunnerProxyDirOutput Condition="'$(IncludeNUnitTestRunnerProxyDirOutput)' == ''">false</IncludeNUnitTestRunnerProxyDirOutput>
 	</PropertyGroup>
 </Project>
