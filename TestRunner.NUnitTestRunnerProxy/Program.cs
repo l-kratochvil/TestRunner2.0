@@ -1,8 +1,11 @@
 using System.Diagnostics;
 using System.IO.Pipes;
 
+using DevKit.Core.Utils;
+
 using StreamJsonRpc;
 
+using TestRunner.Common;
 using TestRunner.NUnitTestRunnerProxy;
 
 internal static class Program
@@ -14,14 +17,14 @@ internal static class Program
     /// </summary>
     private static async Task<int> Main(string[] args)
     {
-        if (!Debugger.IsAttached)
+        if (DebuggerUtils.NetDebuggerLaunchAllowed)
         {
             Debugger.Launch();
         }
 
         if (args.Length < 1 || string.IsNullOrWhiteSpace(args[0]))
         {
-            Console.Error.WriteLine("Usage: TestRunner.NUnitTestRunnerProxy.Server <pipe-name>");
+            await Console.Error.WriteLineAsync("Usage: TestRunner.NUnitTestRunnerProxy.Server <pipe-name>");
             return 1;
         }
 
@@ -44,7 +47,7 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"Server failed: {ex}");
+            await Console.Error.WriteLineAsync($"Server failed: {ex}");
             return 1;
         }
     }

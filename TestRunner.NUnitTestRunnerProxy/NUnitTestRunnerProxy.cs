@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using NUnit;
-using NUnit.Engine;
 using NUnit.Framework.Api;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
@@ -40,33 +39,19 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
         => Task.Run<TestSuiteEntity[]>(
             () =>
             {
-                // USING ENGINE
-                var testEngine = TestEngineActivator.CreateInstance();
-                var package = new TestPackage(path);
-
-                // Run in-process: the NUnit.Engine package does not ship/copy an
-                // out-of-process agent (nunit-agent.exe) into this host's output,
-                // so the default ProcessRunner fails with a Win32Exception
-                // ("cannot find the file") when it tries to launch an agent.
-                package.AddSetting("ProcessModel", "InProcess");
-                package.AddSetting("DomainUsage", "Single");
-
-                var runner = testEngine.GetRunner(package);
-                runner.Load();
-                var explored = runner.Explore(NUnit.Engine.TestFilter.Empty);
-
-                // TODO:
-                // Tests property is allways empty! Why? Maybe the nunit version doesn't match ...
-                // Also look into TestRunner3.0 app logic
+                // Discover tests through the in-process NUnitTestAssemblyRunner.
+                // NOTE: this runner calls Assembly.Load and therefore requires the
+                // test assembly's bitness to match this host. Runtime test libraries
+                // such as Z2xxTests.dll are x86, so this host must run as a 32-bit
+                // process (see <PlatformTarget>x86</PlatformTarget> in the proxy/test
+                // project); otherwise the assembly is reported as NotRunnable with a
+                // BadImageFormatException and no tests are discovered.
                 var testAssemblyDirPath = System.IO.Path.GetDirectoryName(path);
                 var testAssemblyElement = this.runner.Load(path, new Dictionary<string, object>
                 {
                     { FrameworkPackageSettings.WorkDirectory, testAssemblyDirPath },
-                    { "ProcessModel", "InProcess" },
-                    { "DomainUsage", "Single" },
                 });
 
-                var temp = this.runner.ExploreTests(TestFilter.Empty);
                 if (!testAssemblyElement.Tests.Any())
                 {
                     return [];
@@ -74,26 +59,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 
                 var rootTestSuiteElement = testAssemblyElement.Tests[0]; // Root test element = namespace
 
-                // TODO: Transform to test suites
-
-                return
-                [
-                    new TestSuiteEntity(
-                        [
-                            new TestCaseEntity(TestType.RuntimeTest, "Z200_170", "Path"),
-                            new TestCaseEntity(TestType.RuntimeTest, "Z200_171", "Path"),
-                            new TestCaseEntity(TestType.RuntimeTest, "Z200_180", "Path"),
-                            new TestCaseEntity(TestType.RuntimeTest, "Z200_90", "Path"),
-                            new TestCaseEntity(TestType.RuntimeTest, "Z200_87", "Path"),
-                        ],
-                        TestType.ApplicationTest,
-                        "TESTSUITE - A",
-                        "Path1"),
-                    new TestSuiteEntity([], TestType.ApplicationTest, "TESTSUITE - B", "Path2"),
-                    new TestSuiteEntity([], TestType.ApplicationTest, "TESTSUITE - C", "Path3"),
-                    new TestSuiteEntity([], TestType.ApplicationTest, "TESTSUITE - D", "Path4"),
-                    new TestSuiteEntity([], TestType.ApplicationTest, "TESTSUITE - E", "Path5"),
-                ];
+                return [..CollectTestSuiteEntities(rootTestSuiteElement)];
             },
             cancellationToken);
 
@@ -138,21 +104,39 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
             cancellationToken);
     }
 
-    // private static TestEntity TransformITestToTestEntities(ITest test)
-    // {
-    //     const string parameterizedMethodTypeName = "parameterizedmethod";
+    private static IEnumerable<TestSuiteEntity> CollectTestSuiteEntities(ITest root)
+        => root.Tests.OfType<TestSuite>().Select(x =>
+        {
+            var testType = x.FullName.ToLower().Contains("runtimetests")
+                ? TestType.RuntimeTest
+                : TestType.ApplicationTest;
+            return new TestSuiteEntity(
+                [.. CollectTestFixtureEntities(x, testType)],
+                testType,
+                name: x.Name,
+                executionPath: x.FullName);
+        });
 
-    //     var children = test.Tests
-    //         .Where(t => Regex.IsMatch(t.TestType.ToLower(), $"testsuite|testfixture|{parameterizedMethodTypeName}"))
-    //         .Select(t => t.TestType.ToLower().Equals(parameterizedMethodTypeName)
-    //             ? new TestEntity(DetermineTestType(t), t.Tests[0].Name, t.Tests[0].FullName)
-    //             : TransformITestToTestEntities(t))
-    //         .ToArray();
+    private static IEnumerable<TestFixtureEntity> CollectTestFixtureEntities(
+        TestSuite testSuite, TestType testType)
+        => testSuite
+            .Tests
+            .OfType<TestFixture>()
+            .Select(x => new TestFixtureEntity(
+                [..CollectTestCaseEntities(x, testType)],
+                testType,
+                name: x.Name,
+                executionPath: x.FullName));
 
-    //     return new TestEntity(DetermineTestType(test), test.Name, test.FullName, children);
-
-    //     static TestType DetermineTestType(ITest test) => test.FullName.ToLower().Contains("runtimetests") ? TestType.RuntimeTest : TestType.ApplicationTest;
-    // }
+    private static IEnumerable<TestCaseEntity> CollectTestCaseEntities(
+        TestFixture testFixture, TestType testType)
+        => testFixture
+            .Tests
+            .OfType<ParameterizedMethodSuite>()
+            .Select(x => new TestCaseEntity(
+                testType,
+                name: x.Name,
+                executionPath: x.FullName));
 
     private static void FillFilterNodeWithTestEntities(TNode filterNode, IEnumerable<TestEntity> testEntities)
     {
@@ -164,25 +148,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 
         foreach (var testEntity in testEntitiesInArray)
         {
-            filterNode.AddElement("test", testEntity.Path);
+            filterNode.AddElement("test", testEntity.ExecutionPath);
         }
     }
-
-    public Task<TestSuiteEntity[]> _LoadTestAssemblyAsync(string path, CancellationToken cancellationToken = default)
-        => Task.Run<TestSuiteEntity[]>(
-            () =>
-            {
-                // TODO:
-                // Tests property is allways empty! Why? Maybe the nunit version doesn't match ...
-                // Also look into TestRunner3.0 app logic 
-                var testAssemblyElement = this.runner.Load(path, new Dictionary<string, object>());
-                if (!testAssemblyElement.Tests.Any())
-                {
-                    return [];
-                }
-
-                var rootTestSuiteElement = testAssemblyElement.Tests[0]; // Root test element = namespace
-                return []; // TODO: Transform to test suites
-            },
-            cancellationToken);
 }

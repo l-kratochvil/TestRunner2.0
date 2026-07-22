@@ -9,7 +9,7 @@ public class TestEntity(
 
     public string Name { get; } = name;
 
-    public string Path { get; } = executionPath;
+    public string ExecutionPath { get; } = executionPath;
 
     public static TestEntity Default
         => new(TestType.Unknown, string.Empty, string.Empty);

@@ -33,6 +33,11 @@ internal class TestSuitesSelectionScreen(
                     .AddChoices(testsuites)
                     .UseConverter(x => x.Name);
 
+                foreach (var testsuite in testsuites)
+                {
+                    prompt.AddChoiceGroup(testsuite, testsuite.TestFixtures);
+                }
+
                 testRunStore
                     .SelectedTestEntities
                     .OfType<TestSuiteEntity>()

@@ -1,8 +1,8 @@
 ﻿namespace TestRunner.Common.Model;
 
 // TODO: Rnm TestSuite
-public class TestSuiteEntity(
-    TestFixtureEntity[] testFixtures,
+public class TestFixtureEntity(
+    TestCaseEntity[] testCases,
     TestType testType,
     string name,
     string executionPath)
@@ -11,5 +11,5 @@ public class TestSuiteEntity(
         name: name,
         executionPath: executionPath)
 {
-    public TestFixtureEntity[] TestFixtures { get; } = testFixtures;
+    public TestCaseEntity[] TestCases { get; } = testCases;
 }

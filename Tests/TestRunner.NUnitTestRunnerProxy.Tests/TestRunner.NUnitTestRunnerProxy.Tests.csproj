@@ -2,9 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net481</TargetFramework>
-    <!-- Z2xxTests.dll (and other runtime test assemblies) are x86. The test
-         host must run as a 32-bit process to load them in-process; otherwise
-         NUnit reports the assembly as NotRunnable (BadImageFormatException). -->
+    <!-- Z2xxTests.dll (and other runtime test assemblies) are x86. Because the
+         proxy loads test assemblies in-process (NUnitTestAssemblyRunner), the
+         test host must run as a 32-bit process; otherwise loading throws
+         BadImageFormatException and no tests are discovered. -->
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
