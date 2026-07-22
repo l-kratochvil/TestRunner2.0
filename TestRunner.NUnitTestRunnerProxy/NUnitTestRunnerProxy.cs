@@ -46,20 +46,12 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                 // process (see <PlatformTarget>x86</PlatformTarget> in the proxy/test
                 // project); otherwise the assembly is reported as NotRunnable with a
                 // BadImageFormatException and no tests are discovered.
-                var testAssemblyDirPath = System.IO.Path.GetDirectoryName(path);
                 var testAssemblyElement = this.runner.Load(path, new Dictionary<string, object>
                 {
-                    { FrameworkPackageSettings.WorkDirectory, testAssemblyDirPath },
+                    { FrameworkPackageSettings.WorkDirectory, System.IO.Path.GetDirectoryName(path) },
                 });
 
-                if (!testAssemblyElement.Tests.Any())
-                {
-                    return [];
-                }
-
-                var rootTestSuiteElement = testAssemblyElement.Tests[0]; // Root test element = namespace
-
-                return [..CollectTestSuiteEntities(rootTestSuiteElement)];
+                return testAssemblyElement.Tests.Any() ? [..CollectTestSuiteEntities(testAssemblyElement.Tests[0])] : [];
             },
             cancellationToken);
 

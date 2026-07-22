@@ -60,7 +60,7 @@ internal sealed class HomeScreen(
                 {
                     testEntities = testSuites;
                 }
-                else if (testCases.Length != 0 && testCases.Length < 10)
+                else if (testCases is { Length: > 0 and < 10 })
                 {
                     testEntities = testCases;
                 }
@@ -129,6 +129,7 @@ internal sealed class HomeScreen(
             yield break;
         }
 
+        // TODO: If any runtime tests selected then prompt to select test station type (HW01, HW02)
         if (string.IsNullOrEmpty(testRunConfigStore.IdeVersion) ||
             string.IsNullOrEmpty(testRunConfigStore.RuntimeVersion) ||
             !testRunStore.SelectedTestEntities.Any())

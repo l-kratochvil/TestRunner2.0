@@ -3,13 +3,15 @@
 using System.Diagnostics;
 
 using TestRunner.App.Common;
+using TestRunner.Common.Services;
 
 using WindowsInput.Native;
 
 internal class RunTestScreen(
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
-    Lazy<SettingsScreen> settingsScreen)
+    Lazy<SettingsScreen> settingsScreen,
+    INUnitTestRunnerProxy nunitTestRunnerProxy)
     : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
     private CancellationTokenSource? testRunCts;
@@ -46,8 +48,8 @@ internal class RunTestScreen(
                     .AddColumn(string.Empty);
 
                 this.testRunCts = new CancellationTokenSource();
-                var runner = new FAKE_RUNNER();
-                _ = runner.RunAsync(this.testRunCts.Token);
+
+                var runTestTask = nunitTestRunnerProxy.RunTestAsync([], this.testRunCts.Token);
 
                 var promptResult = await ShowLiveDataAsync(
                     table,
@@ -56,7 +58,7 @@ internal class RunTestScreen(
                     {
                         while (!ct.IsCancellationRequested &&
                                !this.testRunCts.IsCancellationRequested &&
-                               runner.IsRunning)
+                               !runTestTask.IsCompleted)
                         {
                             // TODO: Show test logs?
                             table.Rows.Clear();
