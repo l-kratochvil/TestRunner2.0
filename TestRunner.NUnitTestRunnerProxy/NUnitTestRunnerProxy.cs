@@ -27,12 +27,12 @@ using TestStatus = TestRunner.Common.Model.TestStatus;
 /// </summary>
 public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 {
-    private static readonly ImmutableDictionary<string, string> TestSuiteNames =
+    private static readonly ImmutableDictionary<string, string> TestSuiteNamesMap =
         new Dictionary<string, string>
         {
             { "PdpClientTests", "Testy PDP klient" },
             { "Pertinax6Tests", "Testy Pertinax6" },
-            { "RuntimeTests", "Testy runtime" },
+            { "RuntimeTests", "Testy Runtime" },
         }.ToImmutableDictionary();
 
     private readonly NUnitTestAssemblyRunner runner = new(new DefaultTestAssemblyBuilder());
@@ -117,7 +117,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
             return new TestSuiteEntity(
                 [..CollectTestFixtureEntities(x, testType)],
                 testType,
-                name: TestSuiteNames.TryGetValue(x.Name, out var testSuiteName) ? testSuiteName : x.Name,
+                name: TestSuiteNamesMap.TryGetValue(x.Name, out var testSuiteName) ? testSuiteName : x.Name,
                 executionPath: x.FullName);
         });
 
@@ -126,7 +126,11 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
     {
         foreach (var testFixture in testSuite.Tests.OfType<TestFixture>())
         {
-            var testFixtureName = testFixture.TypeInfo.Type.GetAttribute<TestFixtureAttribute>()?.Description
+            var testFixtureName = testFixture
+                                      .TypeInfo
+                                      .Type
+                                      .GetAttribute<TestFixtureAttribute>()?
+                                      .Description
                                   ?? testFixture.Name;
             yield return new TestFixtureEntity(
                 [..CollectTestCaseEntities(testFixture, testType)],
@@ -139,9 +143,13 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
     private static IEnumerable<TestCaseEntity> CollectTestCaseEntities(
         TestFixture testFixture, TestType testType)
     {
-        foreach (var testCase in testFixture.Tests.OfType<ParameterizedMethodSuite>())
+        foreach (var testCase in testFixture.Tests.OfType<Test>())
         {
-            var testCaseId = testCase.Method.MethodInfo.GetAttribute<TestCaseAttribute>()?.TestName
+            var testCaseId = testCase
+                                 .Method?
+                                 .MethodInfo
+                                 .GetAttribute<TestCaseAttribute>()?
+                                 .TestName
                              ?? testCase.Name;
             yield return new TestCaseEntity(
                 testType,

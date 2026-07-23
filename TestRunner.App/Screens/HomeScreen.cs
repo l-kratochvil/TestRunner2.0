@@ -79,7 +79,7 @@ internal sealed class HomeScreen(
 
                 foreach (var testEntity in testEntities)
                 {
-                    MarkupLine($"  [yellow]{testEntity.Name}[/]");
+                    MarkupLine($"  [yellow]{(testEntity as TestCaseEntity)?.Id ?? testEntity.Name}[/]");
                 }
 
                 WriteLine();

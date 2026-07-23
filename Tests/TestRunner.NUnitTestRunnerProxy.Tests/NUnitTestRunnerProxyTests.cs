@@ -6,6 +6,8 @@ using DevKit.Core.Extensions.Types;
 
 using NUnit.Framework;
 
+using TestRunner.Common.Model;
+
 // TODO: Test RunTestAsync, etc.
 public class NUnitTestRunnerProxyTests
 {
@@ -39,6 +41,15 @@ public class NUnitTestRunnerProxyTests
 
         // Then
         Assert.That(result, Is.Not.Empty);
+        Assert.That(result, Has.Length.EqualTo(1));
+        Assert.That(result, Has.One.Matches<TestSuiteEntity>(x => x.Name == "Net481"));
+
+        var testSuite = result[0];
+        Assert.That(testSuite.TestFixtures, Has.One.Matches<TestFixtureEntity>(x => x.Name == "SampleTestSuite"));
+
+        var testFixture = testSuite.TestFixtures[0];
+        Assert.That(testFixture.TestCases, Has.Length.EqualTo(1));
+        Assert.That(testFixture.TestCases[0].Name, Is.EqualTo("SampleTestCase"));
     }
 
     [Test]
