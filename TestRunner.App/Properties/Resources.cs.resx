@@ -177,4 +177,124 @@
   <data name="SelectTestStation_ChoiceText" xml:space="preserve">
     <value>Vyber testovací stanici</value>
   </data>
+  <data name="TestRunReport_TestsNotRun_SectionHeader" xml:space="preserve">
+    <value>Nespuštěné testy</value>
+  </data>
+  <data name="TestRunReport_ErrorsFailuresWarnings_SectionHeader" xml:space="preserve">
+    <value>Chyby, selhání a varování</value>
+  </data>
+  <data name="TestRunReport_Summary_SectionHeader" xml:space="preserve">
+    <value>Souhrn běhu testů</value>
+  </data>
+  <data name="TestRunReport_Label_Ignored" xml:space="preserve">
+    <value>Ignorováno</value>
+  </data>
+  <data name="TestRunReport_Label_Explicit" xml:space="preserve">
+    <value>Explicitní</value>
+  </data>
+  <data name="TestRunReport_Label_Skipped" xml:space="preserve">
+    <value>Přeskočeno</value>
+  </data>
+  <data name="TestRunReport_Label_Error" xml:space="preserve">
+    <value>Chyba</value>
+  </data>
+  <data name="TestRunReport_Label_Invalid" xml:space="preserve">
+    <value>Neplatný</value>
+  </data>
+  <data name="TestRunReport_Label_Failed" xml:space="preserve">
+    <value>Selhal</value>
+  </data>
+  <data name="TestRunReport_Label_Warning" xml:space="preserve">
+    <value>Varování</value>
+  </data>
+  <data name="TestRunReport_Summary_OverallResult" xml:space="preserve">
+    <value>Celkový výsledek</value>
+  </data>
+  <data name="TestRunReport_Summary_TestCount" xml:space="preserve">
+    <value>Počet testů</value>
+  </data>
+  <data name="TestRunReport_Summary_Passed" xml:space="preserve">
+    <value>Úspěšné</value>
+  </data>
+  <data name="TestRunReport_Summary_Failed" xml:space="preserve">
+    <value>Neúspěšné</value>
+  </data>
+  <data name="TestRunReport_Summary_Warnings" xml:space="preserve">
+    <value>Varování</value>
+  </data>
+  <data name="TestRunReport_Summary_Inconclusive" xml:space="preserve">
+    <value>Neprůkazné</value>
+  </data>
+  <data name="TestRunReport_Summary_Skipped" xml:space="preserve">
+    <value>Přeskočené</value>
+  </data>
+  <data name="TestRunReport_Summary_FailedTests" xml:space="preserve">
+    <value>Neúspěšné testy</value>
+  </data>
+  <data name="TestRunReport_Summary_Failures" xml:space="preserve">
+    <value>Selhání</value>
+  </data>
+  <data name="TestRunReport_Summary_Errors" xml:space="preserve">
+    <value>Chyby</value>
+  </data>
+  <data name="TestRunReport_Summary_Invalid" xml:space="preserve">
+    <value>Neplatné</value>
+  </data>
+  <data name="TestRunReport_Summary_SkippedTests" xml:space="preserve">
+    <value>Přeskočené testy</value>
+  </data>
+  <data name="TestRunReport_Summary_Ignored" xml:space="preserve">
+    <value>Ignorované</value>
+  </data>
+  <data name="TestRunReport_Summary_Explicit" xml:space="preserve">
+    <value>Explicitní</value>
+  </data>
+  <data name="TestRunReport_Summary_Other" xml:space="preserve">
+    <value>Ostatní</value>
+  </data>
+  <data name="TestRunReport_Summary_StartTime" xml:space="preserve">
+    <value>Čas začátku</value>
+  </data>
+  <data name="TestRunReport_Summary_EndTime" xml:space="preserve">
+    <value>Čas konce</value>
+  </data>
+  <data name="TestRunReport_Summary_Duration" xml:space="preserve">
+    <value>Doba trvání</value>
+  </data>
+  <data name="TestRunReport_Summary_Seconds" xml:space="preserve">
+    <value>sekund</value>
+  </data>
+  <data name="TestRunReport_Status_Passed" xml:space="preserve">
+    <value>Úspěšné</value>
+  </data>
+  <data name="TestRunReport_Status_Failed" xml:space="preserve">
+    <value>Neúspěšné</value>
+  </data>
+  <data name="TestRunReport_Status_Skipped" xml:space="preserve">
+    <value>Přeskočené</value>
+  </data>
+  <data name="TestRunReport_Status_Inconclusive" xml:space="preserve">
+    <value>Neprůkazné</value>
+  </data>
+  <data name="TestRunReport_Status_Warning" xml:space="preserve">
+    <value>Varování</value>
+  </data>
+  <data name="TestRunReport_Status_Unknown" xml:space="preserve">
+    <value>Neznámé</value>
+  </data>
+  <data name="SelectedEntitiesCount" xml:space="preserve">
+    <value>Navolené entity</value>
+  </data>
+  <data name="SelectedEntities" xml:space="preserve">
+    <value>Počet navolených entity</value>
+  </data>
+  <data name="TestEntities" xml:space="preserve">
+    <value>Testovací entity</value>
+  </data>
+  <data name="Selected" xml:space="preserve">
+    <value>Navoleny</value>
+  </data>
+  <data name="Unselected" xml:space="preserve">
+    <value>Nenavoleny</value>
+  </data>
 </root>

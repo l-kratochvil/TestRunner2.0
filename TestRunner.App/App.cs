@@ -25,7 +25,10 @@ internal class App
         {
             var nunitTestRunnerProxy = host.Services.GetRequiredService<INUnitTestRunnerProxy>();
             var testRunStore = host.Services.GetRequiredService<TestRunStore>();
-            testRunStore.LoadedTestSuites = await nunitTestRunnerProxy.LoadTestAssemblyAsync(Paths.Files.TestAssemblyFilePath);
+            // testRunStore.LoadedTestSuites = await nunitTestRunnerProxy.LoadTestAssemblyAsync(Paths.Files.TestAssemblyFilePath);
+            testRunStore.LoadedTestSuites
+                = await nunitTestRunnerProxy.LoadTestAssemblyAsync(
+                    @"c:\Users\l-kratochvil\source\repos\TestRunner2.0\Tests\NUnitTestAssembly.Net481\bin\Debug\net481\NUnitTestAssembly.Net481.dll");
 
             await MainRenderAsync(host.Services.GetRequiredService<HomeScreen>());
         }
@@ -41,7 +44,7 @@ internal class App
         }
         finally
         {
-            File.Delete(Paths.Files.TestRunnerConfig);  // Clean up config file from previous run, if exists
+            File.Delete(Paths.Files.TestRunnerConfig); // Clean up config file from previous run, if exists
         }
     }
 

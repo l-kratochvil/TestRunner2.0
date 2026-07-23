@@ -50,16 +50,16 @@ internal sealed class HomeScreen(
             },
             Info = () =>
             {
-                var testSuites = testRunStore
-                    .SelectedTestEntities.OfType<TestSuiteEntity>().ToArray();
+                var testFixtures = testRunStore
+                    .SelectedTestEntities.OfType<TestFixtureEntity>().ToArray();
                 var testCases = testRunStore
                     .SelectedTestEntities.OfType<TestCaseEntity>().ToArray();
 
                 TestEntity[] testEntities = [];
 
-                if (testSuites.Length != 0)
+                if (testFixtures.Length != 0)
                 {
-                    testEntities = testSuites;
+                    testEntities = testFixtures;
                 }
                 else if (testCases is { Length: > 0 and < 10 })
                 {
@@ -70,12 +70,14 @@ internal sealed class HomeScreen(
 
                 Write(new Rule("INFO").LeftJustified());
                 WriteLine();
-                MarkupLine(anyTestEntities ? "[bold]# Test entities:[/] [yellow]Selected[/]" : "[bold]# Test entities:[/] [gray]Unselected[/]");
+                MarkupLine(anyTestEntities
+                    ? $"[bold]# {Resources.TestEntities}:[/] [yellow]{Resources.Selected}[/]"
+                    : $"[bold]# {Resources.TestEntities}:[/] [gray]{Resources.Unselected}[/]");
 
                 if (anyTestEntities)
                 {
-                    MarkupLine($"[bold]# Selected entities count: [yellow]{testEntities.Length}[/][/]");
-                    MarkupLine("[bold]# Selected entities:[/]");
+                    MarkupLine($"[bold]# {Resources.SelectedEntitiesCount}: [yellow]{testEntities.Length}[/][/]");
+                    MarkupLine($"[bold]# {Resources.SelectedEntities}:[/]");
                 }
 
                 foreach (var testEntity in testEntities)

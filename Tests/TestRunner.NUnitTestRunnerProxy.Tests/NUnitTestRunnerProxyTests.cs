@@ -120,5 +120,10 @@ public class NUnitTestRunnerProxyTests
         Assert.That(result.ErrorResults, Has.Length.EqualTo(1));
         Assert.That(result.FailureResults, Has.Length.EqualTo(1));
         Assert.That(result.IgnoredResults, Has.Length.EqualTo(1));
+        Assert.That(result.Summary.Errors, Is.EqualTo(1));
+        Assert.That(result.Summary.Failures, Is.EqualTo(1));
+        Assert.That(result.Summary.Ignored, Is.EqualTo(1));
+        Assert.That(result.Summary.Passed, Is.EqualTo(1));
+        Assert.That(result.Summary.Total, Is.EqualTo(4));
     }
 }

@@ -13,7 +13,7 @@ using TestRunner.Common.Model;
 public interface INUnitTestRunnerProxy
 {
     /// <summary>Loads the test assembly and returns its discovered test tree.</summary>
-    Task<TestSuiteEntity[]> LoadTestAssemblyAsync(string path, CancellationToken cancellationToken = default);
+    Task<TestSuiteEntity[]> LoadTestAssemblyAsync(string assemblyDllPath, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Runs the supplied test entities. Cancelling <paramref name="cancellationToken"/> forcibly aborts the run.

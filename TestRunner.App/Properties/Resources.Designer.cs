@@ -196,6 +196,33 @@ namespace TestRunner.App.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Selected.
+        /// </summary>
+        public static string Selected {
+            get {
+                return ResourceManager.GetString("Selected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Selected entities count.
+        /// </summary>
+        public static string SelectedEntities {
+            get {
+                return ResourceManager.GetString("SelectedEntities", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Selected entities.
+        /// </summary>
+        public static string SelectedEntitiesCount {
+            get {
+                return ResourceManager.GetString("SelectedEntitiesCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select test cases.
         /// </summary>
         public static string SelectTestCases_ChoiceText {
@@ -237,6 +264,339 @@ namespace TestRunner.App.Properties {
         public static string StopTest_CommandText {
             get {
                 return ResourceManager.GetString("StopTest_CommandText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test entities.
+        /// </summary>
+        public static string TestEntities {
+            get {
+                return ResourceManager.GetString("TestEntities", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Errors, Failures and Warnings.
+        /// </summary>
+        public static string TestRunReport_ErrorsFailuresWarnings_SectionHeader {
+            get {
+                return ResourceManager.GetString("TestRunReport_ErrorsFailuresWarnings_SectionHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string TestRunReport_Label_Error {
+            get {
+                return ResourceManager.GetString("TestRunReport_Label_Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Explicit.
+        /// </summary>
+        public static string TestRunReport_Label_Explicit {
+            get {
+                return ResourceManager.GetString("TestRunReport_Label_Explicit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed.
+        /// </summary>
+        public static string TestRunReport_Label_Failed {
+            get {
+                return ResourceManager.GetString("TestRunReport_Label_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ignored.
+        /// </summary>
+        public static string TestRunReport_Label_Ignored {
+            get {
+                return ResourceManager.GetString("TestRunReport_Label_Ignored", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid.
+        /// </summary>
+        public static string TestRunReport_Label_Invalid {
+            get {
+                return ResourceManager.GetString("TestRunReport_Label_Invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Skipped.
+        /// </summary>
+        public static string TestRunReport_Label_Skipped {
+            get {
+                return ResourceManager.GetString("TestRunReport_Label_Skipped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warning.
+        /// </summary>
+        public static string TestRunReport_Label_Warning {
+            get {
+                return ResourceManager.GetString("TestRunReport_Label_Warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed.
+        /// </summary>
+        public static string TestRunReport_Status_Failed {
+            get {
+                return ResourceManager.GetString("TestRunReport_Status_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Inconclusive.
+        /// </summary>
+        public static string TestRunReport_Status_Inconclusive {
+            get {
+                return ResourceManager.GetString("TestRunReport_Status_Inconclusive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passed.
+        /// </summary>
+        public static string TestRunReport_Status_Passed {
+            get {
+                return ResourceManager.GetString("TestRunReport_Status_Passed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Skipped.
+        /// </summary>
+        public static string TestRunReport_Status_Skipped {
+            get {
+                return ResourceManager.GetString("TestRunReport_Status_Skipped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown.
+        /// </summary>
+        public static string TestRunReport_Status_Unknown {
+            get {
+                return ResourceManager.GetString("TestRunReport_Status_Unknown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warning.
+        /// </summary>
+        public static string TestRunReport_Status_Warning {
+            get {
+                return ResourceManager.GetString("TestRunReport_Status_Warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Duration.
+        /// </summary>
+        public static string TestRunReport_Summary_Duration {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_Duration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to End time.
+        /// </summary>
+        public static string TestRunReport_Summary_EndTime {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_EndTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Errors.
+        /// </summary>
+        public static string TestRunReport_Summary_Errors {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_Errors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Explicit.
+        /// </summary>
+        public static string TestRunReport_Summary_Explicit {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_Explicit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed.
+        /// </summary>
+        public static string TestRunReport_Summary_Failed {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed Tests.
+        /// </summary>
+        public static string TestRunReport_Summary_FailedTests {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_FailedTests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failures.
+        /// </summary>
+        public static string TestRunReport_Summary_Failures {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_Failures", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ignored.
+        /// </summary>
+        public static string TestRunReport_Summary_Ignored {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_Ignored", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Inconclusive.
+        /// </summary>
+        public static string TestRunReport_Summary_Inconclusive {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_Inconclusive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid.
+        /// </summary>
+        public static string TestRunReport_Summary_Invalid {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_Invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Other.
+        /// </summary>
+        public static string TestRunReport_Summary_Other {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_Other", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overall result.
+        /// </summary>
+        public static string TestRunReport_Summary_OverallResult {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_OverallResult", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passed.
+        /// </summary>
+        public static string TestRunReport_Summary_Passed {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_Passed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to seconds.
+        /// </summary>
+        public static string TestRunReport_Summary_Seconds {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_Seconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test Run Summary.
+        /// </summary>
+        public static string TestRunReport_Summary_SectionHeader {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_SectionHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Skipped.
+        /// </summary>
+        public static string TestRunReport_Summary_Skipped {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_Skipped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Skipped Tests.
+        /// </summary>
+        public static string TestRunReport_Summary_SkippedTests {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_SkippedTests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start time.
+        /// </summary>
+        public static string TestRunReport_Summary_StartTime {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_StartTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test Count.
+        /// </summary>
+        public static string TestRunReport_Summary_TestCount {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_TestCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warnings.
+        /// </summary>
+        public static string TestRunReport_Summary_Warnings {
+            get {
+                return ResourceManager.GetString("TestRunReport_Summary_Warnings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tests Not Run.
+        /// </summary>
+        public static string TestRunReport_TestsNotRun_SectionHeader {
+            get {
+                return ResourceManager.GetString("TestRunReport_TestsNotRun_SectionHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unselected.
+        /// </summary>
+        public static string Unselected {
+            get {
+                return ResourceManager.GetString("Unselected", resourceCulture);
             }
         }
     }

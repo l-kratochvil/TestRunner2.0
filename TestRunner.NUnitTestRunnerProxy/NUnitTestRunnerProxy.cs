@@ -46,7 +46,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 
     /// <inheritdoc/>
     public Task<TestSuiteEntity[]> LoadTestAssemblyAsync(
-        string path, CancellationToken cancellationToken = default)
+        string assemblyDllPath, CancellationToken cancellationToken = default)
         => Task.Run<TestSuiteEntity[]>(
             () =>
             {
@@ -57,9 +57,9 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                 // process (see <PlatformTarget>x86</PlatformTarget> in the proxy/test
                 // project); otherwise the assembly is reported as NotRunnable with a
                 // BadImageFormatException and no tests are discovered.
-                var testAssemblyElement = this.runner.Load(path, new Dictionary<string, object>
+                var testAssemblyElement = this.runner.Load(assemblyDllPath, new Dictionary<string, object>
                 {
-                    { FrameworkPackageSettings.WorkDirectory, Path.GetDirectoryName(path) },
+                    { FrameworkPackageSettings.WorkDirectory, Path.GetDirectoryName(assemblyDllPath) },
                 });
 
                 return testAssemblyElement.Tests.Any() ? [..CollectTestSuiteEntities(testAssemblyElement.Tests[0])] : [];
@@ -96,10 +96,23 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                 {
                     var result = this.runner.Run(TestListener.NULL, testFilter);
 
-                    var ignoredResults = new List<Common.IgnoredResult>();
-                    var errorResults = new List<Common.ErrorResult>();
-                    var failureResults = new List<Common.FailureResult>();
-                    CollectResults(result, ignoredResults, errorResults, failureResults);
+                    var buckets = new ResultBuckets();
+                    CollectResults(result, buckets);
+
+                    var summary = new Common.TestRunSummary(
+                        Total: result.PassCount + result.FailCount + result.WarningCount +
+                               result.InconclusiveCount + result.SkipCount,
+                        Passed: result.PassCount,
+                        Failed: result.FailCount,
+                        Warnings: result.WarningCount,
+                        Inconclusive: result.InconclusiveCount,
+                        Skipped: result.SkipCount,
+                        Failures: buckets.Failures.Count,
+                        Errors: buckets.Errors.Count,
+                        Invalid: buckets.Invalid.Count,
+                        Ignored: buckets.Ignored.Count,
+                        Explicit: buckets.Explicit.Count,
+                        Other: buckets.Other.Count);
 
                     return new Common.TestRunResult(
                         result.ResultState.Status switch
@@ -111,9 +124,14 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                             NUnit.Framework.Interfaces.TestStatus.Warning => TestStatus.Warning,
                             _ => TestStatus.Unknown,
                         },
-                        [..ignoredResults],
-                        [..errorResults],
-                        [..failureResults]);
+                        summary,
+                        [..buckets.Ignored],
+                        [..buckets.Explicit],
+                        [..buckets.Other],
+                        [..buckets.Errors],
+                        [..buckets.Invalid],
+                        [..buckets.Failures],
+                        [..buckets.Warnings]);
                 }
                 finally
                 {
@@ -124,19 +142,15 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
     }
 
     /// <summary>
-    /// Recursively walks the NUnit result tree and buckets outcomes into the ignored, error and
-    /// failure collections. Results whose failure is merely propagated from a parent's setup or
-    /// aggregated from children (<see cref="FailureSite.Parent"/>/<see cref="FailureSite.Child"/>)
-    /// are skipped, so each intrinsic outcome is reported exactly once (e.g. a suite's own
-    /// OneTimeSetUp error is reported at the suite node, not duplicated onto its children).
-    /// Ignored/skipped results are only taken from leaf test cases to avoid duplicating an
-    /// ignored fixture across its children.
+    /// Recursively walks the NUnit result tree and buckets outcomes into the not-run
+    /// (ignored/explicit/other), error, invalid, failure and warning collections. Results whose
+    /// outcome is merely propagated from a parent's setup or aggregated from children
+    /// (<see cref="FailureSite.Parent"/>/<see cref="FailureSite.Child"/>) are skipped, so each
+    /// intrinsic outcome is reported exactly once (e.g. a suite's own OneTimeSetUp error is reported
+    /// at the suite node, not duplicated onto its children). Skipped and warning outcomes are only
+    /// taken from leaf test cases to avoid duplicating a fixture-level outcome across its children.
     /// </summary>
-    private static void CollectResults(
-        ITestResult result,
-        List<Common.IgnoredResult> ignoredResults,
-        List<Common.ErrorResult> errorResults,
-        List<Common.FailureResult> failureResults)
+    private static void CollectResults(ITestResult result, ResultBuckets buckets)
     {
         var resultState = result.ResultState;
         var isPropagated = resultState.Site is FailureSite.Parent or FailureSite.Child;
@@ -145,27 +159,50 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
         {
             switch (resultState.Status)
             {
-                case NUnit.Framework.Interfaces.TestStatus.Failed
-                    when resultState.Label is "Error" or "Invalid":
-                    errorResults.Add(new Common.ErrorResult(
+                case NUnit.Framework.Interfaces.TestStatus.Failed when resultState.Label == "Error":
+                    buckets.Errors.Add(new Common.ErrorResult(
+                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
+                    break;
+
+                case NUnit.Framework.Interfaces.TestStatus.Failed when resultState.Label == "Invalid":
+                    buckets.Invalid.Add(new Common.InvalidResult(
                         result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
                     break;
 
                 case NUnit.Framework.Interfaces.TestStatus.Failed:
-                    failureResults.Add(new Common.FailureResult(
+                    buckets.Failures.Add(new Common.FailureResult(
+                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
+                    break;
+
+                case NUnit.Framework.Interfaces.TestStatus.Warning when !result.HasChildren:
+                    buckets.Warnings.Add(new Common.WarningResult(
+                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
+                    break;
+
+                case NUnit.Framework.Interfaces.TestStatus.Skipped when !result.HasChildren
+                                                                        && resultState.Label == "Ignored":
+                    buckets.Ignored.Add(new Common.IgnoredResult(
+                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
+                    break;
+
+                case NUnit.Framework.Interfaces.TestStatus.Skipped when !result.HasChildren
+                                                                        && resultState.Label == "Explicit":
+                    buckets.Explicit.Add(new Common.ExplicitResult(
                         result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
                     break;
 
                 case NUnit.Framework.Interfaces.TestStatus.Skipped when !result.HasChildren:
-                    ignoredResults.Add(new Common.IgnoredResult(
+                    buckets.Other.Add(new Common.OtherSkippedResult(
                         result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
                     break;
+
+                case NUnit.Framework.Interfaces.TestStatus.Warning:
+                case NUnit.Framework.Interfaces.TestStatus.Skipped:
                 case NUnit.Framework.Interfaces.TestStatus.Inconclusive:
                 case NUnit.Framework.Interfaces.TestStatus.Passed:
-                case NUnit.Framework.Interfaces.TestStatus.Warning:
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new NotSupportedException();
             }
         }
 
@@ -176,8 +213,26 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 
         foreach (var child in result.Children)
         {
-            CollectResults(child, ignoredResults, errorResults, failureResults);
+            CollectResults(child, buckets);
         }
+    }
+
+    /// <summary>Mutable accumulator for the categorized outcomes gathered during the result walk.</summary>
+    private sealed class ResultBuckets
+    {
+        public List<Common.IgnoredResult> Ignored { get; } = [];
+
+        public List<Common.ExplicitResult> Explicit { get; } = [];
+
+        public List<Common.OtherSkippedResult> Other { get; } = [];
+
+        public List<Common.ErrorResult> Errors { get; } = [];
+
+        public List<Common.InvalidResult> Invalid { get; } = [];
+
+        public List<Common.FailureResult> Failures { get; } = [];
+
+        public List<Common.WarningResult> Warnings { get; } = [];
     }
 
     private static IEnumerable<TestSuiteEntity> CollectTestSuiteEntities(ITest root)
