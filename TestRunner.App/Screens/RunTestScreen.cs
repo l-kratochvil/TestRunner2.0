@@ -27,6 +27,7 @@ internal class RunTestScreen(
     {
         IsHomeCommandEnabled = false,
         IsBackCommandEnabled = false,
+        IsSettingsCommandEnabled = false,
     };
 
     /// <inheritdoc/>

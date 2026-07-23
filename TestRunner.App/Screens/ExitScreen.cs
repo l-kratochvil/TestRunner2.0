@@ -12,7 +12,7 @@ internal class ExitScreen(
         => new()
         {
             Main = ct => ShowPromptAsync(
-                new ConfirmationPrompt("Exit?").No('n').Yes('y'),
+                new ConfirmationPrompt($"{Resources.ExitApp}?").No('n').Yes('y'),
                 confirmed => confirmed ? new RenderOutput(Exit: true) : new RenderOutput(),
                 ct),
         };

@@ -297,4 +297,7 @@
   <data name="Unselected" xml:space="preserve">
     <value>Unselected</value>
   </data>
+  <data name="ExitApp" xml:space="preserve">
+    <value>Exit app</value>
+  </data>
 </root>

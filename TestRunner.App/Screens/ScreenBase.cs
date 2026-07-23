@@ -133,10 +133,13 @@ internal abstract class ScreenBase : IScreen
             yield return command;
         }
 
-        yield return new InterruptionCommand(
-            Key: VirtualKeyCode.F10,
-            Text: Resources.Settings_CommandText,
-            NextScreen: this.SettingsScreenLazy.Value);
+        if (this.Config.IsSettingsCommandEnabled)
+        {
+            yield return new InterruptionCommand(
+                Key: VirtualKeyCode.F10,
+                Text: Resources.Settings_CommandText,
+                NextScreen: this.SettingsScreenLazy.Value);
+        }
 
         if (this.Config.IsHomeCommandEnabled)
         {
@@ -209,5 +212,6 @@ internal abstract class ScreenBase : IScreen
 
     public record Configuration(
         bool IsBackCommandEnabled = true,
-        bool IsHomeCommandEnabled = true);
+        bool IsHomeCommandEnabled = true,
+        bool IsSettingsCommandEnabled = true);
 }

@@ -106,6 +106,15 @@ namespace TestRunner.App.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Exit app.
+        /// </summary>
+        public static string ExitApp {
+            get {
+                return ResourceManager.GetString("ExitApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Home.
         /// </summary>
         public static string Home_CommandText {

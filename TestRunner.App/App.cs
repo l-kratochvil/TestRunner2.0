@@ -25,6 +25,7 @@ internal class App
         {
             var nunitTestRunnerProxy = host.Services.GetRequiredService<INUnitTestRunnerProxy>();
             var testRunStore = host.Services.GetRequiredService<TestRunStore>();
+
             // testRunStore.LoadedTestSuites = await nunitTestRunnerProxy.LoadTestAssemblyAsync(Paths.Files.TestAssemblyFilePath);
             testRunStore.LoadedTestSuites
                 = await nunitTestRunnerProxy.LoadTestAssemblyAsync(
