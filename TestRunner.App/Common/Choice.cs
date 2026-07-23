@@ -18,8 +18,8 @@ internal static class Choice
         TChoiceValue choiceValue,
         string choiceDisplayText,
         string? choiceDisplayValue,
-        Func<bool> shouldInitPredicate)
-        => shouldInitPredicate()
+        Func<bool>? shouldInitPredicate = null)
+        => shouldInitPredicate?.Invoke() ?? true
             ? Maybe<Choice<TChoiceValue>>.From(new Choice<TChoiceValue>(
                 value: choiceValue,
                 displayText: choiceDisplayText,

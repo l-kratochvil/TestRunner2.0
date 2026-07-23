@@ -12,9 +12,9 @@ internal class TestRunConfigStore(AppStateStore appStateStore)
         set => appStateStore.Update(current => current with { RuntimeVersion = value });
     }
 
-    public string? IdeVersion
+    public string? TestStation
     {
-        get => appStateStore.Current.IdeVersion;
-        set => appStateStore.Update(current => current with { IdeVersion = value });
+        get => appStateStore.Current.TestStation;
+        set => appStateStore.Update(current => current with { TestStation = value });
     }
 }

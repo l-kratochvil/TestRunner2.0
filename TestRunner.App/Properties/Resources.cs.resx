@@ -174,4 +174,7 @@
   <data name="Home_CommandText" xml:space="preserve">
     <value>Domů</value>
   </data>
+  <data name="SelectTestStation_ChoiceText" xml:space="preserve">
+    <value>Vyber testovací stanici</value>
+  </data>
 </root>

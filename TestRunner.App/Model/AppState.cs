@@ -6,4 +6,6 @@ internal record AppState(
     [property: JsonPropertyName("runtimeVersion")]
     string? RuntimeVersion,
     [property: JsonPropertyName("ideVersion")]
-    string? IdeVersion);
+    string? IdeVersion,
+    [property: JsonPropertyName("testStation")]
+    string? TestStation);

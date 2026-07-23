@@ -205,6 +205,15 @@ namespace TestRunner.App.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select test station.
+        /// </summary>
+        public static string SelectTestStation_ChoiceText {
+            get {
+                return ResourceManager.GetString("SelectTestStation_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select test suites.
         /// </summary>
         public static string SelectTestSuites_ChoiceText {

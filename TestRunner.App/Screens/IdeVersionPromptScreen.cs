@@ -3,7 +3,7 @@
 using TestRunner.App.Stores;
 
 internal class IdeVersionPromptScreen(
-    TestRunConfigStore testRunConfigStore,
+    TestRunStore testRunStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -17,7 +17,7 @@ internal class IdeVersionPromptScreen(
                 new TextPrompt<string>(Resources.EnterIdeIVersion_PromptText),
                 version =>
                 {
-                    testRunConfigStore.IdeVersion = version;
+                    testRunStore.IdeVersion = version;
                     return new RenderOutput();
                 },
                 ct),

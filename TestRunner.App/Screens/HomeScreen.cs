@@ -17,6 +17,7 @@ internal sealed class HomeScreen(
     IdeVersionPromptScreen ideVersionPromptScreen,
     TestSuitesSelectionScreen testEntitiesFromTestsuitesPromptScreen,
     TestCasesSelectionScreen testEntitiesFromTestCasesPromptScreen,
+    TestStationSelectionScreen testStationSelectionScreen,
     RunTestScreen runTestScreen)
     : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
@@ -94,21 +95,29 @@ internal sealed class HomeScreen(
             displayText: Resources.RuntimeVersion_ChoiceText,
             displayValue: testRunConfigStore.RuntimeVersion);
 
+        if (testRunConfigStore.RuntimeVersion is null)
+        {
+            yield break;
+        }
+
         if (Choice.InitChoice<IScreen>(
                 ideVersionPromptScreen,
                 Resources.IdeVersion_ChoiceText,
-                testRunConfigStore.IdeVersion,
-                () => testRunConfigStore.RuntimeVersion is not null)
+                testRunStore.IdeVersion)
             .TryGetValue(out var ideVersionChoice))
         {
             yield return ideVersionChoice;
         }
 
+        if (testRunStore.IdeVersion is null)
+        {
+            yield break;
+        }
+
         if (Choice.InitChoice<IScreen>(
                 testEntitiesFromTestsuitesPromptScreen,
                 Resources.SelectTestSuites_ChoiceText,
-                null,
-                () => testRunConfigStore.IdeVersion is not null)
+                null)
             .TryGetValue(out var selectTestSuiteChoice))
         {
             yield return selectTestSuiteChoice;
@@ -117,8 +126,7 @@ internal sealed class HomeScreen(
         if (Choice.InitChoice<IScreen>(
                 testEntitiesFromTestCasesPromptScreen,
                 Resources.SelectTestCases_ChoiceText,
-                null,
-                () => testRunConfigStore.IdeVersion is not null)
+                null)
             .TryGetValue(out var selectTestCasesChoice))
         {
             yield return selectTestCasesChoice;
@@ -129,12 +137,23 @@ internal sealed class HomeScreen(
             yield break;
         }
 
-        if (testRunStore.SelectedTestEntities.Any(x => x.TestType is TestType.RuntimeTest))
+        var runtimeTestEntitySelected = testRunStore.SelectedTestEntities.Any(x => x.TestType is TestType.RuntimeTest);
+        if (Choice.InitChoice<IScreen>(
+                testStationSelectionScreen,
+                Resources.SelectTestStation_ChoiceText,
+                testRunConfigStore.TestStation,
+                () => runtimeTestEntitySelected)
+            .TryGetValue(out var selectTestStationChoice))
         {
-            // TODO: If any runtime tests selected then prompt to select test station type (HW01, HW02)
+            yield return selectTestStationChoice;
         }
 
-        if (string.IsNullOrEmpty(testRunConfigStore.IdeVersion) ||
+        if (runtimeTestEntitySelected && string.IsNullOrEmpty(testRunConfigStore.TestStation))
+        {
+            yield break;
+        }
+
+        if (string.IsNullOrEmpty(testRunStore.IdeVersion) ||
             string.IsNullOrEmpty(testRunConfigStore.RuntimeVersion) ||
             !testRunStore.SelectedTestEntities.Any())
         {

@@ -16,6 +16,7 @@ internal class RunTestScreen(
 {
     private CancellationTokenSource? testRunCts;
 
+    /// <inheritdoc/>
     protected override Configuration Config { get; init; } = new()
     {
         IsHomeCommandEnabled = false,

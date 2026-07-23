@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-using DevKit.Core.Utils;
-
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
