@@ -5,6 +5,8 @@ using NUnit.Framework;
 
 using TestRunner.App.TestLinkApi;
 
+using static TestRunner.App.Common.InternalTypes;
+
 // TODO: Vytvo�it v TL vlastn� projekt pro ��ely testov�n� TestLinkApi
 
 [TestFixture]

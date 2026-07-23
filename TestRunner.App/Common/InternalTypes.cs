@@ -9,6 +9,13 @@ using WindowsInput.Native;
 /// </summary>
 internal static class InternalTypes
 {
+    public record AppSystemConfig(TestLinkConfig TestLinkConfig);
+
+    public record TestLinkConfig(
+        string ApiKey,
+        string XmlRpcServerUrl,
+        bool LoggingEnabled);
+
     /// <summary>
     /// Provides render output.<br/>
     /// If ExitScreen is true, then the render is returned to the previous screen (the one that called the render of the screen).<br/>
@@ -54,4 +61,16 @@ internal static class InternalTypes
     public record TextValueItem<TValue>(
         string Text,
         TValue Value);
+}
+
+internal static class InternalTypesExtensions
+{
+    extension(AppSystemConfig)
+    {
+        public static AppSystemConfig CreateDefault(bool loggingEnabled = false)
+            => new(TestLinkConfig: new TestLinkConfig(
+                ApiKey: "dc7a17e14a9f1879d38583a38c3a81e8",
+                XmlRpcServerUrl: "https://vyvoj.zat.lan/tester/testlink/lib/api/xmlrpc/v1/xmlrpc.php",
+                LoggingEnabled: loggingEnabled));
+    }
 }
