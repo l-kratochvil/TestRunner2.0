@@ -28,16 +28,17 @@ public class NUnitTestRunnerProxyTests
     [Test]
     public async Task LoadTestAssemblyAsync_WithNet481Assembly()
     {
-        if (!File.Exists(TestAssemblyNet481DllPath))
+        var testAssemblyDllPath = TestAssemblyNet481DllPath;
+        if (!File.Exists(testAssemblyDllPath))
         {
-            throw new FileNotFoundException(TestAssemblyNet481DllPath);
+            throw new FileNotFoundException(testAssemblyDllPath);
         }
 
         // Given
         var unit = new NUnitTestRunnerProxy();
 
         // When
-        var result = await unit.LoadTestAssemblyAsync(TestAssemblyNet481DllPath);
+        var result = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
 
         // Then
         Assert.That(result, Is.Not.Empty);
@@ -48,23 +49,27 @@ public class NUnitTestRunnerProxyTests
         Assert.That(testSuite.TestFixtures, Has.One.Matches<TestFixtureEntity>(x => x.Name == "SampleTestSuite"));
 
         var testFixture = testSuite.TestFixtures[0];
-        Assert.That(testFixture.TestCases, Has.Length.EqualTo(1));
-        Assert.That(testFixture.TestCases[0].Name, Is.EqualTo("SampleTestCase"));
+        Assert.That(testFixture.TestCases, Has.Length.EqualTo(4));
+        Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Pass"));
+        Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Fail"));
+        Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Error"));
+        Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Ignored"));
     }
 
     [Test]
     public async Task LoadTestAssemblyAsync_WithNet461Assembly()
     {
-        if (!File.Exists(TestAssemblyNet461DllPath))
+        var testAssemblyDllPath = TestAssemblyNet461DllPath;
+        if (!File.Exists(testAssemblyDllPath))
         {
-            throw new FileNotFoundException(TestAssemblyNet461DllPath);
+            throw new FileNotFoundException(testAssemblyDllPath);
         }
 
         // Given
         var unit = new NUnitTestRunnerProxy();
 
         // When
-        var result = await unit.LoadTestAssemblyAsync(TestAssemblyNet461DllPath);
+        var result = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
 
         // Then
         Assert.That(result, Is.Not.Empty);
@@ -88,5 +93,32 @@ public class NUnitTestRunnerProxyTests
 
         // Then
         Assert.That(result, Is.Not.Empty);
+    }
+
+    [Test]
+    public async Task RunTestAsync()
+    {
+        var testAssemblyDllPath = TestAssemblyNet481DllPath;
+        if (!File.Exists(testAssemblyDllPath))
+        {
+            throw new FileNotFoundException(testAssemblyDllPath);
+        }
+
+        // Given
+        var unit = new NUnitTestRunnerProxy();
+
+        // When
+        var loaded = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
+        var testCaseEntites = loaded
+            .SelectMany(x => x.TestFixtures)
+            .SelectMany(x => x.TestCases)
+            .ToArray();
+        var result = await unit.RunTestAsync(testCaseEntites);
+
+        // Then
+        Assert.That(result.Status, Is.EqualTo(TestStatus.Failed));
+        Assert.That(result.ErrorResults, Has.Length.EqualTo(1));
+        Assert.That(result.FailureResults, Has.Length.EqualTo(1));
+        Assert.That(result.IgnoredResults, Has.Length.EqualTo(1));
     }
 }

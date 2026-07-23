@@ -18,7 +18,6 @@ using TestRunner.Common.Model;
 using TestRunner.Common.Services;
 
 using TestFilter = NUnit.Framework.Internal.TestFilter;
-using TestResult = TestRunner.Common.TestResult;
 using TestStatus = TestRunner.Common.Model.TestStatus;
 
 /// <summary>
@@ -60,7 +59,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                 // BadImageFormatException and no tests are discovered.
                 var testAssemblyElement = this.runner.Load(path, new Dictionary<string, object>
                 {
-                    { FrameworkPackageSettings.WorkDirectory, System.IO.Path.GetDirectoryName(path) },
+                    { FrameworkPackageSettings.WorkDirectory, Path.GetDirectoryName(path) },
                 });
 
                 return testAssemblyElement.Tests.Any() ? [..CollectTestSuiteEntities(testAssemblyElement.Tests[0])] : [];
@@ -68,7 +67,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
             cancellationToken);
 
     /// <inheritdoc/>
-    public Task<TestResult> RunTestAsync(
+    public Task<TestRunner.Common.TestRunResult> RunTestAsync(
         IEnumerable<TestEntity> testsToRun, CancellationToken cancellationToken = default)
     {
         if (!this.runner.IsTestLoaded)
@@ -76,8 +75,15 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
             throw new InvalidOperationException("Test assembly wasn't loaded yet");
         }
 
+        // Explicit OR semantics: a test runs if it matches ANY of the requested names.
+        // (Multiple <test> elements directly under <filter> would be combined with AND.)
         var testFilterNode = new TNode("filter");
-        FillFilterNodeWithTestEntities(testFilterNode, testsToRun);
+        var orNode = testFilterNode.AddElement("or");
+        foreach (var testEntity in testsToRun)
+        {
+            orNode.AddElement("test", testEntity.ExecutionPath);
+        }
+
         var testFilter = TestFilter.FromXml(testFilterNode);
 
         // Cancellation forcibly aborts the in-progress run.
@@ -89,7 +95,13 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                 try
                 {
                     var result = this.runner.Run(TestListener.NULL, testFilter);
-                    return new TestResult(
+
+                    var ignoredResults = new List<Common.IgnoredResult>();
+                    var errorResults = new List<Common.ErrorResult>();
+                    var failureResults = new List<Common.FailureResult>();
+                    CollectResults(result, ignoredResults, errorResults, failureResults);
+
+                    return new Common.TestRunResult(
                         result.ResultState.Status switch
                         {
                             NUnit.Framework.Interfaces.TestStatus.Passed => TestStatus.Passed,
@@ -98,7 +110,10 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                             NUnit.Framework.Interfaces.TestStatus.Inconclusive => TestStatus.Inconclusive,
                             NUnit.Framework.Interfaces.TestStatus.Warning => TestStatus.Warning,
                             _ => TestStatus.Unknown,
-                        });
+                        },
+                        [..ignoredResults],
+                        [..errorResults],
+                        [..failureResults]);
                 }
                 finally
                 {
@@ -106,6 +121,63 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                 }
             },
             cancellationToken);
+    }
+
+    /// <summary>
+    /// Recursively walks the NUnit result tree and buckets outcomes into the ignored, error and
+    /// failure collections. Results whose failure is merely propagated from a parent's setup or
+    /// aggregated from children (<see cref="FailureSite.Parent"/>/<see cref="FailureSite.Child"/>)
+    /// are skipped, so each intrinsic outcome is reported exactly once (e.g. a suite's own
+    /// OneTimeSetUp error is reported at the suite node, not duplicated onto its children).
+    /// Ignored/skipped results are only taken from leaf test cases to avoid duplicating an
+    /// ignored fixture across its children.
+    /// </summary>
+    private static void CollectResults(
+        ITestResult result,
+        List<Common.IgnoredResult> ignoredResults,
+        List<Common.ErrorResult> errorResults,
+        List<Common.FailureResult> failureResults)
+    {
+        var resultState = result.ResultState;
+        var isPropagated = resultState.Site is FailureSite.Parent or FailureSite.Child;
+
+        if (!isPropagated)
+        {
+            switch (resultState.Status)
+            {
+                case NUnit.Framework.Interfaces.TestStatus.Failed
+                    when resultState.Label is "Error" or "Invalid":
+                    errorResults.Add(new Common.ErrorResult(
+                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
+                    break;
+
+                case NUnit.Framework.Interfaces.TestStatus.Failed:
+                    failureResults.Add(new Common.FailureResult(
+                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
+                    break;
+
+                case NUnit.Framework.Interfaces.TestStatus.Skipped when !result.HasChildren:
+                    ignoredResults.Add(new Common.IgnoredResult(
+                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
+                    break;
+                case NUnit.Framework.Interfaces.TestStatus.Inconclusive:
+                case NUnit.Framework.Interfaces.TestStatus.Passed:
+                case NUnit.Framework.Interfaces.TestStatus.Warning:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        if (!result.HasChildren)
+        {
+            return;
+        }
+
+        foreach (var child in result.Children)
+        {
+            CollectResults(child, ignoredResults, errorResults, failureResults);
+        }
     }
 
     private static IEnumerable<TestSuiteEntity> CollectTestSuiteEntities(ITest root)
@@ -127,11 +199,10 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
         foreach (var testFixture in testSuite.Tests.OfType<TestFixture>())
         {
             var testFixtureName = testFixture
-                                      .TypeInfo
-                                      .Type
-                                      .GetAttribute<TestFixtureAttribute>()?
-                                      .Description
-                                  ?? testFixture.Name;
+                .TypeInfo
+                .Type
+                .GetAttribute<TestFixtureAttribute>()?
+                .Description ?? testFixture.Name;
             yield return new TestFixtureEntity(
                 [..CollectTestCaseEntities(testFixture, testType)],
                 testType,
@@ -146,24 +217,15 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
         foreach (var testCase in testFixture.Tests.OfType<Test>())
         {
             var testCaseId = testCase
-                                 .Method?
-                                 .MethodInfo
-                                 .GetAttribute<TestCaseAttribute>()?
-                                 .TestName
-                             ?? testCase.Name;
+                .Method?
+                .MethodInfo
+                .GetAttribute<TestCaseAttribute>()?
+                .TestName ?? testCase.Name;
             yield return new TestCaseEntity(
                 testType,
                 id: testCaseId,
                 name: testCase.Name,
                 executionPath: testCase.FullName);
-        }
-    }
-
-    private static void FillFilterNodeWithTestEntities(TNode filterNode, IEnumerable<TestEntity> testEntities)
-    {
-        foreach (var testEntity in testEntities)
-        {
-            filterNode.AddElement("test", testEntity.ExecutionPath);
         }
     }
 }

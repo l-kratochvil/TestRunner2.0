@@ -41,6 +41,8 @@ internal class RunTestScreen(
             Main = async ct =>
             {
                 var state = new State();
+
+                var startTime = DateTime.Now;
                 state.Stopwatch.Start();
 
                 var table = new Table()
@@ -78,6 +80,8 @@ internal class RunTestScreen(
                     await this.testRunCts.CancelAsync();
                     return interuptedShowPrompt;
                 }
+
+                var endTime = DateTime.Now;
 
                 // TODO: Display final elapsed time
                 // TODO: Display test result

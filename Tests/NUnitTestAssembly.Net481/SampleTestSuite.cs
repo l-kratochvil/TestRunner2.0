@@ -9,11 +9,37 @@ using NUnit.Framework;
 public class SampleTestSuite
 {
     /// <summary>
-    /// A single passing test case.
+    /// A passing test case.
     /// </summary>
     [Test]
-    public void SampleTestCase()
+    public void Pass()
     {
-        Assert.Pass();
+    }
+
+    /// <summary>
+    /// A failing test case.
+    /// </summary>
+    [Test]
+    public void Fail()
+    {
+        Assert.Fail("FAILURE REASON");
+    }
+
+    /// <summary>
+    /// An error test case.
+    /// </summary>
+    [Test]
+    public void Error()
+    {
+        throw new Exception("ERROR REASON");
+    }
+
+    /// <summary>
+    /// An ignored test case.
+    /// </summary>
+    [Test]
+    public void Ignored()
+    {
+        Assert.Ignore("IGNORE REASON");
     }
 }
