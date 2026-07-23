@@ -21,7 +21,7 @@ internal class App
 {
     public static async Task RunAsync(IHost host)
     {
-        // TODO: create new empy config file
+        File.Delete(Paths.Files.TestRunnerConfig); // Clean up config file from previous run, if exists
 
         try
         {
@@ -43,7 +43,7 @@ internal class App
         }
         finally
         {
-            File.Delete(Paths.Files.TestRunnerConfig);
+            File.Delete(Paths.Files.TestRunnerConfig);  // Clean up config file from previous run, if exists
         }
     }
 

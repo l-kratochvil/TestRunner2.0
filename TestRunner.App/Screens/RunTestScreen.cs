@@ -49,6 +49,7 @@ internal class RunTestScreen(
 
                 this.testRunCts = new CancellationTokenSource();
 
+                // TODO: Save TestRunConfigStore state to XML 
                 var runTestTask = nunitTestRunnerProxy.RunTestAsync([], this.testRunCts.Token);
 
                 var promptResult = await ShowLiveDataAsync(

@@ -129,7 +129,11 @@ internal sealed class HomeScreen(
             yield break;
         }
 
-        // TODO: If any runtime tests selected then prompt to select test station type (HW01, HW02)
+        if (testRunStore.SelectedTestEntities.Any(x => x.TestType is TestType.RuntimeTest))
+        {
+            // TODO: If any runtime tests selected then prompt to select test station type (HW01, HW02)
+        }
+
         if (string.IsNullOrEmpty(testRunConfigStore.IdeVersion) ||
             string.IsNullOrEmpty(testRunConfigStore.RuntimeVersion) ||
             !testRunStore.SelectedTestEntities.Any())

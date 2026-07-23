@@ -1,11 +1,15 @@
 namespace TestRunner.NUnitTestRunnerProxy;
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using DevKit.Core.Extensions.Types;
+
 using NUnit;
+using NUnit.Framework;
 using NUnit.Framework.Api;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
@@ -23,6 +27,14 @@ using TestStatus = TestRunner.Common.Model.TestStatus;
 /// </summary>
 public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 {
+    private static readonly ImmutableDictionary<string, string> TestSuiteNames =
+        new Dictionary<string, string>
+        {
+            { "PdpClientTests", "Testy PDP klient" },
+            { "Pertinax6Tests", "Testy Pertinax6" },
+            { "RuntimeTests", "Testy runtime" },
+        }.ToImmutableDictionary();
+
     private readonly NUnitTestAssemblyRunner runner = new(new DefaultTestAssemblyBuilder());
 
     /// <inheritdoc/>
@@ -97,48 +109,51 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
     }
 
     private static IEnumerable<TestSuiteEntity> CollectTestSuiteEntities(ITest root)
-        => root.Tests.OfType<TestSuite>().Select(x =>
+        => root.Tests.OfType<TestSuite>().Select(static x =>
         {
             var testType = x.FullName.ToLower().Contains("runtimetests")
                 ? TestType.RuntimeTest
                 : TestType.ApplicationTest;
             return new TestSuiteEntity(
-                [.. CollectTestFixtureEntities(x, testType)],
+                [..CollectTestFixtureEntities(x, testType)],
                 testType,
-                name: x.Name,
+                name: TestSuiteNames.TryGetValue(x.Name, out var testSuiteName) ? testSuiteName : x.Name,
                 executionPath: x.FullName);
         });
 
     private static IEnumerable<TestFixtureEntity> CollectTestFixtureEntities(
         TestSuite testSuite, TestType testType)
-        => testSuite
-            .Tests
-            .OfType<TestFixture>()
-            .Select(x => new TestFixtureEntity(
-                [..CollectTestCaseEntities(x, testType)],
+    {
+        foreach (var testFixture in testSuite.Tests.OfType<TestFixture>())
+        {
+            var testFixtureName = testFixture.TypeInfo.Type.GetAttribute<TestFixtureAttribute>()?.Description
+                                  ?? testFixture.Name;
+            yield return new TestFixtureEntity(
+                [..CollectTestCaseEntities(testFixture, testType)],
                 testType,
-                name: x.Name,
-                executionPath: x.FullName));
+                name: testFixtureName,
+                executionPath: testFixture.FullName);
+        }
+    }
 
     private static IEnumerable<TestCaseEntity> CollectTestCaseEntities(
         TestFixture testFixture, TestType testType)
-        => testFixture
-            .Tests
-            .OfType<ParameterizedMethodSuite>()
-            .Select(x => new TestCaseEntity(
+    {
+        foreach (var testCase in testFixture.Tests.OfType<ParameterizedMethodSuite>())
+        {
+            var testCaseId = testCase.Method.MethodInfo.GetAttribute<TestCaseAttribute>()?.TestName
+                             ?? testCase.Name;
+            yield return new TestCaseEntity(
                 testType,
-                name: x.Name,
-                executionPath: x.FullName));
+                id: testCaseId,
+                name: testCase.Name,
+                executionPath: testCase.FullName);
+        }
+    }
 
     private static void FillFilterNodeWithTestEntities(TNode filterNode, IEnumerable<TestEntity> testEntities)
     {
-        var testEntitiesInArray = testEntities.ToArray();
-        if (!testEntitiesInArray.Any())
-        {
-            return;
-        }
-
-        foreach (var testEntity in testEntitiesInArray)
+        foreach (var testEntity in testEntities)
         {
             filterNode.AddElement("test", testEntity.ExecutionPath);
         }

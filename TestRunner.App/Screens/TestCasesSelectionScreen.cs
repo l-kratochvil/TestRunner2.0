@@ -75,9 +75,11 @@ internal class TestCasesSelectionScreen(
                         .InstructionsText(InstructionsText)
                         .NotRequired()
                         .PageSize(10)
-                        .UseConverter(x => x.Name);
+                        .UseConverter(x => (x as TestCaseEntity)?.Id ?? x.Name);
 
-                    testSuites.ForEach(testSuite => prompt.AddChoiceGroup(testSuite, testSuite.TestFixtures.SelectMany(x => x.TestCases)));
+                    testSuites.ForEach(testSuite => prompt.AddChoiceGroup(
+                        testSuite,
+                        testSuite.TestFixtures.SelectMany(x => x.TestCases).OrderBy(x => x.Id)));
                     testRunStore.SelectedTestEntities.ForEach(entity => prompt.Select(entity));
 
                     return await ShowPromptAsync(
