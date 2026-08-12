@@ -45,6 +45,15 @@
 - https://github.com/nunit/nunit/milestone/38
 
 ## Další
+- Příloha k výsledku testu:
+	- Zavolat metodu tl.uploadExecutionAttachment a předat získávané execution_id společně s parametry přílohy:  
+		- executionId: ID vykonaného testu  
+		- fileName: Název souboru
+		- fileType / mimetype: Typ souboru (MIME type)
+		- content: Obsah souboru zakódovaný do Base64
+		- title / description (volitelně): Název a popis přílohy
+	- Příloha se vytáhne z 'c:\Automized tests\Tests Output\Screenshots\Current\': Do tohoto adresáře test bude sypat veškeré screenshoty
+	- V názvu souboru bude ID testcasu (executionId)
 - Email notifikace (po dokončení testu) 
 - Možnost přístupu na GOGO, což umožní:
 	- napojit se přímo na adresář s knihovnami testů (v rámci PdpClientTestsuite se zapisuje do resources (ukládá se záloha DB), nebude toto problém?) 
