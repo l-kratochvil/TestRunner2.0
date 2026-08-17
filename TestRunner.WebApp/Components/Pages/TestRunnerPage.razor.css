@@ -1,0 +1,43 @@
+.test-runner-page {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 0.5rem;
+    padding: 0.5rem;
+}
+
+.main-band {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 0.5rem;
+}
+
+.explorer-pane {
+    flex: 0 0 35%;
+    min-width: 0;
+    overflow: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 0.75rem;
+}
+
+.configurator-pane {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 0.75rem;
+}
+
+.log-band {
+    flex: 0 0 30%;
+    min-height: 0;
+    overflow: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+}

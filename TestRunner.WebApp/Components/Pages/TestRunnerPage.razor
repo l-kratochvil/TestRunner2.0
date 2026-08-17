@@ -1,0 +1,21 @@
+﻿@page "/"
+
+@* Composition root of the main screen: it only arranges feature components
+   into the three-band layout (menu lives in MainLayout above this page). *@
+
+<PageTitle>Test Runner</PageTitle>
+
+<div class="test-runner-page">
+    <div class="main-band">
+        <div class="explorer-pane">
+            <TestExplorer />
+        </div>
+        <div class="configurator-pane">
+            <TestConfigurator />
+        </div>
+    </div>
+
+    <div class="log-band">
+        <TestLog />
+    </div>
+</div>

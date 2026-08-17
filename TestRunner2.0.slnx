@@ -9,6 +9,7 @@
   <Folder Name="/Solution Items/docs/">
     <File Path="docs/DEV-NOTES.md" />
     <File Path="docs/Issue-0002.docx" />
+    <File Path="docs/ADR/ADR-0001-testrunner-webapp-blazor-server.md" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Tests/NUnitTestAssembly.Net461/NUnitTestAssembly.Net461.csproj" />
@@ -22,4 +23,5 @@
   </Project>
   <Project Path="TestRunner.Common/TestRunner.Common.csproj" />
   <Project Path="TestRunner.NUnitTestRunnerProxy/TestRunner.NUnitTestRunnerProxy.csproj" />
+  <Project Path="TestRunner.WebApp/TestRunner.WebApp.csproj" />
 </Solution>
