@@ -1,0 +1,42 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // A) C# debug on the server + app opened in the VS Code Integrated Browser
+      //    (workbench.action.browser.open), which the agent can access at runtime.
+      "name": "WebApp: Integrated Browser",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-webapp",
+      "program": "${workspaceFolder}/TestRunner.WebApp/bin/Debug/net10.0/TestRunner.WebApp.dll",
+      "cwd": "${workspaceFolder}/TestRunner.WebApp",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "serverReadyAction": {
+        "action": "openIntegratedBrowser",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s"
+      }
+    },
+    {
+      // B) C# debug on the server + external Edge with DevTools (DOM inspection,
+      //    network tab for the SignalR websocket, console). Attaches the JS debugger too.
+      "name": "WebApp: Edge + DevTools",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-webapp",
+      "program": "${workspaceFolder}/TestRunner.WebApp/bin/Debug/net10.0/TestRunner.WebApp.dll",
+      "cwd": "${workspaceFolder}/TestRunner.WebApp",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "serverReadyAction": {
+        "action": "debugWithEdge",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s",
+        "webRoot": "${workspaceFolder}/TestRunner.WebApp/wwwroot"
+      }
+    }
+  ]
+}
