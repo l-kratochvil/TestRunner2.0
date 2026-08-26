@@ -47,9 +47,6 @@ Generated\ Files/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
-# ...but feature slices named TestResult* are source code, not test output.
-!TestRunner.WebApp/Features/[Tt]est[Rr]esult*/
-
 # NUnit
 *.VisualState.xml
 TestResult.xml

@@ -33,17 +33,9 @@
     line-height: 1.2;
 }
 
-.collapsed-summary {
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 0.8rem;
-}
-
 .error-count {
     flex: 0 0 auto;
+    margin-left: auto;
     font-size: 0.8rem;
     color: #6c757d;
 }

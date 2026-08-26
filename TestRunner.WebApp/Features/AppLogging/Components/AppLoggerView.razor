@@ -24,19 +24,7 @@
 
         @if (this.isCollapsed)
         {
-            <span class="collapsed-summary">
-                @if (this.entries.Count == 0)
-                {
-                    <span class="text-muted">No entries yet.</span>
-                }
-                else
-                {
-                    <span class="last-message severity-@this.entries[^1].Severity.ToString().ToLowerInvariant()">
-                        @this.entries[^1].Message
-                    </span>
-                }
-            </span>
-
+            @* Collapsed means "no log content" — only the error count stays as a summary indicator. *@
             <span class="error-count @(this.ErrorCount > 0 ? "has-errors" : null)">
                 @this.ErrorCount error(s)
             </span>

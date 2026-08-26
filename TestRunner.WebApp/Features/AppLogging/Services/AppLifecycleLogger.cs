@@ -16,7 +16,7 @@ public sealed class AppLifecycleLogger(IAppLogger logger, AppLoggingOptions opti
     public Task StartAsync(CancellationToken cancellationToken)
     {
         string logFilePath = AppLogFiles.GetFilePath(options.LogsDirectoryPath, DateTimeOffset.Now);
-        logger.Info("Application started.", $"Log file: {logFilePath}");
+        logger.Debug("Application started.", $"Log file: {logFilePath}");
 
         return Task.CompletedTask;
     }
@@ -24,7 +24,7 @@ public sealed class AppLifecycleLogger(IAppLogger logger, AppLoggingOptions opti
     /// <inheritdoc/>
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        logger.Info("Application is shutting down.");
+        logger.Debug("Application is shutting down.");
 
         return Task.CompletedTask;
     }

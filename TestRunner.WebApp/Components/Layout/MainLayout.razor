@@ -50,7 +50,7 @@
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
     {
-        this.Log.Info($"Navigated to {this.Navigation.ToBaseRelativePath(args.Location)}.");
+        this.Log.Debug($"Navigated to {this.Navigation.ToBaseRelativePath(args.Location)}.");
     }
 
     private void OnLogCollapsedChanged(bool collapsed)
