@@ -11,3 +11,9 @@ Default canonical labels (`needs-triage`, `needs-info`, `ready-for-agent`, `read
 ### Domain docs
 
 Single-context: one `CONTEXT.md` + `docs/ADR/` at the repo root. See `docs/agents/domain.md`.
+
+## Repo layout
+
+### Tooling
+
+`tools/` holds developer tooling supporting work on the repo, kept apart from the shipped application code. Inside it, `tools/scripts/` holds runnable scripts for routine local tasks.
