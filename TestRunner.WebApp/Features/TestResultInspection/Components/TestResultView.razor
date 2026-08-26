@@ -1,0 +1,47 @@
+@* Feature: TestResultInspection — "the user can view the result of a test run". *@
+
+<section class="test-result-panel">
+    <h2 class="pane-title">Test Result</h2>
+
+    <p class="placeholder-note">
+        Placeholder — the result of the last test run will be shown here
+        (the sections below sketch what it is made of).
+    </p>
+
+    <h3 class="result-section-title">Tests Not Run</h3>
+    <ol class="result-entries">
+        <li>
+            <span class="entry-label label-skipped">Ignored</span>
+            <span class="entry-name">Z2xxTests.Pertinax6Tests.ProjectManagerTestsuite_BasicFunctions.Z200-901</span>
+            <pre class="entry-detail">REASON</pre>
+        </li>
+    </ol>
+
+    <h3 class="result-section-title">Errors, Failures and Warnings</h3>
+    <ol class="result-entries">
+        <li>
+            <span class="entry-label label-problem">Error</span>
+            <span class="entry-name">Z2xxTests.Pertinax6Tests.ProjectManagerTestsuite_BasicFunctions.Z200-902</span>
+            <pre class="entry-detail">System.Exception : TEST
+   at Z2xxTests.Pertinax6Tests.ProjectManagerTestsuite_BasicFunctions.TEMP03() in C:\Users\l-kratochvil\source\repos\Zat.Tests\Z2xxTests\Pertinax6Tests\ProjectManagerTests\ProjectManagerTestsuite_BasicFunctions.cs:line 85</pre>
+        </li>
+    </ol>
+
+    <h3 class="result-section-title">Test Run Summary</h3>
+    <dl class="result-summary">
+        <dt>Overall result</dt>
+        <dd>—</dd>
+        <dt>Test count</dt>
+        <dd>— (passed —, failed —, warnings —, inconclusive —, skipped —)</dd>
+        <dt>Failed tests</dt>
+        <dd>failures —, errors —, invalid —</dd>
+        <dt>Skipped tests</dt>
+        <dd>ignored —, explicit —, other —</dd>
+        <dt>Start time</dt>
+        <dd>—</dd>
+        <dt>End time</dt>
+        <dd>—</dd>
+        <dt>Duration</dt>
+        <dd>—</dd>
+    </dl>
+</section>

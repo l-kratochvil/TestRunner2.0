@@ -70,10 +70,3 @@ h1:focus {
     color: #6c757d;
     font-size: 0.875rem;
 }
-
-.placeholder-log {
-    margin: 0;
-    font-size: 0.8rem;
-    color: #495057;
-    white-space: pre-wrap;
-}

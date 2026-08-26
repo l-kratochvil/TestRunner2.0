@@ -1,0 +1,104 @@
+@* A drag handle that resizes the pane below it. The size is written to a CSS variable on the
+   document root, so the resized element only has to read that variable. *@
+
+@implements IAsyncDisposable
+
+@inject IJSRuntime JS
+
+<div class="splitter-bar"
+     role="separator"
+     aria-orientation="horizontal"
+     aria-label="@this.Label"
+     title="@this.Label"
+     tabindex="0"
+     @ref="this.handle">
+</div>
+
+@code {
+    private const string ModulePath = "./Components/Layout/SplitterBar.razor.js";
+
+    private ElementReference handle;
+    private bool isInitialized;
+
+    /// <summary>
+    /// Name of the CSS variable the dragged size is written to, e.g. <c>--app-log-height</c>.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public string CssVariable { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Key the size is remembered under in local storage, so it survives a reload.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public string StorageKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Smallest size in pixels. Hiding the pane entirely is the collapse button's job.
+    /// </summary>
+    [Parameter]
+    public int MinSize { get; set; } = 120;
+
+    /// <summary>
+    /// Largest size as a fraction of the window height, so the rest of the screen never vanishes.
+    /// </summary>
+    [Parameter]
+    public double MaxSizeRatio { get; set; } = 0.7;
+
+    /// <summary>
+    /// Size on the first visit, as a fraction of the window height.
+    /// </summary>
+    [Parameter]
+    public double DefaultSizeRatio { get; set; } = 0.25;
+
+    /// <summary>
+    /// Describes what the handle resizes, for screen readers and the tooltip.
+    /// </summary>
+    [Parameter]
+    public string Label { get; set; } = "Resize";
+
+    private JsModuleInterop JsModuleInterop
+        => field ??= new JsModuleInterop(this.JS, ModulePath);
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        if (this.isInitialized)
+        {
+            try
+            {
+                await this.JsModuleInterop.InvokeVoidAsync("dispose", this.handle);
+            }
+            catch (JSDisconnectedException)
+            {
+                // The browser is already gone, and its listeners went with it.
+            }
+        }
+
+        await this.JsModuleInterop.DisposeAsync();
+    }
+
+    /// <inheritdoc/>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await this.JsModuleInterop.InvokeVoidAsync(
+            "initialize",
+            this.handle,
+            new
+            {
+                this.CssVariable,
+                this.StorageKey,
+                this.MinSize,
+                this.MaxSizeRatio,
+                this.DefaultSizeRatio,
+            });
+
+        this.isInitialized = true;
+    }
+}

@@ -1,7 +1,8 @@
 # ADR-0001: TestRunner.WebApp — Blazor Server web front-end as the migration target for TestRunner.App
 
 - **Status:** Accepted
-- **Date:** 2026-08-17
+- **Date:** 2026-08-17 (updated 2026-08-26: `AppLogging` extracted from `TestExecution`;
+  `TestResultInspection` and `TestResultReporting` split off from `TestExecution`)
 - **Deciders:** l-kratochvil
 
 ## Context
@@ -50,26 +51,46 @@ migrated without redesigning it into a distributed agent architecture.
 ### 4. Project structure: feature-based (vertical slices)
 
 The guiding rule: **a feature is a capability, not a page**. A feature is a vertical slice
-("the user can ___") that keeps its UI components, services and models together because they
+("the user can \_\_\_") that keeps its UI components, services and models together because they
 change together. Pages are thin **composition roots** that arrange components from several
 features on one screen; the page↔feature relationship is not 1:1.
 
 Identified features (capabilities):
 
-| Feature             | Capability                                                              |
-| ------------------- | ----------------------------------------------------------------------- |
-| `TestDiscovery`     | The user can browse and select test suites and test cases.              |
-| `TestConfiguration` | The user can configure a test run (versions, station, TestLink options).|
-| `TestExecution`     | The user can start a test run and watch its output and results.         |
-| `AppSettings`       | The user can view and change persistent application settings.           |
+| Feature                | Capability                                                               |
+| ---------------------- | ------------------------------------------------------------------------ |
+| `TestDiscovery`        | The user can browse and select test suites and test cases.               |
+| `TestConfiguration`    | The user can configure a test run (versions, station, TestLink options). |
+| `TestExecution`        | The user can start and stop a test run.                                  |
+| `TestResultInspection` | The user can view the result of a test run.                              |
+| `TestResultReporting`  | The user can publish a test run's result to TestLink.                    |
+| `AppLogging`           | The user can see and filter what the application is doing.               |
+| `AppSettings`          | The user can view and change persistent application settings.            |
+
+`AppLogging` is a capability, not a technical layer: the user watches and filters the activity of
+the application. What only that capability needs — the entry model, the in-memory store, the log
+file and the panel — lives in the slice. The **write contract** (`IAppLogger`,
+`IAppLoggerFactory`, `LogSeverity`, `LogSources`) is the exception: every other feature logs, so
+it lives in `Shared/Logging` and the features depend on it instead of on `AppLogging`. Only
+`AppLogging` implements it, and `AddAppLogging()` wires the implementation up in DI.
+
+The test result is split across three slices because they change for different reasons:
+`TestExecution` **produces** it (starting and stopping the run), `TestResultInspection`
+**displays** it, and `TestResultReporting` **sends it out** (TestLink, and later result files,
+attachments and notifications). The seam between them is `TestRunResult`, which already lives in
+`TestRunner.Common`, so no slice reaches into another's internals.
 
 Pages (composition):
 
-- `TestRunnerPage` (`/`) — the main screen, composed of three horizontal bands:
-  1. main menu (shared layout component, shown above all pages),
-  2. main area: `TestExplorer` (left) + `TestConfigurator` (right),
-  3. `TestLog` (bottom).
+- `TestRunnerPage` (`/`) — the main screen, composed of three panes of equal width:
+  1. `TestExplorer` (left) + `TestConfigurator` (middle) + `TestResultView` (right).
 - `SettingsPage` (`/settings`) — hosts the `AppSettings` feature.
+
+`MainLayout` wraps every page with the main menu above and the `AppLoggerView` below, so the log is
+reachable from every screen. The panel is collapsible; collapsed it shows only the last message
+and the number of errors. Between the page and the log sits a `SplitterBar` the user drags to size
+the log pane; the size is remembered in local storage and the bar is hidden while the log is
+collapsed, since there is nothing to drag.
 
 Resulting layout:
 
@@ -77,30 +98,75 @@ Resulting layout:
 TestRunner.WebApp/
 ├─ Components/
 │  ├─ App.razor, Routes.razor, _Imports.razor
-│  ├─ Layout/    (MainLayout, MainMenu)
+│  ├─ Layout/    (MainLayout, MainMenu, SplitterBar, AppLoggerView host)
 │  └─ Pages/     (TestRunnerPage "/", SettingsPage "/settings")
 ├─ Features/
-│  ├─ TestDiscovery/      (Components, Services, Models)
-│  ├─ TestConfiguration/  (Components, Services, Models)
-│  ├─ TestExecution/      (Components, Services, Models)
-│  └─ AppSettings/        (Components, Services, Models)
-├─ Shared/       (cross-cutting components/utilities)
+│  ├─ _Imports.razor       (framework usings for feature components)
+│  ├─ TestDiscovery/         (Components, Services, Models)
+│  ├─ TestConfiguration/     (Components, Services, Models)
+│  ├─ TestExecution/         (Components, Services, Models)
+│  ├─ TestResultInspection/  (Components, Services, Models)
+│  ├─ TestResultReporting/   (Components, Services, Models)
+│  ├─ AppLogging/            (Components, Services, Models)
+│  └─ AppSettings/           (Components, Services, Models)
+├─ Shared/       (cross-cutting code, small by design)
+│  ├─ JsModuleInterop.cs  (calls into a component's collocated .razor.js)
+│  └─ Logging/   (IAppLogger, IAppLoggerFactory, LogSeverity, LogSources)
 ├─ wwwroot/
 └─ Program.cs
 ```
 
-The initial commit contains **static UI placeholders only** — no business logic. The default
-template samples (`Counter`, `Weather`, `NavMenu`) were removed so that only the feature-based
-convention exists in the codebase.
+Apart from `AppLogging`, the features contain **static UI placeholders only** — no business logic.
+The default template samples (`Counter`, `Weather`, `NavMenu`) were removed so that only the
+feature-based convention exists in the codebase.
 
-### 5. Deferred decisions
+Inside a slice the three folders mean:
+
+- **`Models/`** — domain data and, when it applies, how that data is persisted (serialization or
+  mapping attributes). Data shapes, not behaviour: `LogEntry` belongs here.
+- **`Services/`** — the behaviour of the capability, including the types configuring it
+  (`AppLoggingOptions`) and its DI registration.
+- **`Components/`** — the UI, including the plain C# classes that are nothing but UI state.
+  `AppLogFilter` lives here, next to `AppLoggerView`: it holds which checkboxes are ticked and
+  changes whenever the panel's filtering changes, so it is not a model.
+
+### 5. Application log (`AppLogging`)
+
+The log is a **feed for the tester**: what the application is doing, in the tester's language.
+Developer-oriented diagnostics may be layered on later (an `ILoggerProvider` bridging
+`Microsoft.Extensions.Logging` into the same model), which is why the slice is named after the
+activity and not after the audience.
+
+- **Entry:** `LogEntry(Timestamp, Severity, Source, Message, Detail?)`, owned by the slice — no
+  other feature ever builds one, they call a logger instead.
+  `LogSeverity` is `Debug | Info | Warning | Error`; success is reported as `Info`.
+  `Source` is a plain string (`App`, `TestRun`, `TestLink`, see `LogSources`) so that a channel
+  can be added — or arrive from outside — without changing the model.
+- **Writing:** `IAppLoggerFactory.CreateLogger(source)` returns an `IAppLogger` bound to that
+  source; a default `IAppLogger` for `App` is registered in DI for convenience. The logger is a
+  thin wrapper, the shared state lives in `IAppLogStore`. `IAppLogger`, `IAppLoggerFactory`,
+  `LogSeverity` and `LogSources` sit in `Shared/Logging` because every feature writes to the log;
+  the rest, including `IAppLogStore`, stays inside the slice.
+- **Memory:** `AppLogStore` is a singleton ring buffer of 2 000 entries, **shared by every browser
+  connected to the server** — intended, because the tool serves one test machine.
+- **Disk:** every entry, including `Debug`, is mirrored to `%LOCALAPPDATA%\TestRunner.WebApp\logs\app-YYYY-MM-DD.log`
+  (one file per day, the 5 newest files are kept). Writing happens on a background loop fed by a
+  channel, so logging never blocks the caller on disk I/O. The file is **best effort**: a failure
+  is reported once as an `Error` entry and the application keeps running with the memory log only.
+- **UI:** entries reach the panel in ~150 ms batches, because test runner output arrives in bursts
+  that would otherwise flood the SignalR circuit with re-renders. The panel offers multi-select
+  filters (severity, source; `Debug` hidden by default), a "jump to newest" button and the path of
+  today's log file. There is deliberately **no "clear"**: the store is shared, and the file is the
+  guarantee that nothing is lost.
+
+### 6. Deferred decisions
 
 - **Authentication/authorization — deliberately deferred, but mandatory before deployment.**
   Remote access to a tool that starts processes on the test machine is effectively remote code
   execution. The learning phase runs without auth; a dedicated security decision (ADR) is
   required before the app is exposed beyond localhost.
-- **Test project** (`TestRunner.WebApp.Tests`, NUnit) — added once the first non-trivial service
-  exists.
+- **Test project** (`TestRunner.WebApp.Tests`, NUnit) — added together with `AppLogging`, the
+  first non-trivial service.
 - **Layering** — no separate Application/Domain/Infrastructure projects yet; layers will be
   split out only when migration pressure justifies them.
 

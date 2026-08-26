@@ -47,6 +47,9 @@ Generated\ Files/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
+# ...but feature slices named TestResult* are source code, not test output.
+!TestRunner.WebApp/Features/[Tt]est[Rr]esult*/
+
 # NUnit
 *.VisualState.xml
 TestResult.xml
@@ -286,6 +289,11 @@ FakesAssemblies/
 # Node.js Tools for Visual Studio
 .ntvs_analysis.dat
 node_modules/
+
+# Collocated Razor scripts are authored as .razor.ts and compiled in place to .razor.js by the
+# CompileTypeScript MSBuild target (see TestRunner.WebApp.csproj); the .js is a build output.
+TestRunner.WebApp/Components/**/*.razor.js
+TestRunner.WebApp/Components/**/*.razor.js.map
 
 # Visual Studio 6 build log
 *.plg

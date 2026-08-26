@@ -11,4 +11,29 @@
     <ProjectReference Include="..\TestRunner.Common\TestRunner.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Each collocated Razor script is authored in TypeScript and compiled in place to the
+         .razor.js next to it, which is where the Blazor SDK expects to find it. -->
+    <TypeScriptSource Include="Components\**\*.razor.ts" />
+  </ItemGroup>
+
+  <!-- BeforeTargets="Restore" runs this ahead of the main build's project evaluation, so the
+       generated .razor.js files already exist on disk by the time MSBuild globs for the static
+       web asset content items; generating them only during the main Build would be too late for
+       that glob to pick them up. -->
+  <Target Name="RestoreTypeScriptTooling"
+          BeforeTargets="Restore"
+          Condition="'@(TypeScriptSource)' != '' and !Exists('$(MSBuildProjectDirectory)\node_modules')">
+    <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
+  <Target Name="CompileTypeScript"
+          BeforeTargets="Restore"
+          DependsOnTargets="RestoreTypeScriptTooling"
+          Condition="'@(TypeScriptSource)' != ''"
+          Inputs="@(TypeScriptSource);$(MSBuildProjectDirectory)\tsconfig.json"
+          Outputs="@(TypeScriptSource->'%(RootDir)%(Directory)%(Filename).js')">
+    <Exec Command="npm run build" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
 </Project>

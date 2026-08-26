@@ -1,0 +1,212 @@
+@* Feature: AppLogging — "the user can see and filter what the application is doing".
+   Shown in MainLayout, so the log is reachable from every screen. *@
+
+@using TestRunner.WebApp.Features.AppLogging.Models
+@using TestRunner.WebApp.Features.AppLogging.Services
+@using TestRunner.WebApp.Shared.Logging
+
+@implements IAsyncDisposable
+
+@inject IAppLogStore Store
+@inject AppLoggingOptions Options
+@inject IJSRuntime JS
+
+<section class="app-log-panel @(this.isCollapsed ? "is-collapsed" : "is-expanded")">
+    <header class="app-log-header">
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary toggle-button"
+                title="@(this.isCollapsed ? "Expand the log" : "Collapse the log")"
+                @onclick="this.ToggleCollapsedAsync">
+            @(this.isCollapsed ? "▲" : "▼")
+        </button>
+
+        <span class="pane-title">Log</span>
+
+        @if (this.isCollapsed)
+        {
+            <span class="collapsed-summary">
+                @if (this.entries.Count == 0)
+                {
+                    <span class="text-muted">No entries yet.</span>
+                }
+                else
+                {
+                    <span class="last-message severity-@this.entries[^1].Severity.ToString().ToLowerInvariant()">
+                        @this.entries[^1].Message
+                    </span>
+                }
+            </span>
+
+            <span class="error-count @(this.ErrorCount > 0 ? "has-errors" : null)">
+                @this.ErrorCount error(s)
+            </span>
+        }
+        else
+        {
+            <div class="filters">
+                <span class="filter-group">
+                    @foreach (LogSeverity severity in Enum.GetValues<LogSeverity>())
+                    {
+                        <label class="form-check-label filter-option">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   checked="@this.filter.IsSelected(severity)"
+                                   @onchange="args => this.filter.SetSelected(severity, (bool)args.Value!)" />
+                            @severity
+                        </label>
+                    }
+                </span>
+
+                <span class="filter-group">
+                    @foreach (string source in this.AvailableSources)
+                    {
+                        <label class="form-check-label filter-option">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   checked="@this.filter.IsSelected(source)"
+                                   @onchange="args => this.filter.SetSelected(source, (bool)args.Value!)" />
+                            @source
+                        </label>
+                    }
+                </span>
+            </div>
+
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary jump-button"
+                    @onclick="this.ScrollToNewestAsync">
+                Jump to newest
+            </button>
+
+            <span class="log-file-path" title="@this.LogFilePath">
+                @this.LogFilePath
+            </span>
+        }
+    </header>
+
+    @if (!this.isCollapsed)
+    {
+        <div class="app-log-entries" @ref="this.entriesElement">
+            @foreach (LogEntry entry in this.filter.Apply(this.entries))
+            {
+                <div class="log-entry severity-@entry.Severity.ToString().ToLowerInvariant()">
+                    <span class="entry-time">@entry.Timestamp.ToString("HH:mm:ss.fff")</span>
+                    <span class="entry-severity">@entry.Severity</span>
+                    <span class="entry-source">@entry.Source</span>
+                    <span class="entry-message">@entry.Message</span>
+                </div>
+
+                if (!string.IsNullOrEmpty(entry.Detail))
+                {
+                    <pre class="entry-detail">@entry.Detail</pre>
+                }
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private const int RefreshIntervalMilliseconds = 150;
+
+    private readonly AppLoggerFilter filter = AppLoggerFilter.CreateDefault();
+
+    private IReadOnlyList<LogEntry> entries = [];
+    private ElementReference entriesElement;
+    
+    private System.Threading.Timer? refreshTimer;
+    private volatile bool hasNewEntries;
+    private bool isCollapsed;
+
+    /// <summary>
+    /// Raised when the user collapses or expands the panel, so the surrounding layout can size
+    /// the pane accordingly.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> CollapsedChanged { get; set; }
+
+    private int ErrorCount => this.entries.Count(entry => entry.Severity == LogSeverity.Error);
+
+    private string LogFilePath => AppLogFiles.GetFilePath(this.Options.LogsDirectoryPath, DateTimeOffset.Now);
+
+    private JsModuleInterop JsModuleInterop 
+        => field ??= new JsModuleInterop(JS, "./Features/AppLogging/Components/AppLoggerView.razor.js");
+
+    private IEnumerable<string> AvailableSources 
+        => LogSources.All
+            .Concat(this.entries.Select(entry => entry.Source))
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        this.Store.EntryAppended -= this.OnEntryAppended;
+
+        if (this.refreshTimer is not null)
+        {
+            await this.refreshTimer.DisposeAsync();
+        }
+
+        await this.JsModuleInterop.DisposeAsync();
+    }
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        this.entries = this.Store.GetEntries();
+    }
+
+    /// <inheritdoc/>
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        // Subscribing here (and not in OnInitialized) keeps the prerendered instance out of the
+        // store's subscriber list.
+        this.Store.EntryAppended += this.OnEntryAppended;
+        this.hasNewEntries = true;
+
+        // Entries arrive in bursts (test runner output), so the UI is refreshed on a timer
+        // instead of once per entry: one re-render per batch, not one per line.
+        this.refreshTimer = new System.Threading.Timer(
+            _ => this.Refresh(),
+            state: null,
+            dueTime: RefreshIntervalMilliseconds,
+            period: RefreshIntervalMilliseconds);
+    }
+
+    private void OnEntryAppended(LogEntry entry)
+    {
+        this.hasNewEntries = true;
+    }
+
+    private void Refresh()
+    {
+        if (!this.hasNewEntries)
+        {
+            return;
+        }
+
+        this.hasNewEntries = false;
+        this.entries = this.Store.GetEntries();
+
+        try
+        {
+            _ = this.InvokeAsync(this.StateHasChanged);
+        }
+        catch (ObjectDisposedException)
+        {
+            // The circuit is gone; the timer is disposed right after.
+        }
+    }
+
+    private async Task ToggleCollapsedAsync()
+    {
+        this.isCollapsed = !this.isCollapsed;
+        await this.CollapsedChanged.InvokeAsync(this.isCollapsed);
+    }
+
+    private Task ScrollToNewestAsync()
+        => this.JsModuleInterop.InvokeVoidAsync("scrollToEnd", this.entriesElement);
+}

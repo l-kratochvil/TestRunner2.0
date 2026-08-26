@@ -1,4 +1,8 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
+
+@inject IAppLogger Log
+@inject NavigationManager Navigation
 
 <div class="app-shell">
     <header class="app-header">
@@ -8,6 +12,19 @@
     <main class="app-content">
         @Body
     </main>
+
+    @* The application log belongs to the shell, not to a page: it must stay reachable from
+       every screen. *@
+    @if (!this.isLogCollapsed)
+    {
+        <SplitterBar CssVariable="--app-log-height"
+                     StorageKey="testrunner.app-log-height"
+                     Label="Resize the log" />
+    }
+
+    <div class="app-log-pane @(this.isLogCollapsed ? "is-collapsed" : null)">
+        <AppLoggerView CollapsedChanged="this.OnLogCollapsedChanged" />
+    </div>
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
@@ -15,3 +32,29 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">X</span>
 </div>
+
+@code {
+    private bool isLogCollapsed;
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        this.Navigation.LocationChanged -= this.OnLocationChanged;
+    }
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        this.Navigation.LocationChanged += this.OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
+    {
+        this.Log.Info($"Navigated to {this.Navigation.ToBaseRelativePath(args.Location)}.");
+    }
+
+    private void OnLogCollapsedChanged(bool collapsed)
+    {
+        this.isLogCollapsed = collapsed;
+    }
+}

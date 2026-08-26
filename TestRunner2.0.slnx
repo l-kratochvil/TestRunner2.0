@@ -16,6 +16,7 @@
     <Project Path="Tests/NUnitTestAssembly.Net481/NUnitTestAssembly.Net481.csproj" />
     <Project Path="Tests/TestRunner.App.Tests/TestRunner.App.Tests.csproj" />
     <Project Path="Tests/TestRunner.NUnitTestRunnerProxy.Tests/TestRunner.NUnitTestRunnerProxy.Tests.csproj" Id="82ad2fa9-69d8-4a6d-9b39-56276ff807bd" />
+    <Project Path="Tests/TestRunner.WebApp.Tests/TestRunner.WebApp.Tests.csproj" />
   </Folder>
   <Project Path="../DevKit.Core/DevKit.Core/DevKit.Core.csproj" />
   <Project Path="TestRunner.App/TestRunner.App.csproj">

@@ -15,6 +15,25 @@
     flex-direction: column;
 }
 
+/* The log pane keeps whatever height the splitter last set; collapsed it shrinks to its header. */
+.app-log-pane {
+    flex: 0 0 auto;
+    height: var(--app-log-height, 25vh);
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+}
+
+.app-log-pane.is-collapsed {
+    height: auto;
+}
+
+.app-log-pane ::deep .app-log-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
 #blazor-error-ui {
     color-scheme: light only;
     background: lightyellow;
