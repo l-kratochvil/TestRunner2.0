@@ -9,8 +9,9 @@
     "forceConsistentCasingInFileNames": true,
     "sourceMap": false
   },
-  // Every Razor component's collocated script lives at Components/**/{Component}.razor.ts and
-  // compiles in place to Components/**/{Component}.razor.js, which is where the Blazor SDK
-  // expects to find it.
-  "include": ["Components/**/*.ts"]
+  // Any .ts anywhere in the project compiles in place to a .js next to it - for collocated Razor
+  // scripts ({Component}.razor.ts) that sibling location is where the Blazor SDK expects the .js.
+  // wwwroot/lib is vendored third-party code, bin/obj are build outputs.
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "bin", "obj", "wwwroot/lib"]
 }

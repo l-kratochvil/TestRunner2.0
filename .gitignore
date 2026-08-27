@@ -287,10 +287,13 @@ FakesAssemblies/
 .ntvs_analysis.dat
 node_modules/
 
-# Collocated Razor scripts are authored as .razor.ts and compiled in place to .razor.js by the
-# CompileTypeScript MSBuild target (see TestRunner.WebApp.csproj); the .js is a build output.
-TestRunner.WebApp/Components/**/*.razor.js
-TestRunner.WebApp/Components/**/*.razor.js.map
+# Everything outside wwwroot in TestRunner.WebApp is authored in TypeScript and compiled in place
+# to a sibling .js by the CompileTypeScript MSBuild target (see TestRunner.WebApp.csproj), so any
+# such .js is a build output. wwwroot holds static/vendored assets whose .js is source, hence the
+# carve-out; author new scripts as .ts outside wwwroot, not as .js inside it.
+TestRunner.WebApp/**/*.js
+TestRunner.WebApp/**/*.js.map
+!TestRunner.WebApp/wwwroot/**
 
 # Visual Studio 6 build log
 *.plg
