@@ -99,13 +99,13 @@ public class AppLogFileSinkTests
 
         // Then:
         string content = File.ReadAllText(expectedFilePath).ReplaceLineEndings("\n");
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             // Debug entries are kept on disk even though the panel hides them by default.
             Assert.That(content, Does.Contain("[Debug  ] [TestRun] raw output"));
             Assert.That(content, Does.Contain("[Error  ] [App] failed"));
             Assert.That(content, Does.Contain("\n    detail line\n"));
-        });
+        }
     }
 
     [Test]

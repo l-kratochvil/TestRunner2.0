@@ -105,12 +105,12 @@ public class AppLogStoreTests
 
         // Then:
         LogEntry failure = this.unit.GetEntries().Single();
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(failure.Severity, Is.EqualTo(LogSeverity.Error));
             Assert.That(failure.Source, Is.EqualTo(LogSources.App));
             Assert.That(failure.Message, Is.EqualTo(givenFailureMessage));
-        });
+        }
     }
 
     [Test]

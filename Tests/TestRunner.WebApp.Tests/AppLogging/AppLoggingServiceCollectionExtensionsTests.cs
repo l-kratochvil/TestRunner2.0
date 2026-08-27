@@ -84,10 +84,10 @@ public class AppLoggingServiceCollectionExtensionsTests
         var hostedServiceRegistration = this.unit.GetServices<IHostedService>().OfType<AppLogFileSink>().Single();
 
         // Then:
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(sinkRegistration, Is.SameAs(expectedSink));
             Assert.That(hostedServiceRegistration, Is.SameAs(expectedSink));
-        });
+        }
     }
 }

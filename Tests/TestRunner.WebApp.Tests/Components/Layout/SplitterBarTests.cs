@@ -36,14 +36,14 @@ public class SplitterBarTests : Bunit.TestContext
         invocation.Arguments[0].ShouldBeElementReferenceTo(component.Find(".splitter-bar"));
 
         object options = invocation.Arguments[1]!;
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(GetProperty(options, "CssVariable"), Is.EqualTo("--app-log-height"));
             Assert.That(GetProperty(options, "StorageKey"), Is.EqualTo("log-height"));
             Assert.That(GetProperty(options, "MinSize"), Is.EqualTo(100));
             Assert.That(GetProperty(options, "MaxSizeRatio"), Is.EqualTo(0.6));
             Assert.That(GetProperty(options, "DefaultSizeRatio"), Is.EqualTo(0.3));
-        });
+        }
     }
 
     [Test]

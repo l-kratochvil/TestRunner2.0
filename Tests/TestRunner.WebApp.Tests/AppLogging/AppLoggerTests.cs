@@ -53,12 +53,12 @@ public class AppLoggerTests
 
         // Then:
         LogEntry entry = this.appendedEntries.Single();
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(entry.Severity, Is.EqualTo(givenSeverity));
             Assert.That(entry.Source, Is.EqualTo(GivenSource));
             Assert.That(entry.Message, Is.EqualTo(givenMessage));
-        });
+        }
     }
 
     [Test]
