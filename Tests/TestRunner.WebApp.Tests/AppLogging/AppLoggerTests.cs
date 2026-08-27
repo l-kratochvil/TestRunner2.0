@@ -38,7 +38,6 @@ public class AppLoggerTests
         return this.appendedEntries.Single().Severity;
     }
 
-    [TestCase(LogSeverity.Debug)]
     [TestCase(LogSeverity.Info)]
     [TestCase(LogSeverity.Warning)]
     [TestCase(LogSeverity.Error)]
@@ -99,10 +98,6 @@ public class AppLoggerTests
     {
         const string Prefix = nameof(AppLogger.Log);
         const string Message = "message";
-
-        yield return new TestCaseData((Action<IAppLogger>)(logger => logger.Debug(Message)))
-            .SetName(Prefix + "_WhenCalledThroughDebug_ThenShouldAppend_Debug")
-            .Returns(LogSeverity.Debug);
 
         yield return new TestCaseData((Action<IAppLogger>)(logger => logger.Info(Message)))
             .SetName(Prefix + "_WhenCalledThroughInfo_ThenShouldAppend_Info")

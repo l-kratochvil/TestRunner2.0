@@ -1,8 +1,9 @@
-# ADR-0001: TestRunner.WebApp — Blazor Server web front-end as the migration target for TestRunner.App
+# ADR-0001: Initial architecture of TestRunner.WebApp — Blazor Server web front-end as the migration target for TestRunner.App
 
 - **Status:** Accepted
 - **Date:** 2026-08-17 (updated 2026-08-26: `AppLogging` extracted from `TestExecution`;
-  `TestResultInspection` and `TestResultReporting` split off from `TestExecution`)
+  `TestResultInspection` and `TestResultReporting` split off from `TestExecution`; updated
+  2026-08-27: logging through `Microsoft.Extensions.Logging`)
 - **Deciders:** l-kratochvil
 
 ## Context
@@ -19,6 +20,14 @@ project structure rather than an ad-hoc sandbox.
 
 A key architectural fact: the tool's core logic is inherently **local** — it launches processes,
 touches the file system and simulates input on the machine where tests execute.
+
+Diagnosing an incident on the test machine needs two halves at the same moment: what the
+application was doing, in the tester's language, and what the framework was doing underneath
+(circuits dropping, reconnects failing, unhandled exceptions in the pipeline). If the application
+keeps its own file sink while the host runs the untouched `Microsoft.Extensions.Logging` pipeline
+into Console and Debug providers nobody reads on the test machine, the two halves land in two
+places — or, for the framework half, in no place at all. That is what makes an incident
+unreadable, so logging is decided here together with the rest of the structure.
 
 ## Decision
 
@@ -72,7 +81,7 @@ the application. What only that capability needs — the entry model, the in-mem
 file and the panel — lives in the slice. The **write contract** (`IAppLogger`,
 `IAppLoggerFactory`, `LogSeverity`, `LogSources`) is the exception: every other feature logs, so
 it lives in `Shared/Logging` and the features depend on it instead of on `AppLogging`. Only
-`AppLogging` implements it, and `AddAppLogging()` wires the implementation up in DI.
+`AppLogging` implements it, and `InitAppLogging()` wires the implementation up in DI.
 
 The test result is split across three slices because they change for different reasons:
 `TestExecution` **produces** it (starting and stopping the run), `TestResultInspection`
@@ -96,6 +105,9 @@ Resulting layout:
 
 ```
 TestRunner.WebApp/
+├─ Application/
+│  ├─ DependencyInjection/  (InitServicesExtension — one Init* method per feature)
+│  └─ Logging/              (the log file provider of Microsoft.Extensions.Logging)
 ├─ Components/
 │  ├─ App.razor, Routes.razor, _Imports.razor
 │  ├─ Layout/    (MainLayout, MainMenu, SplitterBar, AppLoggerView host)
@@ -124,24 +136,26 @@ Inside a slice the three folders mean:
 
 - **`Models/`** — domain data and, when it applies, how that data is persisted (serialization or
   mapping attributes). Data shapes, not behaviour: `LogEntry` belongs here.
-- **`Services/`** — the behaviour of the capability, including the types configuring it
-  (`AppLoggingOptions`) and its DI registration.
+- **`Services/`** — the behaviour of the capability, including the types configuring it. The DI
+  registration itself sits outside the slice, in
+  `Application/DependencyInjection/InitServicesExtension`, so that the composition root lists the
+  whole application in one place.
 - **`Components/`** — the UI, including the plain C# classes that are nothing but UI state.
   `AppLogFilter` lives here, next to `AppLoggerView`: it holds which checkboxes are ticked and
   changes whenever the panel's filtering changes, so it is not a model.
 
-### 5. Application log (`AppLogging`)
+### 5. Application log (`AppLogging`) and the logging pipeline
 
 The log is a **feed for the tester**: what the application is doing, in the tester's language.
-Developer-oriented diagnostics may be layered on later (an `ILoggerProvider` bridging
-`Microsoft.Extensions.Logging` into the same model), which is why the slice is named after the
-activity and not after the audience.
+Developer diagnostics live in `Microsoft.Extensions.Logging` next to it, and the two meet in the
+log file.
 
 - **Entry:** `LogEntry(Timestamp, Severity, Source, Message, Detail?)`, owned by the slice — no
   other feature ever builds one, they call a logger instead.
-  `LogSeverity` is `Debug | Info | Warning | Error`; success is reported as `Info`.
-  `Source` is a plain string (`App`, `TestRun`, `TestLink`, see `LogSources`) so that a channel
-  can be added — or arrive from outside — without changing the model.
+  `LogSeverity` is `Info | Warning | Error`; success is reported as `Info`. There is no debug
+  severity: developer detail is logged through `ILogger<T>` and never reaches the panel.
+  `Source` is a plain string (see `LogSources`) so that a channel can be added — or arrive from
+  outside — without changing the model.
 - **Writing:** `IAppLoggerFactory.CreateLogger(source)` returns an `IAppLogger` bound to that
   source; a default `IAppLogger` for `App` is registered in DI for convenience. The logger is a
   thin wrapper, the shared state lives in `IAppLogStore`. `IAppLogger`, `IAppLoggerFactory`,
@@ -149,15 +163,46 @@ activity and not after the audience.
   the rest, including `IAppLogStore`, stays inside the slice.
 - **Memory:** `AppLogStore` is a singleton ring buffer of 2 000 entries, **shared by every browser
   connected to the server** — intended, because the tool serves one test machine.
-- **Disk:** every entry, including `Debug`, is mirrored to `%LOCALAPPDATA%\TestRunner.WebApp\logs\app-YYYY-MM-DD.log`
-  (one file per day, the 5 newest files are kept). Writing happens on a background loop fed by a
-  channel, so logging never blocks the caller on disk I/O. The file is **best effort**: a failure
-  is reported once as an `Error` entry and the application keeps running with the memory log only.
 - **UI:** entries reach the panel in ~150 ms batches, because test runner output arrives in bursts
   that would otherwise flood the SignalR circuit with re-renders. The panel offers multi-select
-  filters (severity, source; `Debug` hidden by default), a "jump to newest" button and the path of
-  today's log file. There is deliberately **no "clear"**: the store is shared, and the file is the
-  guarantee that nothing is lost.
+  filters (severity, source; everything shown by default), a "jump to newest" button and the path
+  of today's log file. There is deliberately **no "clear"**: the store is shared, and the file is
+  the guarantee that nothing is lost.
+
+**The application log is a source of the logging pipeline, not a competitor to it.** `AppLogStore`
+hands every entry to `BlazorLoggerSink`, which logs it through `ILogger` under the category
+`TestRunner.AppLog.<Source>`. Nothing in the application writes to a file directly. The log source
+becoming the logger category is the point: it makes one channel filterable on its own through the
+standard `Logging:<provider>:LogLevel` configuration, without inventing a filtering mechanism of
+our own. The whole arrangement rests on one asymmetry:
+
+> every application log entry is also a pipeline record; not every pipeline record is an
+> application log entry.
+
+**The log file is an `ILoggerProvider`.** `FileLoggerProvider` (`[ProviderAlias("File")]`) lives in
+`Application/Logging`, not in the `AppLogging` slice: it writes framework records too, so the slice
+does not own it. One file per day named `YYYY-MM-DD.log`, the newest files retained, a channel
+feeding a background writer, best effort with a one-time failure report. Retention also runs when
+the day rolls over, not only at startup, so a long-running application does not accumulate files
+indefinitely; files are recognized by parsing their name as a date rather than by a wildcard,
+because `Directory` wildcards match more names than they appear to and this code deletes files.
+
+**What lands in the file is configuration, not code.** `Logging:File:LogLevel` is
+`Default: Warning` plus `TestRunner: Debug`: the application is verbose, the framework speaks only
+when something is wrong. `Information` on the framework would flood the day's file with request and
+static-asset noise and make it unreadable exactly when it is needed.
+
+**A broken log file is reported, not swallowed.** `FileLoggerProvider` raises `Failed`, which the
+composition root wires to `IAppLogStore.ReportFailure`. That reaches the in-memory buffer and
+**only** the buffer, because routing it through the sinks would loop back into the provider that
+just failed. A handler attached after the failure already happened is invoked immediately, since
+the provider is created with the pipeline, long before the store exists. The wire is explicit in
+`InitAppLogging` rather than hidden in a sink: a sink whose `Write` does nothing is not a sink.
+
+The writer catches **every** exception, not only the expected file system ones, and keeps its loop
+alive. An unexpected one would otherwise escape the background loop and end it: the log would stop
+writing for good, report nothing, and leave its queue growing unbounded — a failure mode
+indistinguishable from the outside from a healthy log with nothing to say.
 
 ### 6. Deferred decisions
 
@@ -180,6 +225,10 @@ activity and not after the audience.
   code changes and keeps the migration incremental (one capability at a time).
 - Thin composition pages make the two-screen UI explicit while features stay independent.
 - Single modern framework (Blazor Web App) with today's default template — good learning value.
+- One file holds both halves of an incident, in one timeline; the panel shows only what the tester
+  should read.
+- Filtering, configuration and provider composition are the platform's, not ours; adding a second
+  destination (Seq, event log, a second file) is a registration, not a redesign.
 
 **Negative / risks**
 
@@ -189,6 +238,13 @@ activity and not after the audience.
   independent of the circuit lifetime (to survive page reloads) — a known upcoming design task.
 - Running without authentication is only acceptable while the app is not exposed; this is an
   explicit, tracked risk.
+- Every application log entry now also passes through the Console provider, so the development
+  console repeats the panel.
+- `IAppLogSink` survives with a single real implementation plus a failure channel; it is kept as a
+  seam for future destinations and is worth removing if none appear.
+- The file provider is reachable from the `AppLogging` panel (for the file path it displays), which
+  is a feature reading from `Application/` — tolerated because the panel only asks where the file
+  is.
 
 ## Alternatives considered
 
@@ -198,3 +254,16 @@ activity and not after the audience.
   on the test machine.
 - **Remote web + agent on the test machine:** rejected for now — requires a distributed
   architecture; unnecessary while server-on-test-machine topology is acceptable.
+- **A file sink owned by `AppLogging`, next to an independent file provider:** rejected — two files
+  on disk drift apart and nobody knows which one to read.
+- **`IAppLogger.Debug` kept as a facade that bypasses the store:** rejected — a `Debug` method on
+  an interface documented as "writes entries to the application log" that does not write to the
+  application log is a lying API.
+- **A second, verbose file with `Default: Information`:** considered and dropped — the noise it
+  captures (requests, static assets, SignalR frames) costs more in readability and disk than it
+  returns in diagnosis. `Logging:File:LogLevel` can be raised without a code change if that turns
+  out to be wrong.
+- **A true circular buffer inside the file:** rejected — a fixed-length record ring stops the file
+  from being chronological plain text, and rewriting the file on every trim is unaffordable. The
+  alternative that keeps plain text is segment rotation, which was not worth its complexity once
+  the verbose file was dropped.

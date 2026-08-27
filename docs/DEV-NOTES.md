@@ -59,6 +59,51 @@
 	- napojit se přímo na adresář s knihovnami testů (v rámci PdpClientTestsuite se zapisuje do resources (ukládá se záloha DB), nebude toto problém?) 
 	- provádět instalaci přímo z adresáře instalací
 
+# HomeScreen
+- Možnosti:
+  - Runtime - verze: volitelné půjde zadat datum
+  - IDE - verze: volitelné bude zadat datum
+  - Testovací entity (test. sady, test. případy)
+  - (Testovací hardware sestavy)
+  - Dotaz: Odeslat výsledek do TestLinku?
+  - Dotaz: Spustit test?
+
+# Settings screen
+- implementovat až pozeději
+- půjde nastavit adresář k instalacím
+- budou se ukládat do XML v app data
+
+# Načítaní testcasů z DLL testů
+- Bude vyžadovat změnu targetu knihovnx testů z framework na standard
+- Implementace viz Models a Services
+
+# Config model:
+- Název souboru: test-runner.config
+- Ukládat do AppData
+
+	<Config>
+		<Settings>
+			// TL access token ??
+			// IDE installation path (where it is installed)
+			// Tested application installers directory path
+		</Settings>
+		// State is used for cacheing of previous testrunner instance
+		<State>
+			<AppVersions>
+				// type takes from enum (VersionType.Runtime.ToString().ToLower())
+				<Version Type="runtime">
+					...
+				</Version>
+				<Version Type="ide">
+					...
+				</Version>
+				<Version Type="pdp">
+					...
+				</Version>
+			</AppVersions>
+		</State>
+	<Config>
+
 # Spectre.Console 
 ## Užitečné features
 - Progress + Status:

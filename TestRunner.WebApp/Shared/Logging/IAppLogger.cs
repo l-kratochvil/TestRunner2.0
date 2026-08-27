@@ -3,19 +3,17 @@ namespace TestRunner.WebApp.Shared.Logging;
 /// <summary>
 /// Writes entries to the application log under a fixed source.
 /// </summary>
+/// <remarks>
+/// This is the log the user reads. Developer detail belongs to
+/// <see cref="Microsoft.Extensions.Logging.ILogger{TCategoryName}"/>, which every entry written
+/// here is mirrored into as well.
+/// </remarks>
 public interface IAppLogger
 {
     /// <summary>
     /// Gets the source every entry of this logger is written under.
     /// </summary>
     string Source { get; }
-
-    /// <summary>
-    /// Logs verbose detail, hidden in the log panel by default.
-    /// </summary>
-    /// <param name="message">Single-line message.</param>
-    /// <param name="detail">Optional multi-line detail.</param>
-    void Debug(string message, string? detail = null);
 
     /// <summary>
     /// Logs normal progress, including successful outcomes.

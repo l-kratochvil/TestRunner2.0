@@ -1,5 +1,6 @@
+using TestRunner.WebApp.Application.DependencyInjection;
+using TestRunner.WebApp.Application.Logging;
 using TestRunner.WebApp.Components;
-using TestRunner.WebApp.Features.AppLogging.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddAppLogging();
+builder.Logging.InitFileLogger();
+builder.Services.InitAppLogging();
+builder.Services.InitSharedServices();
 
 var app = builder.Build();
 
@@ -28,5 +31,15 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// Lifecycle is developer detail, so it goes to the logging pipeline and not to the log panel.
+// The category is spelled out because the generated Program class has no namespace and would not
+// match the filters configured for the application.
+var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("TestRunner.WebApp.Lifetime");
+var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+
+lifetime.ApplicationStarted.Register(() => logger.LogDebug("Application started."));
+lifetime.ApplicationStopping.Register(() => logger.LogDebug("Application is shutting down (stopping)."));
+lifetime.ApplicationStopped.Register(() => logger.LogDebug("Application is shutting down (stopped)."));
 
 app.Run();

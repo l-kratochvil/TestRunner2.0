@@ -12,6 +12,26 @@ Default canonical labels (`needs-triage`, `needs-info`, `ready-for-agent`, `read
 
 Single-context: one `CONTEXT.md` + `docs/ADR/` at the repo root. See `docs/agents/domain.md`.
 
+### Internals
+
+`docs/internals/index.md` explains the mechanisms that are not obvious from the code, for humans and
+agents alike. It describes how things work now and points at an ADR for why; a section that outgrows
+a few paragraphs moves into its own file under `docs/internals/` and leaves a pointer in the index.
+`README.md` is the entry point tying the three together.
+
+**Keep the glossary general.** A term defines a role and the rule that governs it, not the values
+that happen to exist today. Enumerating current values (severities, sources, statuses) puts a copy
+of the code into prose that goes stale on the next commit and makes the glossary read as a
+specification of the present rather than of the concept. Name the type or constant that holds the
+values instead, and let the reader follow it.
+
+## Code changes
+
+### Static analysis
+
+Read the analyzer output of every build and drive it to zero: fix errors, warnings and info-level
+diagnostics alike.
+
 ## Repo layout
 
 ### Tooling

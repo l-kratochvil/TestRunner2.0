@@ -9,6 +9,11 @@ using TestRunner.WebApp.Shared.Logging;
 /// </summary>
 public sealed class AppLogStore : IAppLogStore
 {
+    /// <summary>
+    /// Number of entries kept in memory unless another capacity is asked for.
+    /// </summary>
+    public const int DefaultCapacity = 2000;
+
     private readonly Lock gate = new();
     private readonly Queue<LogEntry> entries = new();
     private readonly int capacity;
@@ -17,18 +22,18 @@ public sealed class AppLogStore : IAppLogStore
     /// <summary>
     /// Initializes a new instance of the <see cref="AppLogStore"/> class.
     /// </summary>
-    /// <param name="options">Configuration of the application log.</param>
     /// <param name="sinks">Destinations the entries are mirrored to.</param>
-    public AppLogStore(AppLoggingOptions options, IEnumerable<IAppLogSink> sinks)
+    /// <param name="capacity">Maximum number of entries kept in memory.</param>
+    public AppLogStore(IEnumerable<IAppLogSink> sinks, int capacity = DefaultCapacity)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(options.Capacity, 1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(capacity, 1);
 
-        this.capacity = options.Capacity;
+        this.capacity = capacity;
         this.sinks = [.. sinks];
 
         foreach (IAppLogSink sink in this.sinks)
         {
-            sink.Failed += this.OnSinkFailed;
+            sink.Failed += this.ReportFailure;
         }
     }
 
@@ -51,8 +56,14 @@ public sealed class AppLogStore : IAppLogStore
     {
         lock (this.gate)
         {
-            return [.. this.entries];
+            return [..this.entries];
         }
+    }
+
+    /// <inheritdoc/>
+    public void ReportFailure(string message)
+    {
+        this.AppendToBuffer(new LogEntry(DateTimeOffset.Now, LogSeverity.Error, LogSources.App, message));
     }
 
     private void AppendToBuffer(LogEntry entry)
@@ -68,12 +79,5 @@ public sealed class AppLogStore : IAppLogStore
         }
 
         this.EntryAppended?.Invoke(entry);
-    }
-
-    private void OnSinkFailed(string message)
-    {
-        // Only the in-memory buffer is used here: routing the failure back through the sinks
-        // would either loop or fail again.
-        this.AppendToBuffer(new LogEntry(DateTimeOffset.Now, LogSeverity.Error, LogSources.App, message));
     }
 }

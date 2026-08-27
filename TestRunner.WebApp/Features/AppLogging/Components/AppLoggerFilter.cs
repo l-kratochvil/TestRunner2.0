@@ -7,26 +7,27 @@ using TestRunner.WebApp.Shared.Logging;
 /// Selection of severities and sources shown in the log panel.
 /// </summary>
 /// <remarks>
-/// The filter tracks what is <em>hidden</em> rather than what is shown, so a source that is not
-/// known up front (see <see cref="LogSources.All"/>) is visible instead of being silently dropped.
+/// Severities are tracked as what is <em>shown</em>, because they are known up front. Sources are
+/// tracked the other way round, as what is <em>hidden</em>, so that a source that is not known up
+/// front (see <see cref="LogSources.All"/>) is visible instead of being silently dropped.
 /// </remarks>
 public sealed class AppLoggerFilter
 {
-    private readonly HashSet<LogSeverity> hiddenSeverities;
+    private readonly HashSet<LogSeverity> selectedSeverities;
     private readonly HashSet<string> hiddenSources = new(StringComparer.OrdinalIgnoreCase);
 
-    private AppLoggerFilter(IEnumerable<LogSeverity> hiddenSeverities)
+    private AppLoggerFilter(IEnumerable<LogSeverity> selectedSeverities)
     {
-        this.hiddenSeverities = [.. hiddenSeverities];
+        this.selectedSeverities = [.. selectedSeverities];
     }
 
     /// <summary>
-    /// Creates the filter used when the panel is first shown: everything except <see cref="LogSeverity.Debug"/>.
+    /// Creates the filter used when the panel is first shown: every severity and every source.
     /// </summary>
     /// <returns>The default filter.</returns>
     public static AppLoggerFilter CreateDefault()
     {
-        return new AppLoggerFilter([LogSeverity.Debug]);
+        return new AppLoggerFilter(Enum.GetValues<LogSeverity>());
     }
 
     /// <summary>
@@ -36,7 +37,7 @@ public sealed class AppLoggerFilter
     /// <returns><see langword="true"/> when the severity is shown.</returns>
     public bool IsSelected(LogSeverity severity)
     {
-        return !this.hiddenSeverities.Contains(severity);
+        return this.selectedSeverities.Contains(severity);
     }
 
     /// <summary>
@@ -58,11 +59,11 @@ public sealed class AppLoggerFilter
     {
         if (selected)
         {
-            this.hiddenSeverities.Remove(severity);
+            this.selectedSeverities.Add(severity);
         }
         else
         {
-            this.hiddenSeverities.Add(severity);
+            this.selectedSeverities.Remove(severity);
         }
     }
 

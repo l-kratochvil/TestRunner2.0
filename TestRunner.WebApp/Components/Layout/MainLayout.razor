@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @implements IDisposable
 
-@inject IAppLogger Log
+@inject ILogger<MainLayout> Logger
 @inject NavigationManager Navigation
 
 <div class="app-shell">
@@ -50,7 +50,9 @@
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
     {
-        this.Log.Debug($"Navigated to {this.Navigation.ToBaseRelativePath(args.Location)}.");
+        // Navigation is developer detail: it belongs to the log file, not to the panel the user
+        // reads.
+        this.Logger.LogDebug("Navigated to {Location}.", this.Navigation.ToBaseRelativePath(args.Location));
     }
 
     private void OnLogCollapsedChanged(bool collapsed)

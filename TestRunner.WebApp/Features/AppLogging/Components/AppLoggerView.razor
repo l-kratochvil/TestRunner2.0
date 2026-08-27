@@ -1,6 +1,8 @@
 @* Feature: AppLogging — "the user can see and filter what the application is doing".
    Shown in MainLayout, so the log is reachable from every screen. *@
 
+@using Microsoft.Extensions.Options
+@using TestRunner.WebApp.Application.Logging
 @using TestRunner.WebApp.Features.AppLogging.Models
 @using TestRunner.WebApp.Features.AppLogging.Services
 @using TestRunner.WebApp.Shared.Logging
@@ -8,8 +10,8 @@
 @implements IAsyncDisposable
 
 @inject IAppLogStore Store
-@inject AppLoggingOptions Options
-@inject IJSRuntime JS
+@inject IOptions<FileLoggerOptions> FileLoggerOptions
+@inject IJsModuleInteropFactory JsModuleInteropFactory
 
 <section class="app-log-panel @(this.isCollapsed ? "is-collapsed" : "is-expanded")">
     <header class="app-log-header">
@@ -64,10 +66,6 @@
                     @onclick="this.ScrollToNewestAsync">
                 Jump to newest
             </button>
-
-            <span class="log-file-path" title="@this.LogFilePath">
-                @this.LogFilePath
-            </span>
         }
     </header>
 
@@ -95,10 +93,13 @@
 @code {
     private const int RefreshIntervalMilliseconds = 150;
 
+    private const string ModulePath = "./Features/AppLogging/Components/AppLoggerView.razor.js";
+
     private readonly AppLoggerFilter filter = AppLoggerFilter.CreateDefault();
 
     private IReadOnlyList<LogEntry> entries = [];
     private ElementReference entriesElement;
+    private JsModuleInterop? jsModuleInterop;
     
     private System.Threading.Timer? refreshTimer;
     private volatile bool hasNewEntries;
@@ -113,10 +114,8 @@
 
     private int ErrorCount => this.entries.Count(entry => entry.Severity == LogSeverity.Error);
 
-    private string LogFilePath => AppLogFiles.GetFilePath(this.Options.LogsDirectoryPath, DateTimeOffset.Now);
-
     private JsModuleInterop JsModuleInterop 
-        => field ??= new JsModuleInterop(JS, "./Features/AppLogging/Components/AppLoggerView.razor.js");
+        => this.jsModuleInterop ??= this.JsModuleInteropFactory.Create(ModulePath);
 
     private IEnumerable<string> AvailableSources 
         => LogSources.All
@@ -133,7 +132,12 @@
             await this.refreshTimer.DisposeAsync();
         }
 
-        await this.JsModuleInterop.DisposeAsync();
+        // The module is only imported when the user jumps to the newest entry, so a panel nobody
+        // scrolled has nothing to release.
+        if (this.jsModuleInterop is not null)
+        {
+            await this.jsModuleInterop.DisposeAsync();
+        }
     }
 
     /// <inheritdoc/>
@@ -196,5 +200,5 @@
     }
 
     private Task ScrollToNewestAsync()
-        => this.JsModuleInterop.InvokeVoidAsync("scrollToEnd", this.entriesElement);
+        => this.JsModuleInterop.InvokeVoidSafeAsync("scrollToEnd", this.entriesElement);
 }

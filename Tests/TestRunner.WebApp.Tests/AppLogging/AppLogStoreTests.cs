@@ -16,7 +16,7 @@ public class AppLogStoreTests
     public void SetUp()
     {
         this.sinkMock = new Mock<IAppLogSink>();
-        this.unit = new AppLogStore(new AppLoggingOptions(), [this.sinkMock.Object]);
+        this.unit = new AppLogStore([this.sinkMock.Object]);
     }
 
     [Test]
@@ -26,7 +26,7 @@ public class AppLogStoreTests
         const int givenCapacity = 3;
         const int givenEntryCount = 5;
         string[] expectedMessages = ["entry 3", "entry 4", "entry 5"];
-        this.unit = new AppLogStore(new AppLoggingOptions { Capacity = givenCapacity }, []);
+        this.unit = new AppLogStore([], givenCapacity);
 
         // When:
         for (int i = 1; i <= givenEntryCount; i++)
@@ -57,7 +57,7 @@ public class AppLogStoreTests
     {
         // Given:
         const int givenEntryCount = 1000;
-        this.unit = new AppLogStore(new AppLoggingOptions { Capacity = givenEntryCount }, []);
+        this.unit = new AppLogStore([], givenEntryCount);
 
         // When:
         Parallel.For(0, givenEntryCount, i => this.unit.Append(CreateEntry($"entry {i}")));
@@ -92,6 +92,35 @@ public class AppLogStoreTests
 
         // Then:
         Assert.That(observedMessages, Is.EqualTo(new[] { givenMessage }));
+    }
+
+    [Test]
+    public void ReportFailure__WhenSomethingFeedingTheLogFails__ThenShouldBufferItAsAnErrorOfTheAppSource()
+    {
+        // Given:
+        const string givenFailureMessage = "the log file is unreachable";
+
+        // When:
+        this.unit.ReportFailure(givenFailureMessage);
+
+        // Then:
+        LogEntry failure = this.unit.GetEntries().Single();
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(failure.Severity, Is.EqualTo(LogSeverity.Error));
+            Assert.That(failure.Source, Is.EqualTo(LogSources.App));
+            Assert.That(failure.Message, Is.EqualTo(givenFailureMessage));
+        }
+    }
+
+    [Test]
+    public void ReportFailure__WhenSomethingFeedingTheLogFails__ThenShouldNotRouteItToTheSinks()
+    {
+        // When:
+        this.unit.ReportFailure("the log file is unreachable");
+
+        // Then:
+        this.sinkMock.Verify(sink => sink.Write(It.IsAny<LogEntry>()), Times.Never);
     }
 
     [Test]

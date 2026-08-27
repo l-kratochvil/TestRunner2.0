@@ -18,7 +18,7 @@ This is a single-context repo:
 /
 ├── CONTEXT.md          ← created lazily by /domain-modeling
 ├── docs/ADR/
-│   └── ADR-0001-testrunner-webapp-blazor-server.md
+│   └── ADR-0001-initial.md
 ├── TestRunner.App/
 ├── TestRunner.Common/
 ├── TestRunner.WebApp/

@@ -1,15 +1,44 @@
 namespace TestRunner.WebApp.Tests.Components.Layout;
 
 using Bunit;
-using Microsoft.JSInterop;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
 using TestRunner.WebApp.Components.Layout;
+using TestRunner.WebApp.Shared.JsInterop;
 
 [TestFixture]
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class SplitterBarTests : Bunit.TestContext
 {
     private const string ModulePath = "./Components/Layout/SplitterBar.razor.js";
+    private const string InitializeFunction = "initialize";
+    private const string DisposeFunction = "dispose";
+    private const string HandleSelector = ".splitter-bar";
+
+    private const int HandleArgumentIndex = 0;
+    private const int OptionsArgumentIndex = 1;
+
+    private const string GivenCssVariable = "--app-log-height";
+    private const string GivenStorageKey = "log-height";
+    private const int GivenMinSize = 100;
+    private const double GivenMaxSizeRatio = 0.6;
+    private const double GivenDefaultSizeRatio = 0.3;
+    private const string GivenLabel = "Different label";
+
+    private BunitJSModuleInterop module;
+
+    [SetUp]
+    public void SetUp()
+    {
+        this.module = this.JSInterop.SetupModule(ModulePath);
+
+        // The component asks the factory for its module, so the real wiring is registered here
+        // rather than the component being handed a wrapper built by the test.
+        this.Services.AddSingleton<ILogger<JsModuleInterop>>(NullLogger<JsModuleInterop>.Instance);
+        this.Services.AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>();
+    }
 
     [TearDown]
     public void TearDown()
@@ -19,30 +48,25 @@ public class SplitterBarTests : Bunit.TestContext
     public void OnAfterRenderAsync__WhenTheComponentIsFirstRendered__ThenShouldInitializeTheJsModuleWithTheHandleAndOptions()
     {
         // Given:
-        BunitJSModuleInterop module = this.JSInterop.SetupModule(ModulePath);
-        JSRuntimeInvocationHandler initialize = module.SetupVoid("initialize", _ => true).SetVoidResult();
+        JSRuntimeInvocationHandler initialize = this.SetupVoidFunction(InitializeFunction);
 
         // When:
-        IRenderedComponent<SplitterBar> component = this.RenderComponent<SplitterBar>(parameters => parameters
-            .Add(p => p.CssVariable, "--app-log-height")
-            .Add(p => p.StorageKey, "log-height")
-            .Add(p => p.MinSize, 100)
-            .Add(p => p.MaxSizeRatio, 0.6)
-            .Add(p => p.DefaultSizeRatio, 0.3));
+        IRenderedComponent<SplitterBar> component = this.RenderSplitterBar();
 
         // Then:
-        Assert.That(initialize.Invocations["initialize"], Has.Count.EqualTo(1));
-        JSRuntimeInvocation invocation = initialize.Invocations["initialize"][0];
-        invocation.Arguments[0].ShouldBeElementReferenceTo(component.Find(".splitter-bar"));
+        Assert.That(initialize.Invocations[InitializeFunction], Has.Count.EqualTo(1));
 
-        object options = invocation.Arguments[1]!;
+        JSRuntimeInvocation invocation = initialize.Invocations[InitializeFunction][0];
+        invocation.Arguments[HandleArgumentIndex].ShouldBeElementReferenceTo(component.Find(HandleSelector));
+
+        object options = invocation.Arguments[OptionsArgumentIndex]!;
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(GetProperty(options, "CssVariable"), Is.EqualTo("--app-log-height"));
-            Assert.That(GetProperty(options, "StorageKey"), Is.EqualTo("log-height"));
-            Assert.That(GetProperty(options, "MinSize"), Is.EqualTo(100));
-            Assert.That(GetProperty(options, "MaxSizeRatio"), Is.EqualTo(0.6));
-            Assert.That(GetProperty(options, "DefaultSizeRatio"), Is.EqualTo(0.3));
+            Assert.That(GetProperty(options, nameof(SplitterBar.CssVariable)), Is.EqualTo(GivenCssVariable));
+            Assert.That(GetProperty(options, nameof(SplitterBar.StorageKey)), Is.EqualTo(GivenStorageKey));
+            Assert.That(GetProperty(options, nameof(SplitterBar.MinSize)), Is.EqualTo(GivenMinSize));
+            Assert.That(GetProperty(options, nameof(SplitterBar.MaxSizeRatio)), Is.EqualTo(GivenMaxSizeRatio));
+            Assert.That(GetProperty(options, nameof(SplitterBar.DefaultSizeRatio)), Is.EqualTo(GivenDefaultSizeRatio));
         }
     }
 
@@ -50,36 +74,31 @@ public class SplitterBarTests : Bunit.TestContext
     public void OnAfterRenderAsync__WhenTheComponentIsRerendered__ThenShouldInitializeTheJsModuleOnlyOnce()
     {
         // Given:
-        BunitJSModuleInterop module = this.JSInterop.SetupModule(ModulePath);
-        JSRuntimeInvocationHandler initialize = module.SetupVoid("initialize", _ => true).SetVoidResult();
-        IRenderedComponent<SplitterBar> component = this.RenderComponent<SplitterBar>(parameters => parameters
-            .Add(p => p.CssVariable, "--app-log-height")
-            .Add(p => p.StorageKey, "log-height"));
+        JSRuntimeInvocationHandler initialize = this.SetupVoidFunction(InitializeFunction);
+        IRenderedComponent<SplitterBar> component = this.RenderSplitterBar();
 
         // When:
-        component.SetParametersAndRender(parameters => parameters.Add(p => p.Label, "Different label"));
+        component.SetParametersAndRender(parameters => parameters.Add(p => p.Label, GivenLabel));
 
         // Then:
-        Assert.That(initialize.Invocations["initialize"], Has.Count.EqualTo(1));
+        Assert.That(initialize.Invocations[InitializeFunction], Has.Count.EqualTo(1));
     }
 
     [Test]
     public async Task DisposeAsync__WhenTheComponentWasInitialized__ThenShouldInvokeTheJsDisposeWithTheHandle()
     {
         // Given:
-        BunitJSModuleInterop module = this.JSInterop.SetupModule(ModulePath);
-        module.SetupVoid("initialize", _ => true).SetVoidResult();
-        JSRuntimeInvocationHandler dispose = module.SetupVoid("dispose", _ => true).SetVoidResult();
-        IRenderedComponent<SplitterBar> component = this.RenderComponent<SplitterBar>(parameters => parameters
-            .Add(p => p.CssVariable, "--app-log-height")
-            .Add(p => p.StorageKey, "log-height"));
+        this.SetupVoidFunction(InitializeFunction);
+        JSRuntimeInvocationHandler dispose = this.SetupVoidFunction(DisposeFunction);
+        IRenderedComponent<SplitterBar> component = this.RenderSplitterBar();
 
         // When:
         await component.Instance.DisposeAsync();
 
         // Then:
-        Assert.That(dispose.Invocations["dispose"], Has.Count.EqualTo(1));
-        dispose.Invocations["dispose"][0].Arguments[0].ShouldBeElementReferenceTo(component.Find(".splitter-bar"));
+        Assert.That(dispose.Invocations[DisposeFunction], Has.Count.EqualTo(1));
+        dispose.Invocations[DisposeFunction][0].Arguments[HandleArgumentIndex]
+            .ShouldBeElementReferenceTo(component.Find(HandleSelector));
     }
 
     [Test]
@@ -92,21 +111,17 @@ public class SplitterBarTests : Bunit.TestContext
         Assert.That(async () => await unit.DisposeAsync(), Throws.Nothing);
     }
 
-    [Test]
-    public void DisposeAsync__WhenTheJsDisposeCallThrowsBecauseTheBrowserDisconnected__ThenShouldSwallowTheException()
-    {
-        // Given:
-        BunitJSModuleInterop module = this.JSInterop.SetupModule(ModulePath);
-        module.SetupVoid("initialize", _ => true).SetVoidResult();
-        module.SetupVoid("dispose", _ => true).SetException(new JSDisconnectedException("The circuit disconnected."));
-        IRenderedComponent<SplitterBar> component = this.RenderComponent<SplitterBar>(parameters => parameters
-            .Add(p => p.CssVariable, "--app-log-height")
-            .Add(p => p.StorageKey, "log-height"));
-
-        // When / Then:
-        Assert.That(async () => await component.Instance.DisposeAsync(), Throws.Nothing);
-    }
-
     private static object? GetProperty(object source, string name)
         => source.GetType().GetProperty(name)!.GetValue(source);
+
+    private JSRuntimeInvocationHandler SetupVoidFunction(string identifier)
+        => this.module.SetupVoid(identifier, _ => true).SetVoidResult();
+
+    private IRenderedComponent<SplitterBar> RenderSplitterBar()
+        => this.RenderComponent<SplitterBar>(parameters => parameters
+            .Add(p => p.CssVariable, GivenCssVariable)
+            .Add(p => p.StorageKey, GivenStorageKey)
+            .Add(p => p.MinSize, GivenMinSize)
+            .Add(p => p.MaxSizeRatio, GivenMaxSizeRatio)
+            .Add(p => p.DefaultSizeRatio, GivenDefaultSizeRatio));
 }

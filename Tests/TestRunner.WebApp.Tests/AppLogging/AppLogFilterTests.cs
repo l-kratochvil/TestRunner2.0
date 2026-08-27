@@ -16,11 +16,10 @@ public class AppLogFilterTests
         this.unit = AppLoggerFilter.CreateDefault();
     }
 
-    [TestCase(LogSeverity.Debug, ExpectedResult = false)]
     [TestCase(LogSeverity.Info, ExpectedResult = true)]
     [TestCase(LogSeverity.Warning, ExpectedResult = true)]
     [TestCase(LogSeverity.Error, ExpectedResult = true)]
-    public bool IsSelected__WhenFilterIsDefault__ThenShouldSelectEverySeverityExceptDebug(
+    public bool IsSelected__WhenFilterIsDefault__ThenShouldSelectEverySeverity(
         LogSeverity givenSeverity)
     {
         // When:
@@ -41,11 +40,10 @@ public class AppLogFilterTests
         Assert.That(result, Is.True);
     }
 
-    [TestCase(LogSeverity.Debug, LogSources.TestRun, ExpectedResult = false)]
     [TestCase(LogSeverity.Info, LogSources.TestRun, ExpectedResult = true)]
     [TestCase(LogSeverity.Warning, LogSources.App, ExpectedResult = true)]
     [TestCase(LogSeverity.Error, "SomeFutureSource", ExpectedResult = true)]
-    public bool Matches__WhenFilterIsDefault__ThenShouldHideOnlyDebugEntries(
+    public bool Matches__WhenFilterIsDefault__ThenShouldShowEveryEntry(
         LogSeverity givenSeverity, string givenSource)
     {
         // Given:
@@ -73,11 +71,12 @@ public class AppLogFilterTests
     }
 
     [Test]
-    public void Matches__WhenDebugIsSelected__ThenShouldShowDebugEntries()
+    public void Matches__WhenSeverityIsSelectedAgain__ThenShouldShowEntriesOfThatSeverity()
     {
         // Given:
-        LogEntry givenEntry = CreateEntry(LogSeverity.Debug, LogSources.TestRun);
-        this.unit.SetSelected(LogSeverity.Debug, selected: true);
+        LogEntry givenEntry = CreateEntry(LogSeverity.Info, LogSources.TestRun);
+        this.unit.SetSelected(LogSeverity.Info, selected: false);
+        this.unit.SetSelected(LogSeverity.Info, selected: true);
 
         // When:
         bool result = this.unit.Matches(givenEntry);
@@ -108,9 +107,10 @@ public class AppLogFilterTests
         LogEntry[] givenEntries =
         [
             CreateEntry(LogSeverity.Info, LogSources.App, expectedMessages[0]),
-            CreateEntry(LogSeverity.Debug, LogSources.App, "hidden"),
+            CreateEntry(LogSeverity.Warning, LogSources.App, "hidden"),
             CreateEntry(LogSeverity.Error, LogSources.App, expectedMessages[1]),
         ];
+        this.unit.SetSelected(LogSeverity.Warning, selected: false);
 
         // When:
         IEnumerable<LogEntry> result = this.unit.Apply(givenEntries);

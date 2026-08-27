@@ -10,7 +10,5 @@ public sealed class AppLoggerFactory(IAppLogStore store) : IAppLoggerFactory
 {
     /// <inheritdoc/>
     public IAppLogger CreateLogger(string source)
-    {
-        return new AppLogger(store, source);
-    }
+        => new AppLogger(store, source);
 }

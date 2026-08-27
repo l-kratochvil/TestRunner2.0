@@ -3,7 +3,7 @@
 
 @implements IAsyncDisposable
 
-@inject IJSRuntime JS
+@inject IJsModuleInteropFactory JsModuleInteropFactory
 
 <div class="splitter-bar"
      role="separator"
@@ -19,6 +19,7 @@
 
     private ElementReference handle;
     private bool isInitialized;
+    private JsModuleInterop? jsModuleInterop;
 
     /// <summary>
     /// Name of the CSS variable the dragged size is written to, e.g. <c>--app-log-height</c>.
@@ -59,24 +60,22 @@
     public string Label { get; set; } = "Resize";
 
     private JsModuleInterop JsModuleInterop
-        => field ??= new JsModuleInterop(this.JS, ModulePath);
+        => this.jsModuleInterop ??= this.JsModuleInteropFactory.Create(ModulePath);
 
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
         if (this.isInitialized)
         {
-            try
-            {
-                await this.JsModuleInterop.InvokeVoidAsync("dispose", this.handle);
-            }
-            catch (JSDisconnectedException)
-            {
-                // The browser is already gone, and its listeners went with it.
-            }
+            await this.JsModuleInterop.InvokeVoidSafeAsync("dispose", this.handle);
         }
 
-        await this.JsModuleInterop.DisposeAsync();
+        // A component that never reached the browser never asked for the module either, and
+        // creating a wrapper only to dispose it would need a factory it was never given.
+        if (this.jsModuleInterop is not null)
+        {
+            await this.jsModuleInterop.DisposeAsync();
+        }
     }
 
     /// <inheritdoc/>
@@ -87,7 +86,7 @@
             return;
         }
 
-        await this.JsModuleInterop.InvokeVoidAsync(
+        await this.JsModuleInterop.InvokeVoidSafeAsync(
             "initialize",
             this.handle,
             new

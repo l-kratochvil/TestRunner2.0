@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- DevKit.Core lives in a sibling clone, see docs/ADR/ADR-0002-devkit-core-dependency.md. -->
+    <ProjectReference Include="..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
     <ProjectReference Include="..\TestRunner.Common\TestRunner.Common.csproj" />
   </ItemGroup>
 

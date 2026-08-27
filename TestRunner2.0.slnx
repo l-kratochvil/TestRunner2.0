@@ -4,12 +4,15 @@
     <File Path=".gitignore" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Build.targets" />
+    <File Path="README.md" />
     <File Path="StyleCop.json" />
   </Folder>
   <Folder Name="/Solution Items/docs/">
     <File Path="docs/DEV-NOTES.md" />
     <File Path="docs/Issue-0002.docx" />
-    <File Path="docs/ADR/ADR-0001-testrunner-webapp-blazor-server.md" />
+    <File Path="docs/ADR/ADR-0001-initial.md" />
+    <File Path="docs/ADR/ADR-0002-devkit-core-dependency.md" />
+    <File Path="docs/internals/index.md" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Tests/NUnitTestAssembly.Net461/NUnitTestAssembly.Net461.csproj" />

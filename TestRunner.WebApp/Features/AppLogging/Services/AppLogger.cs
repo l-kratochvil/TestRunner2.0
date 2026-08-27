@@ -14,12 +14,6 @@ public sealed class AppLogger(IAppLogStore store, string source) : IAppLogger
     public string Source { get; } = source;
 
     /// <inheritdoc/>
-    public void Debug(string message, string? detail = null)
-    {
-        this.Log(LogSeverity.Debug, message, detail);
-    }
-
-    /// <inheritdoc/>
     public void Info(string message, string? detail = null)
     {
         this.Log(LogSeverity.Info, message, detail);
