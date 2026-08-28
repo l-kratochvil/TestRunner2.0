@@ -10,6 +10,14 @@
     "sourceMap": false,
     "rootDir": "Browser",
     "outDir": "wwwroot/js",
+    "baseUrl": ".",
+    // One shared module importing another spells it the way every other script does, by the URL it
+    // is served under, so that all of them name the same instance. Here that path points back at
+    // the sources this same build compiles - unlike the collocated build, which has to be sent to
+    // the declarations instead.
+    "paths": {
+      "/js/*": ["Browser/*"]
+    },
     // The collocated build resolves "/js/*.js" against these declarations instead of against the
     // sources, so it treats a shared module as something already built rather than compiling a
     // second copy of it next to the .ts. They are intermediate output and stay out of wwwroot,

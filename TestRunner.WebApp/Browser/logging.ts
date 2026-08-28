@@ -49,8 +49,17 @@ const log = createLogger(import.meta.url);
  * Takes the reference the .NET side is reachable through, and starts watching for the errors
  * nobody reports by hand.
  */
-export function register(logger: BrowserLoggerReference): void {
-  reference = logger;
+export function register(logger: unknown): void {
+  // BrowserLoggerReference is an interface, so there is no class to hold a value against: what
+  // makes one usable here is the single method every call back into .NET goes through. Checking
+  // it by hand rather than through /js/guards.js keeps that module from having to grow a way to
+  // describe a shape for this one caller.
+  if (typeof (logger as BrowserLoggerReference | null)?.invokeMethodAsync !== "function") {
+    log.warn("Ignored a register call: the argument is not a BrowserLogger reference.");
+    return;
+  }
+
+  reference = logger as BrowserLoggerReference;
 
   // addEventListener rather than window.onerror, which is a single slot: assigning it would evict
   // whatever handler is already there, Blazor's included.
@@ -74,7 +83,6 @@ export function unregister(): void {
  */
 export function createLogger(moduleUrl: string): Logger {
   const module = toModuleName(moduleUrl);
-
   return {
     debug: (message, detail) => send("debug", module, message, detail),
     info: (message, detail) => send("info", module, message, detail),
@@ -112,7 +120,6 @@ function onUnhandledRejection(event: PromiseRejectionEvent): void {
   // A rejection carries no location of its own, so unlike onError there is no file name to take.
   if (reason instanceof Error) {
     report(unknownModule, `${reason.name}: ${reason.message}`, reason.stack);
-
     return;
   }
 

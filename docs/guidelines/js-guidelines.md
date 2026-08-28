@@ -2,13 +2,18 @@
 
 ## Contents
 
-- [Guard every exported function's parameters at runtime](#guard-every-exported-functions-parameters-at-runtime)
+- [Guard the .NET boundary at runtime](#guard-the-net-boundary-at-runtime)
 
-## Guard every exported function's parameters at runtime
+## Guard the .NET boundary at runtime
 
-An exported function is external API: anything can call it, including code TypeScript never
-type-checked against this module. A parameter's type signature is not enforced past the boundary —
-nothing at runtime rejects a caller passing the wrong shape.
+An exported function that .NET calls is external API, and the call carries no types at all: the
+function is named by a string and its arguments travel as JSON. Nothing on either side checks that
+the two agree — a renamed parameter, a changed component, a mistyped call site, and the browser
+receives whatever was sent.
 
-Check every received value before using it — `instanceof`, `typeof`, or an equivalent runtime guard
-— rather than trusting the declared parameter type.
+Declare each such parameter as `unknown`, then check it with the
+[guards module](../../TestRunner.WebApp/Browser/guards.ts) (`/js/guards.js`), which also reports a
+mismatch to the application log.
+
+If a check fails, return immediately: `null` means the call was never valid, not a value to build
+on. A function that owes a value returns whatever means "nothing happened" instead.
