@@ -1,13 +1,13 @@
-@* A drag handle that resizes the pane below it. The size is written to a CSS variable on the
-   document root, so the resized element only has to read that variable. *@
+@* A drag handle that resizes the pane on one side of it. The size is written to a CSS variable on
+   the document root, so the resized element only has to read that variable. *@
 
 @implements IAsyncDisposable
 
 @inject IJsModuleInteropFactory JsModuleInteropFactory
 
-<div class="splitter-bar"
+<div class="@(this.IsHorizontal ? "splitter-bar is-horizontal" : "splitter-bar")"
      role="separator"
-     aria-orientation="horizontal"
+    aria-orientation="@(this.IsHorizontal ? "vertical" : "horizontal")"
      aria-label="@this.Label"
      title="@this.Label"
      tabindex="0"
@@ -42,13 +42,19 @@
     public int MinSize { get; set; } = 120;
 
     /// <summary>
-    /// Largest size as a fraction of the window height, so the rest of the screen never vanishes.
+    /// Whether the splitter resizes panes horizontally instead of vertically.
+    /// </summary>
+    [Parameter]
+    public bool IsHorizontal { get; set; }
+
+    /// <summary>
+    /// Largest size as a fraction of the relevant window dimension, so the rest of the screen never vanishes.
     /// </summary>
     [Parameter]
     public double MaxSizeRatio { get; set; } = 0.7;
 
     /// <summary>
-    /// Size on the first visit, as a fraction of the window height.
+    /// Size on the first visit, as a fraction of the relevant window dimension.
     /// </summary>
     [Parameter]
     public double DefaultSizeRatio { get; set; } = 0.25;
@@ -94,6 +100,7 @@
                 this.CssVariable,
                 this.StorageKey,
                 this.MinSize,
+                this.IsHorizontal,
                 this.MaxSizeRatio,
                 this.DefaultSizeRatio,
             });

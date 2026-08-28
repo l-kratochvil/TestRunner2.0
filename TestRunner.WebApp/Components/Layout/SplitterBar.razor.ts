@@ -12,6 +12,7 @@ interface SplitterOptions {
   cssVariable: string;
   storageKey: string;
   minSize: number;
+  isHorizontal: boolean;
   maxSizeRatio: number;
   defaultSizeRatio: number;
 }
@@ -24,6 +25,7 @@ export function initialize(uElement: unknown, uOptions: unknown): void {
   const cssVariable = ofType(options.cssVariable, "string");
   const storageKey = ofType(options.storageKey, "string");
   const minSize = ofType(options.minSize, "number");
+  const isHorizontal = ofType(options.isHorizontal, "boolean");
   const maxSizeRatio = ofType(options.maxSizeRatio, "number");
   const defaultSizeRatio = ofType(options.defaultSizeRatio, "number");
 
@@ -32,6 +34,7 @@ export function initialize(uElement: unknown, uOptions: unknown): void {
     cssVariable === null ||
     storageKey === null ||
     minSize === null ||
+    isHorizontal === null ||
     maxSizeRatio === null ||
     defaultSizeRatio === null
   ) {
@@ -43,8 +46,9 @@ export function initialize(uElement: unknown, uOptions: unknown): void {
   // The size the user asked for is kept apart from the size that fits: a small window renders
   // clamped, but growing the window back restores what the user chose.
   let desiredSize = 0;
+  const viewportSize = (): number => (isHorizontal ? window.innerWidth : window.innerHeight);
 
-  const clamp = (value: number): number => Math.min(Math.max(value, minSize), window.innerHeight * maxSizeRatio);
+  const clamp = (value: number): number => Math.min(Math.max(value, minSize), viewportSize() * maxSizeRatio);
   const render = (): void => root.style.setProperty(cssVariable, `${clamp(desiredSize)}px`);
   const renderedSize = (): number => parseFloat(getComputedStyle(root).getPropertyValue(cssVariable));
   const setSize = (value: number): void => {
@@ -66,13 +70,24 @@ export function initialize(uElement: unknown, uOptions: unknown): void {
     return Number.isFinite(stored) ? stored : null;
   };
 
-  setSize(recall() ?? window.innerHeight * defaultSizeRatio);
+  setSize(recall() ?? viewportSize() * defaultSizeRatio);
 
   let startPosition = 0;
   let startSize = 0;
+  let startDirection = 1;
 
-  // The pane sits below the handle, so dragging up must make it bigger.
-  const onPointerMove = (event: PointerEvent): void => setSize(startSize + (startPosition - event.clientY));
+  // A handle divides the pane it sizes from a pane that takes whatever is left over, so a drag
+  // only ever moves those two. The sized one is the neighbour that does not grow, and the side it
+  // sits on says which way its size follows the pointer; reading that from the layout keeps the
+  // component from being told what the stylesheet already says.
+  const direction = (): number => {
+    const preceding = element.previousElementSibling;
+
+    return preceding !== null && parseFloat(getComputedStyle(preceding).flexGrow) === 0 ? 1 : -1;
+  };
+
+  const onPointerMove = (event: PointerEvent): void =>
+    setSize(startSize + (startDirection * ((isHorizontal ? event.clientX : event.clientY) - startPosition)));
 
   const onPointerUp = (event: PointerEvent): void => {
     element.releasePointerCapture(event.pointerId);
@@ -88,8 +103,9 @@ export function initialize(uElement: unknown, uOptions: unknown): void {
       return;
     }
 
-    startPosition = event.clientY;
+    startPosition = isHorizontal ? event.clientX : event.clientY;
     startSize = renderedSize();
+    startDirection = direction();
 
     element.setPointerCapture(event.pointerId);
     element.addEventListener("pointermove", onPointerMove);
@@ -102,11 +118,13 @@ export function initialize(uElement: unknown, uOptions: unknown): void {
   };
 
   const onKeyDown = (event: KeyboardEvent): void => {
-    const step = event.shiftKey ? 50 : 10;
+    // An arrow moves the handle, exactly as a drag does; which pane grows is the handle's
+    // business, not the key's.
+    const step = (event.shiftKey ? 50 : 10) * direction();
 
-    if (event.key === "ArrowUp") {
+    if (event.key === (isHorizontal ? "ArrowRight" : "ArrowDown")) {
       setSize(renderedSize() + step);
-    } else if (event.key === "ArrowDown") {
+    } else if (event.key === (isHorizontal ? "ArrowLeft" : "ArrowUp")) {
       setSize(renderedSize() - step);
     } else {
       return;

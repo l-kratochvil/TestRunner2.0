@@ -23,6 +23,7 @@ public class SplitterBarTests : Bunit.TestContext
     private const string GivenCssVariable = "--app-log-height";
     private const string GivenStorageKey = "log-height";
     private const int GivenMinSize = 100;
+    private const bool GivenIsHorizontal = true;
     private const double GivenMaxSizeRatio = 0.6;
     private const double GivenDefaultSizeRatio = 0.3;
     private const string GivenLabel = "Different label";
@@ -65,6 +66,7 @@ public class SplitterBarTests : Bunit.TestContext
             Assert.That(GetProperty(options, nameof(SplitterBar.CssVariable)), Is.EqualTo(GivenCssVariable));
             Assert.That(GetProperty(options, nameof(SplitterBar.StorageKey)), Is.EqualTo(GivenStorageKey));
             Assert.That(GetProperty(options, nameof(SplitterBar.MinSize)), Is.EqualTo(GivenMinSize));
+            Assert.That(GetProperty(options, nameof(SplitterBar.IsHorizontal)), Is.EqualTo(GivenIsHorizontal));
             Assert.That(GetProperty(options, nameof(SplitterBar.MaxSizeRatio)), Is.EqualTo(GivenMaxSizeRatio));
             Assert.That(GetProperty(options, nameof(SplitterBar.DefaultSizeRatio)), Is.EqualTo(GivenDefaultSizeRatio));
         }
@@ -122,6 +124,7 @@ public class SplitterBarTests : Bunit.TestContext
             .Add(p => p.CssVariable, GivenCssVariable)
             .Add(p => p.StorageKey, GivenStorageKey)
             .Add(p => p.MinSize, GivenMinSize)
+            .Add(p => p.IsHorizontal, GivenIsHorizontal)
             .Add(p => p.MaxSizeRatio, GivenMaxSizeRatio)
             .Add(p => p.DefaultSizeRatio, GivenDefaultSizeRatio));
 }

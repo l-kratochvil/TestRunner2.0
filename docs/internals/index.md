@@ -7,6 +7,7 @@ The mechanisms of this repository that are not obvious from the code.
 - [TypeScript/JavaScript orchestration](#typescript-javascript-orchestration)
 - [JavaScript interop](#javascript-interop)
 - [The browser bridge](#the-browser-bridge)
+- [Resizable panes](#resizable-panes)
 
 ## TypeScript/JavaScript orchestration
 
@@ -65,3 +66,22 @@ bridge per circuit and — through `Routes.razor`'s `DefaultLayout` — covers e
 `/Error` included. `BrowserLogger` is a singleton: it holds a logger and no circuit of its own, so
 one instance serves every browser, and each circuit merely wraps it in its own
 `DotNetObjectReference`.
+
+## Resizable panes
+
+`SplitterBar` writes the size it is dragged to into a CSS variable on the document root, and the
+stylesheet decides what that size means. Dragging therefore never touches a pane directly, and on
+Blazor Server it never leaves the browser: a `pointermove` answered over SignalR would leave the
+bar lagging behind the cursor.
+
+### The layout a handle expects
+
+A handle must sit between a pane sized by its variable and a pane that takes whatever is left
+(`flex: 1 1 0`). The flexible pane absorbs every change, so a drag moves only the two panes the
+handle divides and no pane further away. `TestRunnerPage` therefore sizes the two outer panes and
+lets the configurator between them absorb; `MainLayout` sizes the log pane and lets the page above
+it absorb.
+
+That arrangement is also how the script knows which way to move: the pane it sizes is the
+neighbour that does not grow, and the side it sits on says whether its size follows the pointer or
+runs against it. The layout already states this, so the component is not told it a second time.

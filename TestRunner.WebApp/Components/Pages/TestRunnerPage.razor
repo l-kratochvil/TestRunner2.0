@@ -10,9 +10,23 @@
         <div class="explorer-pane">
             <TestExplorer />
         </div>
+        @* The outer panes are the sized ones and the configurator takes what is left, so each
+           handle only moves the boundary the user grabbed. *@
+        <SplitterBar CssVariable="--test-explorer-width"
+                     StorageKey="testrunner.test-explorer-width"
+                     MinSize="180"
+                     IsHorizontal="true"
+                     DefaultSizeRatio="0.333"
+                     Label="Resize the test explorer" />
         <div class="configurator-pane">
             <TestConfigurator />
         </div>
+        <SplitterBar CssVariable="--test-result-width"
+                     StorageKey="testrunner.test-result-width"
+                     MinSize="180"
+                     IsHorizontal="true"
+                     DefaultSizeRatio="0.333"
+                     Label="Resize the test result" />
         <div class="result-pane">
             <TestResultView />
         </div>
