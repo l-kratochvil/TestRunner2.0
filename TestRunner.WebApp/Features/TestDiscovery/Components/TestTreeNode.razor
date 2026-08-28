@@ -1,0 +1,89 @@
+@* Feature: TestDiscovery — one node of the test tree.
+
+   The selector is a button rather than <input type="checkbox"> on purpose. A checkbox cannot show
+   a partial selection from markup (indeterminate is a DOM property, not an attribute), and the
+   browser toggles it on its own: completing a partly selected group leaves the model unchanged, so
+   the renderer emits no edit and the box stays where the browser put it. A button holds no state of
+   its own, takes aria-checked="mixed" as a plain attribute, and still answers space and enter. *@
+
+<li class="test-node">
+    <div class="node-row">
+        @if (this.Node.HasChildren)
+        {
+            <button type="button"
+                    class="expander"
+                    aria-expanded="@this.Node.IsExpanded"
+                    aria-label="@(this.Node.IsExpanded ? $"Collapse {this.Node.Name}" : $"Expand {this.Node.Name}")"
+                    @onclick="this.ToggleExpanded">
+                @(this.Node.IsExpanded ? "▾" : "▸")
+            </button>
+        }
+        else
+        {
+            @* Keeps the selectors of one level aligned under each other. *@
+            <span class="expander-placeholder" aria-hidden="true"></span>
+        }
+
+        <button type="button"
+                role="checkbox"
+                class="node-check @CheckStateCssClass"
+                aria-checked="@AriaChecked"
+                aria-label="@this.Node.Name"
+                disabled="@(!this.Node.CanCheck)"
+                @onclick="this.ToggleCheckedAsync">
+        </button>
+
+        <span class="node-name" @onclick="this.ToggleExpanded">@this.Node.Name</span>
+    </div>
+
+    @if (this.Node.HasChildren && this.Node.IsExpanded)
+    {
+        <ul class="node-children">
+            @foreach (TestNodeViewModel child in this.Node.Children)
+            {
+                @* Keyed by the path so that a rediscovered tree pairs nodes by identity and not by
+                   position, which would move expansion and focus onto a different test. *@
+                <TestTreeNode Node="child" @key="child.ExecutionPath" SelectionChanged="this.SelectionChanged" />
+            }
+        </ul>
+    }
+</li>
+
+@code {
+    /// <summary>
+    /// The node rendered by this component.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public TestNodeViewModel Node { get; set; } = default!;
+
+    /// <summary>
+    /// Raised after the user changed what is selected, anywhere beneath this node. Handled by the
+    /// explorer, which owns both the tree and the store the selection is kept in.
+    /// </summary>
+    [Parameter]
+    public EventCallback SelectionChanged { get; set; }
+
+    private string AriaChecked
+        => this.Node.CheckState switch
+        {
+            TestNodeCheckState.Checked => "true",
+            TestNodeCheckState.Mixed => "mixed",
+            _ => "false",
+        };
+
+    private string CheckStateCssClass
+        => $"is-{this.Node.CheckState.ToString().ToLowerInvariant()}";
+
+    private void ToggleExpanded()
+    {
+        this.Node.IsExpanded = !this.Node.IsExpanded;
+    }
+
+    private Task ToggleCheckedAsync()
+    {
+        this.Node.Toggle();
+
+        return this.SelectionChanged.InvokeAsync();
+    }
+}

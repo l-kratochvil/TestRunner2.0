@@ -9,7 +9,12 @@ mean something else here.
 | Term                    | Meaning                                                                                                                                           | Not                    |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
 | **Test suite**          | A group of test cases as defined by the test assemblies / TestLink.                                                                               |                        |
+| **Test fixture**        | The group of test cases inside a test suite, as the test assemblies define it. The middle level of the test tree.                                 | "test suite"           |
 | **Test case**           | A single test as defined by the test assemblies / TestLink.                                                                                       |                        |
+| **Test entity**         | Anything the test tree is built from, whatever its level, see `TestEntity`. What the runner is asked to run is expressed in these.                | "test", "node"         |
+| **Execution path**      | The name a test entity is both identified and executed by, see `TestEntity.ExecutionPath`. Identity and execution deliberately share one key.     | "name", "id"           |
+| **Test selection**      | The test cases the user picked to run. Only test cases are ever part of it; what a group looks like follows from the test cases beneath it.       | "checked tests"        |
+| **Store**               | A holder of state that outlives the component reading it and is shared by the features that need it, see `Shared/Stores` and `AppLogStore`.       | "cache", "repository"  |
 | **Test run**            | One execution of the selected test cases on the test machine.                                                                                     | "test", "build"        |
 | **Test result**         | The outcome of a test run (passed / failed), the thing that is uploaded to TestLink.                                                              | "log"                  |
 | **Log**                 | The application activity feed the tester reads: what the application is doing, shown in `AppLoggerView`. Never the test result.                   | "output", "result"     |

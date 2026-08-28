@@ -10,6 +10,7 @@ builder.Services.AddRazorComponents()
 
 builder.Logging.InitFileLogger();
 builder.Services.InitAppLogging();
+builder.Services.InitStores();
 builder.Services.InitSharedServices();
 
 var app = builder.Build();

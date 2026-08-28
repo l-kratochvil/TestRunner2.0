@@ -1,12 +1,15 @@
 namespace TestRunner.WebApp.Application.DependencyInjection;
 
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using TestRunner.WebApp.Application.Logging;
 using TestRunner.WebApp.Features.AppLogging.Services;
+using TestRunner.WebApp.Features.TestDiscovery.Services;
 using TestRunner.WebApp.Shared.JsInterop;
 using TestRunner.WebApp.Shared.Logging;
+using TestRunner.WebApp.Shared.Stores;
 
 /// <summary>
 /// Registration of the application services, one method per feature.
@@ -47,6 +50,26 @@ public static class InitServicesExtension
 
                     return store;
                 });
+
+    /// <summary>
+    /// Registers the stores: the state several features read and write, held for one browser tab.
+    /// </summary>
+    /// <remarks>
+    /// Scoped, because a store belongs to a single circuit: two testers may put a run together at
+    /// the same time and neither should see the other's selection appear under their hands.
+    /// <para>
+    /// The discovered test suites are sample data for now. Discovery replaces this seed once it
+    /// can read the test assemblies, and nothing but this registration has to change.
+    /// </para>
+    /// </remarks>
+    /// <param name="services">Service collection to register into.</param>
+    /// <returns>The service collection, to allow chaining.</returns>
+    public static IServiceCollection InitStores(this IServiceCollection services)
+        => services
+            .AddScoped(static provider => new TestRunStore(
+                provider.GetRequiredService<ProtectedLocalStorage>(),
+                provider.GetRequiredService<IAppLogger>(),
+                SampleTestSuites.Create()));
 
     /// <summary>
     /// Registers the services shared across features: the ones living under <c>Shared</c> and

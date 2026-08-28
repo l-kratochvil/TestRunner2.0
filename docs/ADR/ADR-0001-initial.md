@@ -4,7 +4,8 @@
 - **Date:** 2026-08-17 (updated 2026-08-26: `AppLogging` extracted from `TestExecution`;
   `TestResultInspection` and `TestResultReporting` split off from `TestExecution`; updated
   2026-08-27: logging through `Microsoft.Extensions.Logging`; DevKit.Core added as a
-  cross-repository project reference; updated 2026-08-28: ADR-0002 folded into this ADR)
+  cross-repository project reference; updated 2026-08-28: ADR-0002 folded into this ADR; updated
+  2026-08-28: test selection and `Shared/Stores` added)
 - **Deciders:** l-kratochvil
 
 ## Context
@@ -124,7 +125,8 @@ TestRunner.WebApp/
 │  └─ AppSettings/           (Components, Services, Models)
 ├─ Shared/       (cross-cutting code, small by design)
 │  ├─ JsModuleInterop.cs  (calls into a component's collocated .razor.js)
-│  └─ Logging/   (IAppLogger, IAppLoggerFactory, LogSeverity, LogSources)
+│  ├─ Logging/   (IAppLogger, IAppLoggerFactory, LogSeverity, LogSources)
+│  └─ Stores/    (state shared across features: LocalStorageStoreBase, TestRunStore)
 ├─ wwwroot/
 └─ Program.cs
 ```
@@ -144,6 +146,16 @@ Inside a slice the three folders mean:
 - **`Components/`** — the UI, including the plain C# classes that are nothing but UI state.
   `AppLogFilter` lives here, next to `AppLoggerView`: it holds which checkboxes are ticked and
   changes whenever the panel's filtering changes, so it is not a model.
+
+State that **several features** read and write lives in `Shared/Stores` instead, so that a feature
+never has to reach into another one to learn what the user chose: `TestExecution` will read the
+selection `TestDiscovery` makes, and neither has to know the other exists.
+
+`AppLogStore` stays inside `AppLogging` even so. It is not shared state — it is the log itself, the
+substance of that one capability, and it is built out of `LogEntry` and `IAppLogSink`, which live in
+the slice. Moving it would make `Shared` depend on a feature, turning the one rule that keeps the
+slices independent upside down. What every feature does need is the **write contract**, and that
+already lives in `Shared/Logging`.
 
 ### 5. Application log (`AppLogging`) and the logging pipeline
 
@@ -205,7 +217,53 @@ alive. An unexpected one would otherwise escape the background loop and end it: 
 writing for good, report nothing, and leave its queue growing unbounded — a failure mode
 indistinguishable from the outside from a healthy log with nothing to say.
 
-### 6. Deferred decisions
+### 6. Test selection: what the user picks, and how it is kept
+
+The test explorer shows the three levels the test assemblies define — suite, fixture, test case —
+and a selector next to each. The rules are the ones the console application already taught the
+tester: selecting a group selects everything under it, and a group follows the test cases beneath
+it.
+
+**Only test cases are ever selected.** `TestRunStore` keeps the **execution paths** of the selected
+test cases and nothing else; how a suite or a fixture looks is computed from the test cases under
+it. The alternative — keeping whichever nodes the user clicked — reads well until a single test
+case is ticked: the rule that a parent follows its children would put the fixture and the suite in
+the selection too, and the runner builds its filter by matching each entry against NUnit's full
+name, so a suite entry runs the **whole suite**. The user would see one test ticked and hundreds
+run. Deriving the parents instead leaves one description of what runs, which cannot disagree with
+itself. It also needs nothing from the runner: a filter of test case paths already selects exactly
+those test cases.
+
+Identity is the execution path, not the name. The console application compares test entities by
+name, which is not unique across fixtures; making identity the same key the runner executes by
+removes a whole class of "ran the wrong test" from the start.
+
+The store keeps **paths rather than entities**, so nothing it holds can outlive the tree it came
+from. A rediscovered tree brings new instances, and a store holding the old ones would show an
+empty tree while claiming a selection. A path that matches nothing simply selects nothing, which is
+what a selection made before the test assemblies changed should do.
+
+**Per circuit, remembered in the browser.** Several testers may put a run together at once, so the
+store is scoped and neither sees the other's selection move under their hands. What was selected
+last is written to local storage through `ProtectedLocalStorage` and read back on the first render
+— the browser cannot be reached before that, which is why `LocalStorageStoreBase` separates
+`InitializeAsync` from construction. Only the selection and the IDE version are remembered; the
+discovered suites are read from the test assemblies on every start and a copy would go stale on the
+next commit.
+
+The selector is a `<button role="checkbox">` rather than `<input type="checkbox">`. A checkbox
+cannot show a partial selection from markup — `indeterminate` is a DOM property with no attribute —
+and it carries state the browser mutates on its own: completing a partly selected group leaves the
+model unchanged, so the renderer emits no edit and the box keeps whatever the browser put there
+([aspnetcore#56847](https://github.com/dotnet/aspnetcore/issues/56847)). A button holds no state of
+its own, takes `aria-checked="mixed"` as an ordinary attribute, and still answers space and enter.
+Every rule therefore lives in C#, and the browser is asked for nothing.
+
+`LocalStorageStoreBase` is a base class proven by a single store, which is one fewer than it takes
+to know what belongs in it. It is kept because the next store is expected to want exactly this, and
+is worth collapsing into `TestRunStore` if none appears.
+
+### 7. Deferred decisions
 
 - **Authentication/authorization — deliberately deferred, but mandatory before deployment.**
   Remote access to a tool that starts processes on the test machine is effectively remote code
@@ -215,8 +273,14 @@ indistinguishable from the outside from a healthy log with nothing to say.
   first non-trivial service.
 - **Layering** — no separate Application/Domain/Infrastructure projects yet; layers will be
   split out only when migration pressure justifies them.
+- **Test discovery** — `TestRunStore` is seeded with a hand-written tree (`SampleTestSuites`) so
+  the explorer has something to show. Reading the test assemblies through `INUnitTestRunnerProxy`
+  replaces that seed where it is registered, and nothing above the store has to change.
+- **Starting a test run** — `TestExecution` reads the selection from the store and hands the
+  resolved test cases to the runner; the store is the seam, so neither feature reaches into the
+  other.
 
-### 7. Dependency: DevKit.Core as a cross-repository project reference
+### 8. Dependency: DevKit.Core as a cross-repository project reference
 
 TestRunner needs small, general-purpose helpers that are not specific to test running: assertions
 that stay quiet outside a debugging session, functional result types, and similar. These already
@@ -260,6 +324,8 @@ point this decision is superseded by a package-feed one rather than amended.
   should read.
 - Filtering, configuration and provider composition are the platform's, not ours; adding a second
   destination (Seq, event log, a second file) is a registration, not a redesign.
+- The selection is expressed in test case paths alone, so what the tree shows and what the runner
+  runs cannot drift apart, and a rediscovered tree needs no reconciliation.
 
 **Negative / risks**
 
@@ -276,6 +342,12 @@ point this decision is superseded by a package-feed one rather than amended.
 - The file provider is reachable from the `AppLogging` panel (for the file path it displays), which
   is a feature reading from `Application/` — tolerated because the panel only asks where the file
   is.
+- The selection is per circuit but remembered under one browser key, so two tabs of the same browser
+  overwrite each other's remembered selection and the last write is what both see after a reload.
+- The remembered selection can only be read after the first render, so the tree is drawn once with
+  nothing selected and marked up immediately afterwards.
+- A selector that is a button and not a checkbox is ours to keep working: the appearance of all
+  three states is drawn in CSS, and only the keyboard behaviour still comes from the platform.
 - **The build needs a sibling clone.** `DevKit.Core` must sit next to `TestRunner2.0` in the same
   parent directory. A fresh clone of this repository alone does not build, and neither does CI
   without checking out both. This is the price of the DevKit.Core decision and the first thing a
