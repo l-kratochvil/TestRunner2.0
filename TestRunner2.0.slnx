@@ -11,7 +11,6 @@
     <File Path="docs/DEV-NOTES.md" />
     <File Path="docs/Issue-0002.docx" />
     <File Path="docs/ADR/ADR-0001-initial.md" />
-    <File Path="docs/ADR/ADR-0002-devkit-core-dependency.md" />
     <File Path="docs/internals/index.md" />
   </Folder>
   <Folder Name="/Tests/">

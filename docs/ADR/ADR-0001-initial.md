@@ -3,7 +3,8 @@
 - **Status:** Accepted
 - **Date:** 2026-08-17 (updated 2026-08-26: `AppLogging` extracted from `TestExecution`;
   `TestResultInspection` and `TestResultReporting` split off from `TestExecution`; updated
-  2026-08-27: logging through `Microsoft.Extensions.Logging`)
+  2026-08-27: logging through `Microsoft.Extensions.Logging`; DevKit.Core added as a
+  cross-repository project reference; updated 2026-08-28: ADR-0002 folded into this ADR)
 - **Deciders:** l-kratochvil
 
 ## Context
@@ -215,6 +216,36 @@ indistinguishable from the outside from a healthy log with nothing to say.
 - **Layering** — no separate Application/Domain/Infrastructure projects yet; layers will be
   split out only when migration pressure justifies them.
 
+### 7. Dependency: DevKit.Core as a cross-repository project reference
+
+TestRunner needs small, general-purpose helpers that are not specific to test running: assertions
+that stay quiet outside a debugging session, functional result types, and similar. These already
+exist in DevKit.Core, a separate repository maintained by the same author, alongside TestRunner and
+not derived from it. DevKit.Core is not published to any package feed: it is a plain
+multi-targeted library (`net481;net9.0;net9.0-windows;net10.0;net10.0-windows`) built with
+`LangVersion=preview`, signed with its own key, and developed in parallel with the applications
+consuming it.
+
+Three ways to consume it were considered: a project reference across repository boundaries, a
+NuGet package on a local or hosted feed referenced by version, or a git submodule pinning a commit
+inside this repository.
+
+`TestRunner.WebApp` references DevKit.Core through a **project reference to a sibling clone**:
+
+```xml
+<ProjectReference Include="..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
+```
+
+The reference is declared on `TestRunner.WebApp` alone; other projects reach the library
+transitively if they ever need it, so the dependency is stated once, where it is actually used.
+
+Both repositories are under active parallel development. A package feed would put a publish step
+between writing a helper and using it, and a submodule would put a commit-and-bump step there; both
+costs are paid on every iteration, while the benefit — a reproducible pin — matters only once the
+library settles down. **Revisit when the library stabilises:** the natural trigger is DevKit.Core
+changing less often than its consumers, or a second consumer or CI pipeline appearing. At that
+point this decision is superseded by a package-feed one rather than amended.
+
 ## Consequences
 
 **Positive**
@@ -245,6 +276,17 @@ indistinguishable from the outside from a healthy log with nothing to say.
 - The file provider is reachable from the `AppLogging` panel (for the file path it displays), which
   is a feature reading from `Application/` — tolerated because the panel only asks where the file
   is.
+- **The build needs a sibling clone.** `DevKit.Core` must sit next to `TestRunner2.0` in the same
+  parent directory. A fresh clone of this repository alone does not build, and neither does CI
+  without checking out both. This is the price of the DevKit.Core decision and the first thing a
+  newcomer hits; the README says so up front.
+- **No version pin on DevKit.Core.** TestRunner always builds against the working tree of
+  DevKit.Core, including its uncommitted changes. A breaking change there breaks the build here
+  immediately, which is useful while both are young and unhelpful once they are not.
+- **Preview language features cross the DevKit.Core boundary.** DevKit.Core uses
+  `LangVersion=preview`, and `Debug.SafeFail` is a C# 14 extension member. Consuming it from this
+  repository works because both build on the .NET 10 SDK; a future SDK split between the two would
+  surface here first.
 
 ## Alternatives considered
 
@@ -267,3 +309,10 @@ indistinguishable from the outside from a healthy log with nothing to say.
   from being chronological plain text, and rewriting the file on every trim is unaffordable. The
   alternative that keeps plain text is segment rotation, which was not worth its complexity once
   the verbose file was dropped.
+- **DevKit.Core as a NuGet package on a local or hosted feed:** rejected for now — would put a
+  publish step between writing a helper and using it, paid on every iteration while both
+  repositories are under active parallel development; worth reopening once DevKit.Core settles
+  down.
+- **DevKit.Core as a git submodule pinning a commit:** rejected for now — would put a
+  commit-and-bump step between writing a helper and using it, for the same reason as the package
+  feed; a reproducible pin only pays off once the library stabilises.
