@@ -17,22 +17,17 @@ interface SplitterOptions {
 
 const disposers = new WeakMap<HTMLElement, () => void>();
 
-export function initialize(element: unknown, options: unknown): void {
-  const handle = ofInstance(element, HTMLElement);
-
-  // A field has to be read off the value before it can be checked, and there is no reading
-  // anything off an unknown; the empty object stands in for a caller who sent nothing at all, so
-  // that every field is reported missing rather than the whole call at once.
-  const given = (options ?? {}) as Partial<Record<keyof SplitterOptions, unknown>>;
-
-  const cssVariable = ofType(given.cssVariable, "string");
-  const storageKey = ofType(given.storageKey, "string");
-  const minSize = ofType(given.minSize, "number");
-  const maxSizeRatio = ofType(given.maxSizeRatio, "number");
-  const defaultSizeRatio = ofType(given.defaultSizeRatio, "number");
+export function initialize(uElement: unknown, uOptions: unknown): void {
+  const element = ofInstance(uElement, HTMLElement);
+  const options = (uOptions ?? {}) as Partial<Record<keyof SplitterOptions, unknown>>;
+  const cssVariable = ofType(options.cssVariable, "string");
+  const storageKey = ofType(options.storageKey, "string");
+  const minSize = ofType(options.minSize, "number");
+  const maxSizeRatio = ofType(options.maxSizeRatio, "number");
+  const defaultSizeRatio = ofType(options.defaultSizeRatio, "number");
 
   if (
-    handle === null ||
+    element === null ||
     cssVariable === null ||
     storageKey === null ||
     minSize === null ||
@@ -48,8 +43,7 @@ export function initialize(element: unknown, options: unknown): void {
   // clamped, but growing the window back restores what the user chose.
   let desiredSize = 0;
 
-  const clamp = (value: number): number =>
-    Math.min(Math.max(value, minSize), window.innerHeight * maxSizeRatio);
+  const clamp = (value: number): number => Math.min(Math.max(value, minSize), window.innerHeight * maxSizeRatio);
 
   const render = (): void => root.style.setProperty(cssVariable, `${clamp(desiredSize)}px`);
 
@@ -74,10 +68,10 @@ export function initialize(element: unknown, options: unknown): void {
   const onPointerMove = (event: PointerEvent): void => setSize(startSize + (startPosition - event.clientY));
 
   const onPointerUp = (event: PointerEvent): void => {
-    handle.releasePointerCapture(event.pointerId);
-    handle.removeEventListener("pointermove", onPointerMove);
-    handle.removeEventListener("pointerup", onPointerUp);
-    handle.classList.remove("is-dragging");
+    element.releasePointerCapture(event.pointerId);
+    element.removeEventListener("pointermove", onPointerMove);
+    element.removeEventListener("pointerup", onPointerUp);
+    element.classList.remove("is-dragging");
     root.style.userSelect = "";
     remember();
   };
@@ -90,10 +84,10 @@ export function initialize(element: unknown, options: unknown): void {
     startPosition = event.clientY;
     startSize = renderedSize();
 
-    handle.setPointerCapture(event.pointerId);
-    handle.addEventListener("pointermove", onPointerMove);
-    handle.addEventListener("pointerup", onPointerUp);
-    handle.classList.add("is-dragging");
+    element.setPointerCapture(event.pointerId);
+    element.addEventListener("pointermove", onPointerMove);
+    element.addEventListener("pointerup", onPointerUp);
+    element.classList.add("is-dragging");
 
     // Without this the drag selects whatever text it sweeps across.
     root.style.userSelect = "none";
@@ -117,28 +111,26 @@ export function initialize(element: unknown, options: unknown): void {
 
   // Re-clamp so a size chosen on a large window does not swallow a small one; the chosen size
   // itself survives, so growing the window back restores it.
-  handle.addEventListener("pointerdown", onPointerDown);
-  handle.addEventListener("keydown", onKeyDown);
+  element.addEventListener("pointerdown", onPointerDown);
+  element.addEventListener("keydown", onKeyDown);
   window.addEventListener("resize", render);
 
-  disposers.set(handle, () => {
-    handle.removeEventListener("pointerdown", onPointerDown);
-    handle.removeEventListener("keydown", onKeyDown);
+  disposers.set(element, () => {
+    element.removeEventListener("pointerdown", onPointerDown);
+    element.removeEventListener("keydown", onKeyDown);
     window.removeEventListener("resize", render);
   });
 }
 
-export function dispose(element: unknown): void {
-  const handle = ofInstance(element, HTMLElement);
-
-  if (handle === null) {
+export function dispose(uElement: unknown): void {
+  const element = ofInstance(uElement, HTMLElement);
+  if (element === null) {
     return;
   }
 
-  const disposer = disposers.get(handle);
-
+  const disposer = disposers.get(element);
   if (disposer) {
     disposer();
-    disposers.delete(handle);
+    disposers.delete(element);
   }
 }

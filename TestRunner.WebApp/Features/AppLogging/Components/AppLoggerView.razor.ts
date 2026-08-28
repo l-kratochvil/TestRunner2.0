@@ -1,18 +1,14 @@
 import { ofInstance } from "/js/guards.js";
 
-export function scrollToEnd(element: unknown): void {
-    // A component can ask for this before its element is rendered, so nothing to scroll is an
-    // ordinary state rather than a broken call, and passes without a word. Anything else that is
-    // not an element is the caller's mistake, and the guard reports it.
-    if (element === null || element === undefined) {
-        return;
-    }
+export function scrollToEnd(uElement: unknown): void {
+  if (uElement === null || uElement === undefined) {
+    return;
+  }
 
-    const target = ofInstance(element, HTMLElement);
+  const element = ofInstance(uElement, HTMLElement);
+  if (element === null) {
+    return;
+  }
 
-    if (target === null) {
-        return;
-    }
-
-    target.scrollTop = target.scrollHeight;
+  element.scrollTop = element.scrollHeight;
 }

@@ -2,8 +2,8 @@
 //
 //   import { ofInstance, ofType } from "/js/guards.js";
 //
-//   export function scrollTo(element: unknown): void {
-//     const target = ofInstance(element, HTMLElement);
+//   export function scrollTo(uElement: unknown): void {
+//     const target = ofInstance(uElement, HTMLElement);
 //
 //     if (target === null) {
 //       return;
@@ -46,10 +46,7 @@ let log: Logger | null = null;
  *
  * @returns The value, typed as what was asked for, or null if it is something else.
  */
-export function ofType<TName extends keyof TypeByName>(
-  value: unknown,
-  type: TName,
-): TypeByName[TName] | null {
+export function ofType<TName extends keyof TypeByName>(value: unknown, type: TName): TypeByName[TName] | null {
   if (typeof value === type) {
     return value as TypeByName[TName];
   }
@@ -66,10 +63,7 @@ export function ofType<TName extends keyof TypeByName>(
  * TypeScript erases it, leaving nothing at runtime to check against.
  * @returns The value, typed as an instance, or null if it is not one.
  */
-export function ofInstance<T>(
-  value: unknown,
-  constructor: abstract new (...args: never[]) => T,
-): T | null {
+export function ofInstance<T>(value: unknown, constructor: abstract new (...args: never[]) => T): T | null {
   if (value instanceof constructor) {
     return value;
   }

@@ -9,6 +9,10 @@
 // rewrites it to the fingerprinted URL, so every spelling of it resolves to the same module.
 // Reaching the file by a path the import map does not know would load a second copy, holding a
 // reference of its own that nobody ever registers.
+//
+// register and unregister are called by the JsBridge module rather than by .NET directly, so the
+// reference arriving here has already been checked and is typed. That module is the boundary; this
+// one is a script like any other on this side of it.
 
 /** Severity a diagnostic can carry, mirroring what BrowserLogger maps onto LogLevel. */
 type Level = "debug" | "info" | "warn" | "error";
@@ -21,8 +25,11 @@ interface BrowserDiagnostic {
   detail: string | null;
 }
 
-/** The DotNetObjectReference<BrowserLogger> the JsBridge component hands over. */
-interface BrowserLoggerReference {
+/**
+ * The DotNetObjectReference<BrowserLogger> the JsBridge module hands over. Exported for that
+ * module, which takes the reference from .NET as unknown and needs this to name what it checked.
+ */
+export interface BrowserLoggerReference {
   invokeMethodAsync(identifier: "Log", diagnostic: BrowserDiagnostic): Promise<void>;
 }
 
@@ -41,6 +48,7 @@ const unknownModule = "(unknown)";
 const maxCaughtErrors = 100;
 
 let reference: BrowserLoggerReference | null = null;
+let isWatching = false;
 let caughtErrors = 0;
 
 const log = createLogger(import.meta.url);
@@ -48,30 +56,41 @@ const log = createLogger(import.meta.url);
 /**
  * Takes the reference the .NET side is reachable through, and starts watching for the errors
  * nobody reports by hand.
+ *
+ * Called by the JsBridge module, which is what .NET reaches and what has already checked the
+ * reference. Registering is paired with unregister and never nested, but it does run more than
+ * once per page: a resumed circuit builds the bridge component anew, and arrives with a reference
+ * of its own.
+ *
+ * @param logger - The reference every diagnostic is sent through, replacing any earlier one.
  */
-export function register(logger: unknown): void {
-  // BrowserLoggerReference is an interface, so there is no class to hold a value against: what
-  // makes one usable here is the single method every call back into .NET goes through. Checking
-  // it by hand rather than through /js/guards.js keeps that module from having to grow a way to
-  // describe a shape for this one caller.
-  if (typeof (logger as BrowserLoggerReference | null)?.invokeMethodAsync !== "function") {
-    log.warn("Ignored a register call: the argument is not a BrowserLogger reference.");
+export function register(logger: BrowserLoggerReference): void {
+  // Always the newest reference. Refusing this one would leave the dead circuit's reference in
+  // place, and every diagnostic from here on would quietly go to the console instead of the log.
+  reference = logger;
+
+  // The handlers stay for the lifetime of the page, past the circuit that first asked for them.
+  // Nothing is lost by that: send() falls back to the console once the reference is gone, which
+  // after a circuit dies is the only place left to write to anyway.
+  if (isWatching) {
     return;
   }
-
-  reference = logger as BrowserLoggerReference;
 
   // addEventListener rather than window.onerror, which is a single slot: assigning it would evict
   // whatever handler is already there, Blazor's included.
   window.addEventListener("error", onError);
   window.addEventListener("unhandledrejection", onUnhandledRejection);
+
+  isWatching = true;
 }
 
-/** Gives the reference up, before the component disposes it. */
+/**
+ * Gives the reference up, before the component disposes it.
+ *
+ * Giving up a reference that was never taken, or taking it away twice, asks for the state this
+ * already leaves behind - so neither is a fault worth reporting.
+ */
 export function unregister(): void {
-  window.removeEventListener("error", onError);
-  window.removeEventListener("unhandledrejection", onUnhandledRejection);
-
   reference = null;
 }
 

@@ -9,7 +9,7 @@
 @inject BrowserLogger BrowserLogger
 
 @code {
-    private const string ModulePath = "/js/logging.js";
+    private const string ModulePath = "./Shared/JsInterop/JsBridge.razor.js";
 
     private DotNetObjectReference<BrowserLogger>? loggerReference;
     private JsModuleInterop? jsModuleInterop;

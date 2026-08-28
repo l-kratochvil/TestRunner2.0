@@ -11,9 +11,10 @@ function is named by a string and its arguments travel as JSON. Nothing on eithe
 the two agree — a renamed parameter, a changed component, a mistyped call site, and the browser
 receives whatever was sent.
 
-Declare each such parameter as `unknown`, then check it with the
-[guards module](../../TestRunner.WebApp/Browser/guards.ts) (`/js/guards.js`), which also reports a
-mismatch to the application log.
+Declare each such parameter as `unknown` and name it with a `u` prefix (`uElement`, `uOptions`), so
+that everywhere it is used, before the guard has run, the name itself says the value is still
+unchecked. Then check it with the [guards module](../../TestRunner.WebApp/Browser/guards.ts)
+(`/js/guards.js`), which also reports a mismatch to the application log.
 
 If a check fails, return immediately: `null` means the call was never valid, not a value to build
 on. A function that owes a value returns whatever means "nothing happened" instead.
