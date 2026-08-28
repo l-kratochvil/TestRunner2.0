@@ -1,15 +1,3 @@
-// The runtime checks a script guards the .NET boundary with, see docs/guidelines/js-guidelines.md:
-//
-//   import { ofInstance, ofType } from "/js/guards.js";
-//
-//   export function scrollTo(uElement: unknown): void {
-//     const target = ofInstance(uElement, HTMLElement);
-//
-//     if (target === null) {
-//       return;
-//     }
-//     ...
-//
 // A check that fails reports the mismatch and answers null; it is up to the caller to leave. That
 // keeps the decision where the context is - only the function itself knows whether a value it did
 // not get is a broken call or an ordinary one.

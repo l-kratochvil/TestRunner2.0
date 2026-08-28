@@ -14,8 +14,9 @@ Every `{Component}.razor.ts` and every script under `Browser/` is TypeScript, co
 JavaScript before the browser sees it.
 
 - **`tsconfig.json`** compiles each `.razor.ts` in place, next to its component.
-- **`tsconfig.shared.json`** compiles the shared modules under `Browser/` into `wwwroot/js`
-  instead.
+- **`Browser/tsconfig.json`** compiles the shared modules under `Browser/` into `wwwroot/js`
+  instead. It lives in that folder, under that name, because the editor's language service only
+  looks for `tsconfig.json` when it decides which project an open file belongs to.
 - **`npm run build`** runs both compilations for both tsconfig files.
 - **The `CompileTypeScript` MSBuild target** runs that npm script as part of every `dotnet build`,
   so the front-end compiles automatically.

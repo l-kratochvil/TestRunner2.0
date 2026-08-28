@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.shared.json && tsc -p tsconfig.json"
+    "build": "tsc -p Browser/tsconfig.json && tsc -p tsconfig.json"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

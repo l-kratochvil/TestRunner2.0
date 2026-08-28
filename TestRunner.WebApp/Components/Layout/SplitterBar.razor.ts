@@ -3,6 +3,7 @@
 
 import { createLogger } from "/js/logging.js";
 import { ofInstance, ofType } from "/js/guards.js";
+import { getItem, setItem } from "/js/storage.js";
 
 const log = createLogger(import.meta.url);
 
@@ -44,22 +45,28 @@ export function initialize(uElement: unknown, uOptions: unknown): void {
   let desiredSize = 0;
 
   const clamp = (value: number): number => Math.min(Math.max(value, minSize), window.innerHeight * maxSizeRatio);
-
   const render = (): void => root.style.setProperty(cssVariable, `${clamp(desiredSize)}px`);
-
   const renderedSize = (): number => parseFloat(getComputedStyle(root).getPropertyValue(cssVariable));
-
   const setSize = (value: number): void => {
     desiredSize = value;
     render();
   };
 
-  const remember = (): void => window.localStorage.setItem(storageKey, String(desiredSize));
+  // The splitter works without storage - the size is only forgotten between visits - so a
+  // failure reaching it must never reach the drag or the keystroke that caused it; the storage
+  // module already swallows that failure and reports it once.
+  const remember = (): void => setItem(storageKey, String(desiredSize));
 
-  const stored = parseFloat(window.localStorage.getItem(storageKey) ?? "");
-  setSize(Number.isFinite(stored) ? stored : window.innerHeight * defaultSizeRatio);
+  /** The size of an earlier visit, or null if none was stored or it cannot be read back. */
+  const recall = (): number | null => {
+    // Anything but a number is a value this script never wrote: storage is shared with every
+    // other script on the origin, and survives the versions of this one that come and go.
+    const stored = parseFloat(getItem(storageKey) ?? "");
 
-  log.debug(`Splitter initialized on ${cssVariable} at ${desiredSize}px.`);
+    return Number.isFinite(stored) ? stored : null;
+  };
+
+  setSize(recall() ?? window.innerHeight * defaultSizeRatio);
 
   let startPosition = 0;
   let startSize = 0;

@@ -8,17 +8,16 @@
     "noEmitOnError": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": false,
-    "baseUrl": ".",
     // A shared module is imported by the URL it is served under, so that every script spells it
     // the same way and the browser keeps one instance of it. TypeScript would read that as a path
-    // on disk, so it is pointed at the declarations tsconfig.shared.json emits alongside the .js.
+    // on disk, so it is pointed at the declarations Browser/tsconfig.json emits alongside the .js.
     "paths": {
-      "/js/*": ["obj/browser-types/*"]
+      "/js/*": ["./obj/browser-types/*"]
     }
   },
   // Any .ts anywhere in the project compiles in place to a .js next to it - for collocated Razor
   // scripts ({Component}.razor.ts) that sibling location is where the Blazor SDK expects the .js.
-  // Browser holds the shared modules, which tsconfig.shared.json builds into wwwroot/js instead.
+  // Browser holds the shared modules, which Browser/tsconfig.json builds into wwwroot/js instead.
   // wwwroot is vendored or generated code, bin/obj are build outputs.
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "bin", "obj", "wwwroot", "Browser"]
