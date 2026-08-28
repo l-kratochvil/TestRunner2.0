@@ -54,11 +54,13 @@ public static class InitServicesExtension
     /// </summary>
     /// <remarks>
     /// The JS module wrappers are scoped because the <see cref="IJSRuntime"/> they are built
-    /// around is, see <see cref="JsModuleInteropFactory"/>.
+    /// around is, see <see cref="JsModuleInteropFactory"/>. <see cref="BrowserLogger"/> holds no
+    /// circuit of its own — only a logger — so one instance serves every browser.
     /// </remarks>
     /// <param name="services">Service collection to register into.</param>
     /// <returns>The service collection, to allow chaining.</returns>
     public static IServiceCollection InitSharedServices(this IServiceCollection services)
         => services
-            .AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>();
+            .AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>()
+            .AddSingleton<BrowserLogger>();
 }

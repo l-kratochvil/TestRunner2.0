@@ -5,6 +5,9 @@
 @inject NavigationManager Navigation
 
 <div class="app-shell">
+    @* Renders nothing; it is here so that the browser has one bridge back into .NET per circuit. *@
+    <JsBridge />
+
     <header class="app-header">
         <MainMenu />
     </header>

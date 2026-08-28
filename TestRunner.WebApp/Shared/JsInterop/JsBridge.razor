@@ -1,0 +1,56 @@
+@* Hands the browser its way back into .NET. Renders nothing: it is here for its lifetime, not for
+   its markup, and it belongs to the shell so that exactly one bridge exists per circuit. *@
+
+@implements IAsyncDisposable
+
+@using Microsoft.JSInterop
+
+@inject IJsModuleInteropFactory JsModuleInteropFactory
+@inject BrowserLogger BrowserLogger
+
+@code {
+    private const string ModulePath = "./Shared/JsInterop/JsBridge.razor.js";
+
+    private DotNetObjectReference<BrowserLogger>? loggerReference;
+    private JsModuleInterop? jsModuleInterop;
+    private bool isRegistered;
+
+    private JsModuleInterop JsModuleInterop
+        => this.jsModuleInterop ??= this.JsModuleInteropFactory.Create(ModulePath);
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        // The module is told first, and only then does the reference go away. The other order would
+        // leave the module holding a dead reference: its next call would reject, the rejection would
+        // reach the very handler that reports through it, and the failure would chase its own tail.
+        if (this.isRegistered)
+        {
+            await this.JsModuleInterop.InvokeVoidSafeAsync("unregister");
+        }
+
+        // A component that never reached the browser never asked for the module either, and
+        // creating a wrapper only to dispose it would need a factory it was never given.
+        if (this.jsModuleInterop is not null)
+        {
+            await this.jsModuleInterop.DisposeAsync();
+        }
+
+        this.loggerReference?.Dispose();
+    }
+
+    /// <inheritdoc/>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        this.loggerReference = DotNetObjectReference.Create(this.BrowserLogger);
+
+        await this.JsModuleInterop.InvokeVoidSafeAsync("register", this.loggerReference);
+
+        this.isRegistered = true;
+    }
+}

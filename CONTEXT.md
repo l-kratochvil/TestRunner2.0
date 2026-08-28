@@ -17,6 +17,7 @@ mean something else here.
 | **Severity**     | How serious an entry is, see `LogSeverity`. A successful outcome is reported as normal progress, there is no `Success`.                        | "level", "log level" |
 | **Log source**   | The channel an entry belongs to. A plain string, so that entries arriving from outside can be routed without a mapping; known ones: `LogSources`. | "category", "logger" |
 | **Diagnostics**  | Developer-facing records written through `ILogger`. They reach the log file but never the log.                                                  | "log", "debug log"   |
+| **Browser diagnostics** | Diagnostics about what happened in the browser, as opposed to on the test machine. Written by the scripts of the front-end, never by the tester. | "client log", "JS log" |
 | **Log file**     | The daily file on disk. A superset of the log: it also holds diagnostics and framework records, see ADR-0001.                                   | "log", "test result" |
 | **Test station** | The hardware station a test run is executed against.                                                                                           |                      |
 | **Options**      | A type registered in DI and bound from configuration that configures one service.                                                              | "settings", "config" |
