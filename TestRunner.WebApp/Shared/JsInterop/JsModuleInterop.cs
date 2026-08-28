@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
 /// <summary>
-/// Wraps calls into a collocated .razor.js module so the module path is spelled out in exactly one
-/// place. Created through <see cref="IJsModuleInteropFactory"/>, then owned and disposed by the
+/// Wraps calls into a JavaScript module so the module path is spelled out in exactly one place.
+/// Created through <see cref="IJsModuleInteropFactory"/>, then owned and disposed by the
 /// component that asked for it (it is not registered in DI itself), following the pattern in
 /// https://learn.microsoft.com/aspnet/core/blazor/javascript-interoperability/.
 /// </summary>
@@ -34,7 +34,7 @@ public sealed class JsModuleInterop(
     /// of throwing.
     /// </summary>
     /// <remarks>
-    /// Importing the module is part of the call, so a missing or broken .razor.js is reported the
+    /// Importing the module is part of the call, so a missing or broken module is reported the
     /// same way. A failed import is remembered: every later call on this instance fails again
     /// instead of retrying, because a module that could not be imported is a build or deployment
     /// fault and not a transient outage.
@@ -120,7 +120,7 @@ public sealed class JsModuleInterop(
     /// <c>Debug.SafeFail</c>.
     /// </summary>
     /// <remarks>
-    /// This never reaches the application log the tester reads: a broken .razor.js is developer
+    /// This never reaches the application log the tester reads: a broken module is developer
     /// detail the tester can do nothing about.
     /// </remarks>
     /// <param name="action">What failed, worded to follow "Failed to".</param>

@@ -36,10 +36,14 @@
     <!-- On a fresh clone the compiled .js files do not exist yet when MSBuild evaluates its item
          globs, so they would miss this build's static web asset scan. Re-globbing here (at target
          execution time, after tsc ran) hands the freshly generated files to
-         ResolveJSModuleStaticWebAssets, which reads @(Content) and @(None) when it executes. -->
+         ResolveJSModuleStaticWebAssets, which reads @(Content) and @(None) when it executes.
+         The shared modules under wwwroot/js need the same treatment, but as Content: wwwroot is
+         what makes them reachable at all, and only a static web asset gets a fingerprint and an
+         import map entry. -->
     <ItemGroup>
       <None Include="**\*.razor.js;**\*.cshtml.js"
             Exclude="@(None);@(Content);bin\**;obj\**;node_modules\**;wwwroot\**" />
+      <Content Include="wwwroot\js\**\*.js" Exclude="@(Content)" />
     </ItemGroup>
   </Target>
 

@@ -1,6 +1,10 @@
 // Dragging runs entirely in the browser: on Blazor Server every pointermove would otherwise be a
 // round-trip over SignalR and the bar would visibly lag behind the cursor.
 
+import { createLogger } from "/js/logging.js";
+
+const log = createLogger(import.meta.url);
+
 interface SplitterOptions {
   cssVariable: string;
   storageKey: string;
@@ -34,6 +38,8 @@ export function initialize(handle: HTMLElement, options: SplitterOptions): void 
 
   const stored = parseFloat(window.localStorage.getItem(options.storageKey) ?? "");
   setSize(Number.isFinite(stored) ? stored : window.innerHeight * options.defaultSizeRatio);
+
+  log.debug(`Splitter initialized on ${options.cssVariable} at ${desiredSize}px.`);
 
   let startPosition = 0;
   let startSize = 0;

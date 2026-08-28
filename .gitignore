@@ -295,6 +295,10 @@ TestRunner.WebApp/**/*.js
 TestRunner.WebApp/**/*.js.map
 !TestRunner.WebApp/wwwroot/**
 
+# The one part of wwwroot that is generated: the shared modules built out of TestRunner.WebApp/
+# Browser, which have to land under wwwroot to be served at all. Edit them there, never here.
+TestRunner.WebApp/wwwroot/js/
+
 # Visual Studio 6 build log
 *.plg
 

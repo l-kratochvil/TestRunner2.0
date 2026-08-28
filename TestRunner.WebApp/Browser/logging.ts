@@ -1,7 +1,7 @@
 // The way a front-end script writes into the log file. A module asks for a logger once, naming
 // itself with import.meta.url:
 //
-//   import { createLogger } from "../../Shared/JsInterop/JsBridge.razor.js";
+//   import { createLogger } from "/js/logging.js";
 //   const log = createLogger(import.meta.url);
 //
 // The reference below is module state, so it only works while there is one instance of this file
@@ -151,8 +151,8 @@ function toModuleName(url: string): string {
 
     // The import map rewrites module paths to fingerprinted ones, so the URL a module knows itself
     // by carries a hash of its content: left in, a script would change its name in the log every
-    // time it is edited.
-    return path.replace(/(\.[a-z0-9]+)?\.razor\.js$/, "") || unknownModule;
+    // time it is edited. The .razor part is optional because a shared module has none.
+    return path.replace(/(\.[a-z0-9]+)?(\.razor)?\.js$/, "") || unknownModule;
   } catch {
     // Not every location a browser reports parses as a URL, and the raw value still says more than
     // "(unknown)" would.

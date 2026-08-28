@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "noEmitOnError": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": false,
+    "rootDir": "Browser",
+    "outDir": "wwwroot/js",
+    // The collocated build resolves "/js/*.js" against these declarations instead of against the
+    // sources, so it treats a shared module as something already built rather than compiling a
+    // second copy of it next to the .ts. They are intermediate output and stay out of wwwroot,
+    // which is published as it stands and would serve them to the browser.
+    "declaration": true,
+    "declarationDir": "obj/browser-types"
+  },
+  // Shared modules, imported by other scripts rather than loaded for a component of their own.
+  // Only *.razor.js becomes a static web asset (see TestRunner.WebApp.csproj), so these cannot
+  // compile in place the way the collocated scripts do: they are emitted into wwwroot, which is
+  // served as it stands. That is also why they are authored here and not in wwwroot directly - a
+  // .ts under wwwroot would be published and served as source.
+  "include": ["Browser/**/*.ts"]
+}
