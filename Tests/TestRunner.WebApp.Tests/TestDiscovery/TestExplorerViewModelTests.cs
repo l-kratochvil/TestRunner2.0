@@ -19,7 +19,7 @@ public class TestExplorerViewModelTests
     [SetUp]
     public void SetUp()
     {
-        this.unit = TestExplorerViewModel.Create([CreateTestSuite()]);
+        this.unit = new TestExplorerViewModel([CreateTestSuite()]);
     }
 
     [Test]
@@ -32,21 +32,21 @@ public class TestExplorerViewModelTests
         this.FindNode(GivenFirstFixturePath).Toggle();
 
         // Then:
-        Assert.That(this.unit.SelectedTestCasesPaths, Is.EqualTo(expectedPaths));
+        Assert.That(this.SelectedPaths(), Is.EqualTo(expectedPaths));
     }
 
     [Test]
     public void Toggle__WhenASelectedFixtureIsToggledAgain__ThenShouldClearEveryTestCaseUnderIt()
     {
         // Given:
-        TestNodeViewModel givenFixture = this.FindNode(GivenFirstFixturePath);
+        TestTreeNodeData givenFixture = this.FindNode(GivenFirstFixturePath);
         givenFixture.Toggle();
 
         // When:
         givenFixture.Toggle();
 
         // Then:
-        Assert.That(this.unit.SelectedTestCasesPaths, Is.Empty);
+        Assert.That(this.SelectedPaths(), Is.Empty);
     }
 
     [Test]
@@ -62,11 +62,11 @@ public class TestExplorerViewModelTests
         this.FindNode(GivenFirstFixturePath).Toggle();
 
         // Then:
-        Assert.That(this.unit.SelectedTestCasesPaths, Is.EqualTo(expectedPaths));
+        Assert.That(this.SelectedPaths(), Is.EqualTo(expectedPaths));
     }
 
     [TestCaseSource(nameof(CheckStateCases))]
-    public TestNodeCheckState CheckState__WhenTestCasesAreSelected__ThenShouldFollowThemOnTheFixture(
+    public TestTreeNodeData.State CheckState__WhenTestCasesAreSelected__ThenShouldFollowThemOnTheFixture(
         string[] givenSelectedPaths)
     {
         // When:
@@ -80,7 +80,7 @@ public class TestExplorerViewModelTests
     public void CheckState__WhenTheLastSelectedTestCaseIsCleared__ThenShouldClearTheGroupsAboveIt()
     {
         // Given:
-        TestNodeViewModel givenTestCase = this.FindNode(GivenFirstCasePath);
+        TestTreeNodeData givenTestCase = this.FindNode(GivenFirstCasePath);
         givenTestCase.Toggle();
 
         // When:
@@ -89,8 +89,8 @@ public class TestExplorerViewModelTests
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(this.FindNode(GivenFirstFixturePath).CheckState, Is.EqualTo(TestNodeCheckState.Unchecked));
-            Assert.That(this.FindNode(GivenSuitePath).CheckState, Is.EqualTo(TestNodeCheckState.Unchecked));
+            Assert.That(this.FindNode(GivenFirstFixturePath).CheckState, Is.EqualTo(TestTreeNodeData.State.Unchecked));
+            Assert.That(this.FindNode(GivenSuitePath).CheckState, Is.EqualTo(TestTreeNodeData.State.Unchecked));
         }
     }
 
@@ -101,11 +101,11 @@ public class TestExplorerViewModelTests
         this.FindNode(GivenFirstFixturePath).Toggle();
 
         // Then:
-        Assert.That(this.FindNode(GivenSuitePath).CheckState, Is.EqualTo(TestNodeCheckState.Mixed));
+        Assert.That(this.FindNode(GivenSuitePath).CheckState, Is.EqualTo(TestTreeNodeData.State.Mixed));
     }
 
     [Test]
-    public void SelectedTestCasesPaths__WhenTheWholeSuiteIsSelected__ThenShouldHoldTestCasesOnly()
+    public void SelectedTestCases__WhenTheWholeSuiteIsSelected__ThenShouldHoldTestCasesOnly()
     {
         // Given:
         // Groups are never part of the selection: a suite path would run everything under it, which
@@ -116,7 +116,7 @@ public class TestExplorerViewModelTests
         this.FindNode(GivenSuitePath).Toggle();
 
         // Then:
-        Assert.That(this.unit.SelectedTestCasesPaths, Is.EqualTo(expectedPaths));
+        Assert.That(this.SelectedPaths(), Is.EqualTo(expectedPaths));
     }
 
     [Test]
@@ -132,7 +132,7 @@ public class TestExplorerViewModelTests
         this.unit.ApplySelection(givenPaths);
 
         // Then:
-        Assert.That(this.unit.SelectedTestCasesPaths, Is.EqualTo(expectedPaths));
+        Assert.That(this.SelectedPaths(), Is.EqualTo(expectedPaths));
     }
 
     [Test]
@@ -155,20 +155,20 @@ public class TestExplorerViewModelTests
 
     private static IEnumerable<TestCaseData> CheckStateCases()
     {
-        const string Prefix = nameof(TestNodeViewModel.CheckState);
+        const string Prefix = nameof(TestTreeNodeData.CheckState);
 
         yield return new TestCaseData(new object[] { Array.Empty<string>() })
             .SetName(Prefix + "__WhenNoTestCaseIsSelected__ThenShouldBe_Unchecked")
-            .Returns(TestNodeCheckState.Unchecked);
+            .Returns(TestTreeNodeData.State.Unchecked);
 
         yield return new TestCaseData(new object[] { new[] { GivenFirstCasePath } })
             .SetName(Prefix + "__WhenSomeTestCasesAreSelected__ThenShouldBe_Mixed")
-            .Returns(TestNodeCheckState.Mixed);
+            .Returns(TestTreeNodeData.State.Mixed);
 
         yield return new TestCaseData(
                 new object[] { new[] { GivenFirstCasePath, GivenSecondCasePath } })
             .SetName(Prefix + "__WhenEveryTestCaseIsSelected__ThenShouldBe_Checked")
-            .Returns(TestNodeCheckState.Checked);
+            .Returns(TestTreeNodeData.State.Checked);
     }
 
     private static TestSuiteEntity CreateTestSuite()
@@ -199,8 +199,11 @@ public class TestExplorerViewModelTests
             name: name,
             executionPath: executionPath);
 
-    private TestNodeViewModel FindNode(string executionPath)
+    private TestTreeNodeData FindNode(string executionPath)
         => this.unit.Roots
             .SelectMany(root => root.SelfAndDescendants())
             .Single(node => node.ExecutionPath == executionPath);
+
+    private IEnumerable<string> SelectedPaths()
+        => this.unit.SelectedTestCases.Select(testCase => testCase.ExecutionPath);
 }

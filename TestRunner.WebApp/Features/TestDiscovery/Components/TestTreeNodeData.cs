@@ -11,18 +11,40 @@ using TestRunner.Common.Model;
 /// test cases beneath it. There is therefore nothing to keep in step — a parent cannot claim to be
 /// selected while its children say otherwise, because it never holds an opinion of its own.
 /// </remarks>
-public sealed class TestNodeViewModel
+public sealed class TestTreeNodeData
 {
-    private readonly List<TestNodeViewModel> children = [];
+    private readonly List<TestTreeNodeData> children = [];
 
     private bool isChecked;
 
-    private TestNodeViewModel(TestEntity entity, bool isTestCase)
+    private TestTreeNodeData(TestEntity entity, bool isTestCase)
     {
+        this.Entity = entity;
         this.Name = entity.Name;
         this.ExecutionPath = entity.ExecutionPath;
         this.IsTestCase = isTestCase;
     }
+
+    /// <summary>
+    /// How a node of the test tree appears to be selected.
+    /// </summary>
+    public enum State
+    {
+        /// <summary>Nothing beneath the node is selected.</summary>
+        Unchecked,
+
+        /// <summary>Some but not all of the test cases beneath the node are selected.</summary>
+        Mixed,
+
+        /// <summary>The node, or everything beneath it, is selected.</summary>
+        Checked,
+    }
+
+    /// <summary>
+    /// Gets the discovered test entity the node was built from, which is what a selection is
+    /// ultimately made of and what the runner is asked to run.
+    /// </summary>
+    public TestEntity Entity { get; }
 
     /// <summary>Gets the name shown to the user.</summary>
     public string Name { get; }
@@ -34,58 +56,61 @@ public sealed class TestNodeViewModel
     public bool IsTestCase { get; }
 
     /// <summary>Gets the nodes nested under this one.</summary>
-    public IReadOnlyList<TestNodeViewModel> Children => this.children;
+    public IReadOnlyList<TestTreeNodeData> Children
+        => this.children;
 
     /// <summary>Gets or sets a value indicating whether the nested nodes are shown.</summary>
     public bool IsExpanded { get; set; }
 
     /// <summary>Gets a value indicating whether the node has anything nested under it.</summary>
-    public bool HasChildren => this.children.Count > 0;
+    public bool HasChildren
+        => this.children.Count > 0;
 
     /// <summary>
     /// Gets a value indicating whether the node can be selected at all. An empty group has no test
     /// case to select and would be a control that does nothing.
     /// </summary>
-    public bool CanCheck => this.IsTestCase || this.HasChildren;
+    public bool CanCheck
+        => this.IsTestCase || this.HasChildren;
 
     /// <summary>
     /// Gets how the node appears to be selected.
     /// </summary>
-    public TestNodeCheckState CheckState
+    public State CheckState
     {
         get
         {
             if (!this.HasChildren)
             {
-                return this.isChecked ? TestNodeCheckState.Checked : TestNodeCheckState.Unchecked;
+                return this.isChecked ? State.Checked : State.Unchecked;
             }
 
             bool hasChecked = false;
             bool hasUnchecked = false;
 
-            foreach (TestNodeViewModel child in this.children)
+            foreach (TestTreeNodeData child in this.children)
             {
                 switch (child.CheckState)
                 {
-                    case TestNodeCheckState.Checked:
+                    case State.Checked:
                         hasChecked = true;
                         break;
 
-                    case TestNodeCheckState.Unchecked:
+                    case State.Unchecked:
                         hasUnchecked = true;
                         break;
 
                     default:
-                        return TestNodeCheckState.Mixed;
+                        return State.Mixed;
                 }
 
                 if (hasChecked && hasUnchecked)
                 {
-                    return TestNodeCheckState.Mixed;
+                    return State.Mixed;
                 }
             }
 
-            return hasChecked ? TestNodeCheckState.Checked : TestNodeCheckState.Unchecked;
+            return hasChecked ? State.Checked : State.Unchecked;
         }
     }
 
@@ -94,9 +119,9 @@ public sealed class TestNodeViewModel
     /// </summary>
     /// <param name="testSuite">Test suite to build from.</param>
     /// <returns>The node standing for the test suite.</returns>
-    public static TestNodeViewModel CreateFrom(TestSuiteEntity testSuite)
+    public static TestTreeNodeData Create(TestSuiteEntity testSuite)
     {
-        var node = new TestNodeViewModel(testSuite, isTestCase: false) { IsExpanded = true };
+        var node = new TestTreeNodeData(testSuite, isTestCase: false) { IsExpanded = true };
 
         node.children.AddRange(testSuite.TestFixtures.Select(CreateFrom));
 
@@ -111,7 +136,7 @@ public sealed class TestNodeViewModel
     {
         if (this.HasChildren)
         {
-            foreach (TestNodeViewModel child in this.children)
+            foreach (TestTreeNodeData child in this.children)
             {
                 child.SetChecked(isSelected);
             }
@@ -130,21 +155,21 @@ public sealed class TestNodeViewModel
     /// follows a partial selection adds to it instead of undoing work already done.
     /// </summary>
     public void Toggle()
-        => this.SetChecked(this.CheckState != TestNodeCheckState.Checked);
+        => this.SetChecked(this.CheckState != State.Checked);
 
     /// <summary>
     /// Walks the node and everything below it.
     /// </summary>
     /// <returns>The node followed by its descendants.</returns>
-    public IEnumerable<TestNodeViewModel> SelfAndDescendants()
-        => [this, .. this.children.SelectMany(child => child.SelfAndDescendants())];
+    public IEnumerable<TestTreeNodeData> SelfAndDescendants()
+        => [this, ..this.children.SelectMany(child => child.SelfAndDescendants())];
 
-    private static TestNodeViewModel CreateFrom(TestFixtureEntity testFixture)
+    private static TestTreeNodeData CreateFrom(TestFixtureEntity testFixture)
     {
-        var node = new TestNodeViewModel(testFixture, isTestCase: false);
+        var node = new TestTreeNodeData(testFixture, isTestCase: false);
 
         node.children.AddRange(testFixture.TestCases.Select(
-            static testCase => new TestNodeViewModel(testCase, isTestCase: true)));
+            static testCase => new TestTreeNodeData(testCase, isTestCase: true)));
 
         return node;
     }

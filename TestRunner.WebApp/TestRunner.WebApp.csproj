@@ -5,7 +5,14 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <!-- The out-of-process NUnit proxy server is launched from this application, so its output
+         (Exchange) has to sit next to ours. -->
+    <IncludeNUnitTestRunnerProxyDirOutput>true</IncludeNUnitTestRunnerProxyDirOutput>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StreamJsonRpc" Version="2.21.10" />
+  </ItemGroup>
 
   <ItemGroup>
     <!-- DevKit.Core lives in a sibling clone, see docs/ADR/ADR-0001-initial.md (section 7). -->

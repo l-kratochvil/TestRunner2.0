@@ -1,16 +1,23 @@
 using TestRunner.WebApp.Application.DependencyInjection;
 using TestRunner.WebApp.Application.Logging;
 using TestRunner.WebApp.Components;
+using TestRunner.WebApp.Shared.NUnitTestRunner;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// The NUnit runner lives in a process of its own, started here so that it is reachable for as long
+// as the application is. Failing to reach it at all means the build did not put the server next to
+// us or that it cannot run here, which is a fault of the installation rather than of the test run:
+// starting up and pretending there are simply no tests would hide it.
+await using var nunitTestRunnerProxyConnector = await NUnitTestRunnerProxyConnector.ConnectAsync();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Logging.InitFileLogger();
-builder.Services.InitAppLogging();
-builder.Services.InitStores();
+builder.Services.AddSingleton(nunitTestRunnerProxyConnector.Proxy);
+builder.Services.InitFeatures();
 builder.Services.InitSharedServices();
 
 var app = builder.Build();

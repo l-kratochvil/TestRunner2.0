@@ -11,32 +11,24 @@ using TestRunner.Common.Model;
 /// Holds nothing but UI state and knows nothing about where the selection is kept, so the rules of
 /// selecting can be exercised on their own.
 /// </remarks>
-public sealed class TestExplorerViewModel
+/// <remarks>
+/// Builds the tree from the discovered test suites.
+/// </remarks>
+/// <param name="testSuites">Test suites to show.</param>
+public sealed class TestExplorerViewModel(IEnumerable<TestSuiteEntity> testSuites)
 {
-    private TestExplorerViewModel(IReadOnlyList<TestNodeViewModel> roots)
-    {
-        this.Roots = roots;
-    }
-
     /// <summary>Gets the nodes standing for the discovered test suites.</summary>
-    public IReadOnlyList<TestNodeViewModel> Roots { get; }
+    public IReadOnlyList<TestTreeNodeData> Roots { get; } = [..testSuites.Select(TestTreeNodeData.Create)];
 
     /// <summary>Gets a value indicating whether there is any test to show.</summary>
-    public bool IsEmpty => this.Roots.Count == 0;
+    public bool IsEmpty
+        => this.Roots.Count == 0;
 
     /// <summary>
-    /// Gets the execution paths of the selected test cases, which is what a test run is made of.
+    /// Gets the selected test cases, which is what a test run is made of.
     /// </summary>
-    public IReadOnlyList<string> SelectedTestCasesPaths
-        => [.. this.SelectedTestCaseNodes().Select(node => node.ExecutionPath)];
-
-    /// <summary>
-    /// Builds the tree from the discovered test suites.
-    /// </summary>
-    /// <param name="testSuites">Test suites to show.</param>
-    /// <returns>The tree.</returns>
-    public static TestExplorerViewModel Create(IEnumerable<TestSuiteEntity> testSuites)
-        => new([.. testSuites.Select(TestNodeViewModel.CreateFrom)]);
+    public IReadOnlyList<TestCaseEntity> SelectedTestCases
+        => [..this.SelectedTestCaseNodes().Select(node => node.Entity).OfType<TestCaseEntity>()];
 
     /// <summary>
     /// Selects the test cases sitting at the given execution paths and clears every other one.
@@ -48,7 +40,7 @@ public sealed class TestExplorerViewModel
     {
         var selectedPaths = executionPaths.ToHashSet(StringComparer.Ordinal);
 
-        foreach (TestNodeViewModel node in this.AllNodes().Where(node => node.IsTestCase))
+        foreach (TestTreeNodeData node in this.AllNodes().Where(node => node.IsTestCase))
         {
             node.SetChecked(selectedPaths.Contains(node.ExecutionPath));
         }
@@ -56,20 +48,20 @@ public sealed class TestExplorerViewModel
         this.ExpandTowardsSelection();
     }
 
-    private IEnumerable<TestNodeViewModel> AllNodes()
+    private IEnumerable<TestTreeNodeData> AllNodes()
         => this.Roots.SelectMany(root => root.SelfAndDescendants());
 
-    private IEnumerable<TestNodeViewModel> SelectedTestCaseNodes()
+    private IEnumerable<TestTreeNodeData> SelectedTestCaseNodes()
         => this.AllNodes().Where(
-            node => node.IsTestCase && node.CheckState == TestNodeCheckState.Checked);
+            node => node.IsTestCase && node.CheckState == TestTreeNodeData.State.Checked);
 
     private void ExpandTowardsSelection()
     {
         // A restored selection the user cannot see is indistinguishable from none, so every group
         // holding one is opened.
-        foreach (TestNodeViewModel node in this.AllNodes())
+        foreach (TestTreeNodeData node in this.AllNodes())
         {
-            if (node.HasChildren && node.CheckState != TestNodeCheckState.Unchecked)
+            if (node.HasChildren && node.CheckState != TestTreeNodeData.State.Unchecked)
             {
                 node.IsExpanded = true;
             }

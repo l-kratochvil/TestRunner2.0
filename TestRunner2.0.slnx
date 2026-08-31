@@ -26,5 +26,7 @@
   </Project>
   <Project Path="TestRunner.Common/TestRunner.Common.csproj" />
   <Project Path="TestRunner.NUnitTestRunnerProxy/TestRunner.NUnitTestRunnerProxy.csproj" />
-  <Project Path="TestRunner.WebApp/TestRunner.WebApp.csproj" />
+  <Project Path="TestRunner.WebApp/TestRunner.WebApp.csproj">
+    <BuildDependency Project="TestRunner.NUnitTestRunnerProxy/TestRunner.NUnitTestRunnerProxy.csproj" />
+  </Project>
 </Solution>

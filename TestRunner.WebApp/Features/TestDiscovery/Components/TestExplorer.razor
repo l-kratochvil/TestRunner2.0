@@ -1,32 +1,36 @@
 ﻿@* Feature: TestDiscovery — "the user can browse and select tests to run". *@
 
-@inject TestRunStore Store
+@using TestRunner.WebApp.Features.TestDiscovery.Services
+@using TestRunner.WebApp.Shared.NUnitTestRunner
+
+@inject INUnitTestRunnerStore TestRunnerStore
+@inject TestDiscoveryStore Store
 
 <section class="test-explorer">
     <h2 class="pane-title">Test Explorer</h2>
 
     @if (this.viewModel.IsEmpty)
     {
-        <p class="placeholder-note">No tests loaded.</p>
+        <p class="placeholder-note">No tests loaded</p>
     }
     else
     {
         <ul class="test-tree">
-            @foreach (TestNodeViewModel root in this.viewModel.Roots)
+            @foreach (var root in this.viewModel.Roots)
             {
-                <TestTreeNode Node="root" @key="root.ExecutionPath" SelectionChanged="this.OnSelectionChangedAsync" />
+                <TestTreeNode Data="root" @key="root.ExecutionPath" SelectionChanged="this.OnSelectionChangedAsync" />
             }
         </ul>
     }
 </section>
 
 @code {
-    private TestExplorerViewModel viewModel = TestExplorerViewModel.Create([]);
+    private TestExplorerViewModel viewModel = new([]);
 
     /// <inheritdoc/>
     protected override void OnInitialized()
     {
-        this.viewModel = TestExplorerViewModel.Create(this.Store.Current.LoadedTestSuites);
+        this.viewModel = new TestExplorerViewModel(this.TestRunnerStore.LoadedTestSuites);
     }
 
     /// <inheritdoc/>
@@ -39,15 +43,17 @@
 
         // What the user selected last is kept in the browser, which a circuit can only reach once
         // it is interactive. The tree is therefore drawn unselected first and marked up afterwards.
-        await this.Store.InitializeAsync();
+        // The remembered selection arrives as execution paths, and the tree is the only thing that
+        // can turn them back into test cases, so the resolving happens here and not in the store.
+        this.viewModel.ApplySelection(await this.Store.ReadRememberedPathsAsync());
+        this.Store.RestoreSelection(this.viewModel.SelectedTestCases);
 
-        this.viewModel.ApplySelection(this.Store.Current.SelectedTestCasesPaths);
         this.StateHasChanged();
     }
 
     private Task OnSelectionChangedAsync()
         => this.Store.UpdateAsync(state => state with
         {
-            SelectedTestCasesPaths = this.viewModel.SelectedTestCasesPaths,
+            SelectedTestCases = this.viewModel.SelectedTestCases,
         });
 }
