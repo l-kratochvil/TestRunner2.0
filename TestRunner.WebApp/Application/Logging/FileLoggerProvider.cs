@@ -20,6 +20,7 @@ public sealed class FileLoggerProvider : IExtendedLoggerProvider
 
     private readonly Lock gate = new();
     private Action<string>? failedHandlers;
+    private string? failure;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileLoggerProvider"/> class.
@@ -35,13 +36,27 @@ public sealed class FileLoggerProvider : IExtendedLoggerProvider
     }
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// The provider is created with the logging pipeline, long before whoever surfaces the failure
+    /// to the user exists, so a failure that happened before the handler was attached is replayed
+    /// to it. Without that, a log file broken at startup would fail silently — the one way a log
+    /// must never fail.
+    /// </remarks>
     public event Action<string>? Failed
     {
         add
         {
+            string? reportedFailure;
+
             lock (this.gate)
             {
                 this.failedHandlers += value;
+                reportedFailure = this.failure;
+            }
+
+            if (reportedFailure is not null)
+            {
+                value?.Invoke(reportedFailure);
             }
         }
 
@@ -72,6 +87,7 @@ public sealed class FileLoggerProvider : IExtendedLoggerProvider
 
         lock (this.gate)
         {
+            this.failure = message;
             handlers = this.failedHandlers;
         }
 
