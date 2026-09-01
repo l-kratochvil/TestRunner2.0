@@ -4,11 +4,11 @@ using TestRunner.WebApp.Features.AppLogging.Models;
 using TestRunner.WebApp.Shared.Logging;
 
 /// <summary>
-/// Thin wrapper over <see cref="IAppLoggerStore"/> that stamps every entry with a fixed source.
+/// Thin wrapper over <see cref="IAppLoggerHub"/> that stamps every entry with a fixed source.
 /// </summary>
-/// <param name="store">Store the entries are appended to.</param>
+/// <param name="loggerHub">Hub the entries are appended to.</param>
 /// <param name="source">Source of the entries.</param>
-public sealed class AppLogger(IAppLoggerStore store, string source) : IAppLogger
+public sealed class AppLogger(IAppLoggerHub loggerHub, string source) : IAppLogger
 {
     /// <inheritdoc/>
     public string Source { get; } = source;
@@ -34,6 +34,6 @@ public sealed class AppLogger(IAppLoggerStore store, string source) : IAppLogger
     /// <inheritdoc/>
     public void Log(LogSeverity severity, string message, string? detail = null)
     {
-        store.Append(new LogEntry(DateTimeOffset.Now, severity, this.Source, message, detail));
+        loggerHub.Append(new LogEntry(DateTimeOffset.Now, severity, this.Source, message, detail));
     }
 }

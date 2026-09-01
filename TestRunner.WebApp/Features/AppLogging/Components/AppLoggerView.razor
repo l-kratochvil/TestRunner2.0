@@ -9,7 +9,7 @@
 
 @implements IAsyncDisposable
 
-@inject IAppLoggerStore Store
+@inject IAppLoggerHub LoggerHub
 @inject IOptions<FileLoggerOptions> FileLoggerOptions
 @inject IJsModuleInteropFactory JsModuleInteropFactory
 
@@ -125,7 +125,7 @@
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
-        this.Store.EntryAppended -= this.OnEntryAppended;
+        this.LoggerHub.EntryAppended -= this.OnEntryAppended;
 
         if (this.refreshTimer is not null)
         {
@@ -143,7 +143,7 @@
     /// <inheritdoc/>
     protected override void OnInitialized()
     {
-        this.entries = this.Store.GetEntries();
+        this.entries = this.LoggerHub.GetEntries();
     }
 
     /// <inheritdoc/>
@@ -155,8 +155,8 @@
         }
 
         // Subscribing here (and not in OnInitialized) keeps the prerendered instance out of the
-        // store's subscriber list.
-        this.Store.EntryAppended += this.OnEntryAppended;
+        // hub's subscriber list.
+        this.LoggerHub.EntryAppended += this.OnEntryAppended;
         this.hasNewEntries = true;
 
         // Entries arrive in bursts (test runner output), so the UI is refreshed on a timer
@@ -181,7 +181,7 @@
         }
 
         this.hasNewEntries = false;
-        this.entries = this.Store.GetEntries();
+        this.entries = this.LoggerHub.GetEntries();
 
         try
         {

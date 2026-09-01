@@ -6,7 +6,7 @@ using TestRunner.WebApp.Features.AppLogging.Models;
 using TestRunner.WebApp.Shared.Logging;
 
 [TestFixture]
-public class AppLogFilterTests
+public class AppLoggerFilterTests
 {
     private AppLoggerFilter unit;
 

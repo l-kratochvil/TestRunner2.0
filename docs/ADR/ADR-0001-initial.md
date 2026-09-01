@@ -144,18 +144,20 @@ Inside a slice the three folders mean:
   `Application/DependencyInjection/InitServicesExtension`, so that the composition root lists the
   whole application in one place.
 - **`Components/`** — the UI, including the plain C# classes that are nothing but UI state.
-  `AppLogFilter` lives here, next to `AppLoggerView`: it holds which checkboxes are ticked and
+  `AppLoggerFilter` lives here, next to `AppLoggerView`: it holds which checkboxes are ticked and
   changes whenever the panel's filtering changes, so it is not a model.
 
 State that **several features** read and write lives in `Shared/Stores` instead, so that a feature
 never has to reach into another one to learn what the user chose: `TestExecution` will read the
 selection `TestDiscovery` makes, and neither has to know the other exists.
 
-`AppLogStore` stays inside `AppLogging` even so. It is not shared state — it is the log itself, the
-substance of that one capability, and it is built out of `LogEntry` and `IAppLogSink`, which live in
-the slice. Moving it would make `Shared` depend on a feature, turning the one rule that keeps the
-slices independent upside down. What every feature does need is the **write contract**, and that
-already lives in `Shared/Logging`.
+`AppLoggerHub` is not one of them — and not a store at all. A store holds state that is read whole
+and replaced whole; the hub is the log itself, where entries are appended and never replaced, and
+where appending one hands it to every sink. It stays inside `AppLogging` because it is the substance
+of that one capability, built out of `LogEntry` and `IAppLoggerSink`, which live in the slice. Moving
+it would make `Shared` depend on a feature, turning the one rule that keeps the slices independent
+upside down. What every feature does need is the **write contract**, and that already lives in
+`Shared/Logging`.
 
 ### 5. Application log (`AppLogging`) and the logging pipeline
 
@@ -171,10 +173,10 @@ log file.
   outside — without changing the model.
 - **Writing:** `IAppLoggerFactory.CreateLogger(source)` returns an `IAppLogger` bound to that
   source; a default `IAppLogger` for `App` is registered in DI for convenience. The logger is a
-  thin wrapper, the shared state lives in `IAppLogStore`. `IAppLogger`, `IAppLoggerFactory`,
+  thin wrapper, the shared state lives in `IAppLoggerHub`. `IAppLogger`, `IAppLoggerFactory`,
   `LogSeverity` and `LogSources` sit in `Shared/Logging` because every feature writes to the log;
-  the rest, including `IAppLogStore`, stays inside the slice.
-- **Memory:** `AppLogStore` is a singleton ring buffer of 2 000 entries, **shared by every browser
+  the rest, including `IAppLoggerHub`, stays inside the slice.
+- **Memory:** `AppLoggerHub` is a singleton ring buffer of 2 000 entries, **shared by every browser
   connected to the server** — intended, because the tool serves one test machine.
 - **UI:** entries reach the panel in ~150 ms batches, because test runner output arrives in bursts
   that would otherwise flood the SignalR circuit with re-renders. The panel offers multi-select
@@ -182,8 +184,8 @@ log file.
   of today's log file. There is deliberately **no "clear"**: the store is shared, and the file is
   the guarantee that nothing is lost.
 
-**The application log is a source of the logging pipeline, not a competitor to it.** `AppLogStore`
-hands every entry to `BlazorLoggerSink`, which logs it through `ILogger` under the category
+**The application log is a source of the logging pipeline, not a competitor to it.** `AppLoggerHub`
+hands every entry to `DiagnosticsLoggerSink`, which logs it through `ILogger` under the category
 `TestRunner.AppLog.<Source>`. Nothing in the application writes to a file directly. The log source
 becoming the logger category is the point: it makes one channel filterable on its own through the
 standard `Logging:<provider>:LogLevel` configuration, without inventing a filtering mechanism of
@@ -206,7 +208,7 @@ when something is wrong. `Information` on the framework would flood the day's fi
 static-asset noise and make it unreadable exactly when it is needed.
 
 **A broken log file is reported, not swallowed.** `FileLoggerProvider` raises `Failed`, which the
-composition root wires to `IAppLogStore.ReportFailure`. That reaches the in-memory buffer and
+composition root wires to `IAppLoggerHub.ReportFailure`. That reaches the in-memory buffer and
 **only** the buffer, because routing it through the sinks would loop back into the provider that
 just failed. A handler attached after the failure already happened is invoked immediately, since
 the provider is created with the pipeline, long before the store exists. The wire is explicit in
@@ -337,7 +339,7 @@ point this decision is superseded by a package-feed one rather than amended.
   explicit, tracked risk.
 - Every application log entry now also passes through the Console provider, so the development
   console repeats the panel.
-- `IAppLogSink` survives with a single real implementation plus a failure channel; it is kept as a
+- `IAppLoggerSink` survives with a single real implementation plus a failure channel; it is kept as a
   seam for future destinations and is worth removing if none appear.
 - The file provider is reachable from the `AppLogging` panel (for the file path it displays), which
   is a feature reading from `Application/` — tolerated because the panel only asks where the file

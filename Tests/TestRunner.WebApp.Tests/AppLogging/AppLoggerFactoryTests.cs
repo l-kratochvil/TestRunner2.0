@@ -9,14 +9,14 @@ using TestRunner.WebApp.Shared.Logging;
 [TestFixture]
 public class AppLoggerFactoryTests
 {
-    private Mock<IAppLoggerStore> storeMock;
+    private Mock<IAppLoggerHub> loggerHubMock;
     private AppLoggerFactory unit;
 
     [SetUp]
     public void SetUp()
     {
-        this.storeMock = new Mock<IAppLoggerStore>();
-        this.unit = new AppLoggerFactory(this.storeMock.Object);
+        this.loggerHubMock = new Mock<IAppLoggerHub>();
+        this.unit = new AppLoggerFactory(this.loggerHubMock.Object);
     }
 
     [TestCase(LogSources.App, ExpectedResult = LogSources.App)]
@@ -34,7 +34,7 @@ public class AppLoggerFactoryTests
     }
 
     [Test]
-    public void CreateLogger__WhenTheCreatedLoggerLogs__ThenShouldAppendIntoTheSharedStore()
+    public void CreateLogger__WhenTheCreatedLoggerLogs__ThenShouldAppendIntoTheSharedHub()
     {
         // Given:
         IAppLogger givenLogger = this.unit.CreateLogger(LogSources.TestLink);
@@ -43,8 +43,8 @@ public class AppLoggerFactoryTests
         givenLogger.Error("unreachable");
 
         // Then:
-        this.storeMock.Verify(
-            store => store.Append(It.Is<LogEntry>(entry =>
+        this.loggerHubMock.Verify(
+            loggerHub => loggerHub.Append(It.Is<LogEntry>(entry =>
                 entry.Source == LogSources.TestLink && entry.Severity == LogSeverity.Error)),
             Times.Once);
     }

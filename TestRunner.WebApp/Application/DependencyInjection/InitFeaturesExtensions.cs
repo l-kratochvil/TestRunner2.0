@@ -7,7 +7,6 @@ using TestRunner.WebApp.Features.AppLogging.Services;
 using TestRunner.WebApp.Features.TestConfiguration.Services;
 using TestRunner.WebApp.Features.TestDiscovery.Services;
 using TestRunner.WebApp.Shared.Logging;
-using TestRunner.WebApp.Shared.NUnitTestRunner;
 using TestRunner.WebApp.Shared.Stores;
 
 /// <summary>
@@ -28,10 +27,10 @@ public static class InitFeaturesExtensions
             .AddSingleton(static provider =>
                 provider.GetRequiredService<IAppLoggerFactory>()
                         .CreateLogger(LogSources.App))
-            .AddSingleton<IAppLoggerStore>(
+            .AddSingleton<IAppLoggerHub>(
                 static provider =>
                 {
-                    var store = new AppLoggerStore(provider.GetServices<IAppLoggerSink>());
+                    var loggerHub = new AppLoggerHub(provider.GetServices<IAppLoggerSink>());
 
                     // The log file sits at the far end of the pipeline the log itself feeds, so its
                     // failures cannot travel back as ordinary entries. This is the one wire that carries
@@ -40,15 +39,21 @@ public static class InitFeaturesExtensions
                         .GetServices<ILoggerProvider>()
                         .OfType<IExtendedLoggerProvider>())
                     {
-                        fileLoggerProvider.Failed += store.ReportFailure;
+                        fileLoggerProvider.Failed += loggerHub.ReportFailure;
                     }
 
-                    return store;
+                    return loggerHub;
                 });
 
     private static IServiceCollection InitTestDiscovery(this IServiceCollection services)
-        => services.AddScoped<ITestDiscoveryStore, TestDiscoveryStore>();
+        => services
+            .AddScoped<TestDiscoveryStore>()
+            .AddScoped<ITestDiscoveryStore>(
+                provider => provider.GetRequiredService<TestDiscoveryStore>());
 
     private static IServiceCollection InitTestConfiguration(this IServiceCollection services)
-        => services.AddScoped<ITestConfigurationStore, TestConfigurationStore>();
+        => services
+            .AddScoped<TestConfigurationStore>()
+            .AddScoped<ITestConfigurationStore>(
+                provider => provider.GetRequiredService<TestConfigurationStore>());
 }

@@ -58,7 +58,7 @@ public class InitServicesExtensionTests
 
         // Then:
         Assert.That(
-            this.unit.GetRequiredService<IAppLoggerStore>().GetEntries().Select(entry => entry.Source),
+            this.unit.GetRequiredService<IAppLoggerHub>().GetEntries().Select(entry => entry.Source),
             Is.EqualTo(expectedSources));
     }
 
@@ -106,7 +106,7 @@ public class InitServicesExtensionTests
     }
 
     [Test]
-    public void InitAppLogging__WhenTheLogFileCannotBeWritten__ThenShouldReportItInTheStore()
+    public void InitAppLogging__WhenTheLogFileCannotBeWritten__ThenShouldReportItInTheHub()
     {
         // Given:
         // A file where the logs directory should be, so that the provider cannot write anything.
@@ -118,7 +118,7 @@ public class InitServicesExtensionTests
         try
         {
             ServiceProvider provider = BuildProvider(givenBlockedPath);
-            var store = provider.GetRequiredService<IAppLoggerStore>();
+            var loggerHub = provider.GetRequiredService<IAppLoggerHub>();
 
             // When:
             provider.GetRequiredService<IAppLogger>().Info("message");
@@ -126,7 +126,7 @@ public class InitServicesExtensionTests
 
             // Then:
             Assert.That(
-                store.GetEntries().Select(entry => entry.Message),
+                loggerHub.GetEntries().Select(entry => entry.Message),
                 Has.Some.Contains("log file"));
         }
         finally
@@ -169,7 +169,7 @@ public class InitServicesExtensionTests
         var services = new ServiceCollection();
         services.AddLogging(builder => builder.InitFileLogger());
         services.Configure<FileLoggerOptions>(configuration);
-        services.InitAppLogging();
+        services.InitFeatures();
 
         return services.BuildServiceProvider();
     }

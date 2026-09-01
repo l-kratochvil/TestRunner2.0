@@ -14,10 +14,10 @@ mean something else here.
 | **Test entity**         | Anything the test tree is built from, whatever its level, see `TestEntity`. What the runner is asked to run is expressed in these.                | "test", "node"         |
 | **Execution path**      | The name a test entity is both identified and executed by, see `TestEntity.ExecutionPath`. Identity and execution deliberately share one key.     | "name", "id"           |
 | **Test selection**      | The test cases the user picked to run. Only test cases are ever part of it; what a group looks like follows from the test cases beneath it.       | "checked tests"        |
-| **Store**               | A holder of state that outlives the component reading it and is shared by the features that need it, see `Shared/Stores` and `AppLogStore`.       | "cache", "repository"  |
+| **Store**               | A holder of state that outlives the component reading it: the state is read whole, replaced whole and its change announced to whoever listens, see `StoreBase`.  | "cache", "repository"  |
 | **Test run**            | One execution of the selected test cases on the test machine.                                                                                     | "test", "build"        |
 | **Test result**         | The outcome of a test run (passed / failed), the thing that is uploaded to TestLink.                                                              | "log"                  |
-| **Log**                 | The application activity feed the tester reads: what the application is doing, shown in `AppLoggerView`. Never the test result.                   | "output", "result"     |
+| **Log**                 | The application activity feed the tester reads: what the application is doing, held in memory by `AppLoggerHub` and shown in `AppLoggerView`. Never the test result. | "output", "result"     |
 | **Log entry**           | One record in the log: timestamp, severity, source, message and optional detail.                                                                  | "message", "line"      |
 | **Severity**            | How serious an entry is, see `LogSeverity`. A successful outcome is reported as normal progress, there is no `Success`.                           | "level", "log level"   |
 | **Log source**          | The channel an entry belongs to. A plain string, so that entries arriving from outside can be routed without a mapping; known ones: `LogSources`. | "category", "logger"   |

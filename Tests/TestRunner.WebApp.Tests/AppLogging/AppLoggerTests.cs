@@ -11,7 +11,7 @@ public class AppLoggerTests
 {
     private const string GivenSource = LogSources.TestRun;
 
-    private Mock<IAppLoggerStore> storeMock;
+    private Mock<IAppLoggerHub> loggerHubMock;
     private List<LogEntry> appendedEntries;
     private AppLogger unit;
 
@@ -19,12 +19,12 @@ public class AppLoggerTests
     public void SetUp()
     {
         this.appendedEntries = [];
-        this.storeMock = new Mock<IAppLoggerStore>();
-        this.storeMock
-            .Setup(store => store.Append(It.IsAny<LogEntry>()))
+        this.loggerHubMock = new Mock<IAppLoggerHub>();
+        this.loggerHubMock
+            .Setup(loggerHub => loggerHub.Append(It.IsAny<LogEntry>()))
             .Callback<LogEntry>(this.appendedEntries.Add);
 
-        this.unit = new AppLogger(this.storeMock.Object, GivenSource);
+        this.unit = new AppLogger(this.loggerHubMock.Object, GivenSource);
     }
 
     [TestCaseSource(nameof(SeverityMethodCases))]

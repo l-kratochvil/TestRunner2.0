@@ -8,7 +8,7 @@ using TestRunner.WebApp.Features.AppLogging.Services;
 using TestRunner.WebApp.Shared.Logging;
 
 [TestFixture]
-public class InternalLoggerSinkTests
+public class DiagnosticsLoggerSinkTests
 {
     private List<CapturedRecord> records;
     private Mock<ILoggerFactory> loggerFactoryMock;

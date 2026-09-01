@@ -7,7 +7,7 @@ using TestRunner.WebApp.Shared.Logging;
 /// <summary>
 /// In-memory ring buffer of log entries that also fans entries out to the registered sinks.
 /// </summary>
-public sealed class AppLoggerStore : IAppLoggerStore
+public sealed class AppLoggerHub : IAppLoggerHub
 {
     /// <summary>
     /// Number of entries kept in memory unless another capacity is asked for.
@@ -20,11 +20,11 @@ public sealed class AppLoggerStore : IAppLoggerStore
     private readonly IReadOnlyList<IAppLoggerSink> sinks;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AppLoggerStore"/> class.
+    /// Initializes a new instance of the <see cref="AppLoggerHub"/> class.
     /// </summary>
     /// <param name="sinks">Destinations the entries are mirrored to.</param>
     /// <param name="capacity">Maximum number of entries kept in memory.</param>
-    public AppLoggerStore(IEnumerable<IAppLoggerSink> sinks, int capacity = DefaultCapacity)
+    public AppLoggerHub(IEnumerable<IAppLoggerSink> sinks, int capacity = DefaultCapacity)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(capacity, 1);
 
