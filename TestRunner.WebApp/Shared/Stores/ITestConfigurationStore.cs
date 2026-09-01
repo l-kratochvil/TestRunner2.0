@@ -13,5 +13,5 @@ public interface ITestConfigurationStore
     /// <summary>
     /// Gets the configuration as it stands now.
     /// </summary>
-    TestConfigurationState Current { get; }
+    TestConfigurationStoreState Current { get; }
 }

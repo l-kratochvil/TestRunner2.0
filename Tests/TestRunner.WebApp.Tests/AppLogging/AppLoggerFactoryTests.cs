@@ -9,13 +9,13 @@ using TestRunner.WebApp.Shared.Logging;
 [TestFixture]
 public class AppLoggerFactoryTests
 {
-    private Mock<IAppLogStore> storeMock;
+    private Mock<IAppLoggerStore> storeMock;
     private AppLoggerFactory unit;
 
     [SetUp]
     public void SetUp()
     {
-        this.storeMock = new Mock<IAppLogStore>();
+        this.storeMock = new Mock<IAppLoggerStore>();
         this.unit = new AppLoggerFactory(this.storeMock.Object);
     }
 

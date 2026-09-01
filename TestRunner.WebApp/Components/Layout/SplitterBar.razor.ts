@@ -1,9 +1,9 @@
 // Dragging runs entirely in the browser: on Blazor Server every pointermove would otherwise be a
 // round-trip over SignalR and the bar would visibly lag behind the cursor.
 
-import { createLogger } from "/js/logging.js";
-import { ofInstance, ofType } from "/js/guards.js";
-import { getItem, setItem } from "/js/storage.js";
+import { createLogger } from "/browser/logging.js";
+import { ofInstance, ofType } from "/browser/guards.js";
+import { getItem, setItem } from "/browser/storage.js";
 
 const log = createLogger(import.meta.url);
 

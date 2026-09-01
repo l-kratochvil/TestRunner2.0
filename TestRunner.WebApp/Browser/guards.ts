@@ -2,7 +2,7 @@
 // keeps the decision where the context is - only the function itself knows whether a value it did
 // not get is a broken call or an ordinary one.
 
-import { createLogger, type Logger } from "/js/logging.js";
+import { createLogger, type Logger } from "/browser/logging.js";
 
 /**
  * The typeof names worth asking about, each mapped to what a value of that name is.

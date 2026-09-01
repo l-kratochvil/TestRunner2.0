@@ -7,7 +7,7 @@ using TestRunner.WebApp.Shared.Logging;
 /// <summary>
 /// In-memory ring buffer of log entries that also fans entries out to the registered sinks.
 /// </summary>
-public sealed class AppLogStore : IAppLogStore
+public sealed class AppLoggerStore : IAppLoggerStore
 {
     /// <summary>
     /// Number of entries kept in memory unless another capacity is asked for.
@@ -17,21 +17,21 @@ public sealed class AppLogStore : IAppLogStore
     private readonly Lock gate = new();
     private readonly Queue<LogEntry> entries = new();
     private readonly int capacity;
-    private readonly IReadOnlyList<IAppLogSink> sinks;
+    private readonly IReadOnlyList<IAppLoggerSink> sinks;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AppLogStore"/> class.
+    /// Initializes a new instance of the <see cref="AppLoggerStore"/> class.
     /// </summary>
     /// <param name="sinks">Destinations the entries are mirrored to.</param>
     /// <param name="capacity">Maximum number of entries kept in memory.</param>
-    public AppLogStore(IEnumerable<IAppLogSink> sinks, int capacity = DefaultCapacity)
+    public AppLoggerStore(IEnumerable<IAppLoggerSink> sinks, int capacity = DefaultCapacity)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(capacity, 1);
 
         this.capacity = capacity;
-        this.sinks = [.. sinks];
+        this.sinks = [..sinks];
 
-        foreach (IAppLogSink sink in this.sinks)
+        foreach (IAppLoggerSink sink in this.sinks)
         {
             sink.Failed += this.ReportFailure;
         }
@@ -45,7 +45,7 @@ public sealed class AppLogStore : IAppLogStore
     {
         this.AppendToBuffer(entry);
 
-        foreach (IAppLogSink sink in this.sinks)
+        foreach (IAppLoggerSink sink in this.sinks)
         {
             sink.Write(entry);
         }

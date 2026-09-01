@@ -11,7 +11,7 @@ public class AppLoggerTests
 {
     private const string GivenSource = LogSources.TestRun;
 
-    private Mock<IAppLogStore> storeMock;
+    private Mock<IAppLoggerStore> storeMock;
     private List<LogEntry> appendedEntries;
     private AppLogger unit;
 
@@ -19,7 +19,7 @@ public class AppLoggerTests
     public void SetUp()
     {
         this.appendedEntries = [];
-        this.storeMock = new Mock<IAppLogStore>();
+        this.storeMock = new Mock<IAppLoggerStore>();
         this.storeMock
             .Setup(store => store.Append(It.IsAny<LogEntry>()))
             .Callback<LogEntry>(this.appendedEntries.Add);

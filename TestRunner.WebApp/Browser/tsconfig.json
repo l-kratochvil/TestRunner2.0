@@ -9,16 +9,16 @@
     "forceConsistentCasingInFileNames": true,
     "sourceMap": false,
     "rootDir": ".",
-    "outDir": "../wwwroot/js",
+    "outDir": "../wwwroot/browser",
     // One shared module importing another spells it the way every other script does, by the URL it
     // is served under, so that all of them name the same instance. Here that path points back at
     // the sources this same build compiles - unlike the collocated build, which has to be sent to
     // the declarations instead.
     "paths": {
-      "/js/*": ["./*"]
+      "/browser/*": ["./*"]
     },
-    // The collocated build resolves "/js/*.js" against these declarations instead of against the
-    // sources, so it treats a shared module as something already built rather than compiling a
+    // The collocated build resolves "/browser/*.js" against these declarations instead of against
+    // the sources, so it treats a shared module as something already built rather than compiling a
     // second copy of it next to the .ts. They are intermediate output and stay out of wwwroot,
     // which is published as it stands and would serve them to the browser.
     "declaration": true,
@@ -32,6 +32,7 @@
   //
   // This config sits in the folder it builds, and is named tsconfig.json, because that is the only
   // name the editor's language service looks for: a config the project root excludes would leave
-  // these files in no project at all, and the "/js/*" imports below unresolved while editing them.
+  // these files in no project at all, and the "/browser/*" imports below unresolved while editing
+  // them.
   "include": ["**/*.ts"]
 }

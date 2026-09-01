@@ -1,7 +1,9 @@
 namespace TestRunner.WebApp.Features.TestDiscovery.Services;
 
 using System.Linq;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using TestRunner.Common.Model;
+using TestRunner.WebApp.Shared.Logging;
 using TestRunner.WebApp.Shared.Stores;
 
 /// <summary>
@@ -13,9 +15,14 @@ using TestRunner.WebApp.Shared.Stores;
 /// <see cref="ITestDiscoveryStore"/>, which reads and cannot select.
 /// </remarks>
 /// <param name="localStorage">Browser storage the selection is remembered in.</param>
-public sealed class TestDiscoveryStore(TestDiscoveryLocalStorage localStorage)
+public sealed class TestDiscoveryStore(
+    IAppLogger logger,
+    ProtectedLocalStorage protectedLocalStorage)
     : StoreBase<TestDiscoveryState>, ITestDiscoveryStore
 {
+    private readonly LocalStorage<LocalStorageData> localStorage =
+        new("test-discovery", protectedLocalStorage, logger);
+
     /// <inheritdoc/>
     protected override TestDiscoveryState DefaultState
         => new(SelectedTestCases: []);
@@ -31,7 +38,7 @@ public sealed class TestDiscoveryStore(TestDiscoveryLocalStorage localStorage)
     /// <returns>The remembered execution paths, empty when there are none.</returns>
     public async Task<IReadOnlyList<string>> ReadRememberedPathsAsync()
     {
-        TestDiscoveryData? data = await localStorage.ReadAsync();
+        LocalStorageData? data = await this.localStorage.ReadAsync();
 
         return data?.SelectedTestCasesPaths ?? [];
     }
@@ -56,8 +63,10 @@ public sealed class TestDiscoveryStore(TestDiscoveryLocalStorage localStorage)
     {
         await base.UpdateAsync(update);
 
-        await localStorage.WriteAsync(
-            new TestDiscoveryData(
+        await this.localStorage.WriteAsync(
+            new LocalStorageData(
                 [..this.Current.SelectedTestCases.Select(testCase => testCase.ExecutionPath)]));
     }
+
+    private sealed record LocalStorageData(string[] SelectedTestCasesPaths);
 }

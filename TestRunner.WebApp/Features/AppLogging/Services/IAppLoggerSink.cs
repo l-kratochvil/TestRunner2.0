@@ -9,7 +9,7 @@ using TestRunner.WebApp.Features.AppLogging.Models;
 /// A sink is best effort: <see cref="Write"/> must never throw and must never block the caller,
 /// because it runs on the hot path of whoever is logging.
 /// </remarks>
-public interface IAppLogSink
+public interface IAppLoggerSink
 {
     /// <summary>
     /// Raised when the sink itself fails, so that the failure can be surfaced in the log panel.

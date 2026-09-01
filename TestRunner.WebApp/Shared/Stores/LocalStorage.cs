@@ -3,18 +3,13 @@ namespace TestRunner.WebApp.Shared.Stores;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using TestRunner.WebApp.Shared.Logging;
 
-/// <summary>
-/// A piece of data the browser remembers between visits, on behalf of a store.
-/// </summary>
-/// <remarks>
-/// Reading is deliberately not part of construction. The browser is reached over JavaScript
-/// interop, which a circuit cannot use before its first render, so a caller reads once the
-/// component is interactive.
-/// </remarks>
 /// <typeparam name="TData">Shape of the remembered data.</typeparam>
 /// <param name="localStorage">Browser storage the data is kept in.</param>
 /// <param name="logger">Log a storage failure is reported to.</param>
-public abstract class LocalStorageBase<TData>(ProtectedLocalStorage localStorage, IAppLogger logger)
+public class LocalStorage<TData>(
+    string storageName,
+    ProtectedLocalStorage localStorage,
+    IAppLogger logger)
     where TData : class
 {
     /// <summary>
@@ -27,7 +22,7 @@ public abstract class LocalStorageBase<TData>(ProtectedLocalStorage localStorage
     /// Gets the name telling this data apart from the rest of the application's, which is all a
     /// derived class has to decide: the key itself is built here, so it cannot be spelled two ways.
     /// </summary>
-    protected abstract string StorageName { get; }
+    protected string StorageName { get; } = storageName;
 
     private string StorageKey
         => $"{KeyPrefix}.{this.StorageName}";

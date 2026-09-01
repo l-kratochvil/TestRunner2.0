@@ -15,7 +15,7 @@ Every `{Component}.razor.ts` and every script under `Browser/` is TypeScript, co
 JavaScript before the browser sees it.
 
 - **`tsconfig.json`** compiles each `.razor.ts` in place, next to its component.
-- **`Browser/tsconfig.json`** compiles the shared modules under `Browser/` into `wwwroot/js`
+- **`Browser/tsconfig.json`** compiles the shared modules under `Browser/` into `wwwroot/browser`
   instead. It lives in that folder, under that name, because the editor's language service only
   looks for `tsconfig.json` when it decides which project an open file belongs to.
 - **`npm run build`** runs both compilations for both tsconfig files.
@@ -54,7 +54,7 @@ browser diagnostics land in the same log file.
 A module asks for a logger once, naming itself:
 
 ```ts
-import { createLogger } from "/js/logging.js";
+import { createLogger } from "/browser/logging.js";
 
 const log = createLogger(import.meta.url);
 ```

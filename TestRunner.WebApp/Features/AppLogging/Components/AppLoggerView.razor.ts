@@ -1,4 +1,4 @@
-import { ofInstance } from "/js/guards.js";
+import { ofInstance } from "/browser/guards.js";
 
 export function scrollToEnd(uElement: unknown): void {
   if (uElement === null || uElement === undefined) {

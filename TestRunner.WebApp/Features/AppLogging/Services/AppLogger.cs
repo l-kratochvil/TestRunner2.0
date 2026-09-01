@@ -4,11 +4,11 @@ using TestRunner.WebApp.Features.AppLogging.Models;
 using TestRunner.WebApp.Shared.Logging;
 
 /// <summary>
-/// Thin wrapper over <see cref="IAppLogStore"/> that stamps every entry with a fixed source.
+/// Thin wrapper over <see cref="IAppLoggerStore"/> that stamps every entry with a fixed source.
 /// </summary>
 /// <param name="store">Store the entries are appended to.</param>
 /// <param name="source">Source of the entries.</param>
-public sealed class AppLogger(IAppLogStore store, string source) : IAppLogger
+public sealed class AppLogger(IAppLoggerStore store, string source) : IAppLogger
 {
     /// <inheritdoc/>
     public string Source { get; } = source;

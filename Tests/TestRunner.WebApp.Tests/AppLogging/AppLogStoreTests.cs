@@ -9,14 +9,14 @@ using TestRunner.WebApp.Shared.Logging;
 [TestFixture]
 public class AppLogStoreTests
 {
-    private Mock<IAppLogSink> sinkMock;
-    private AppLogStore unit;
+    private Mock<IAppLoggerSink> sinkMock;
+    private AppLoggerStore unit;
 
     [SetUp]
     public void SetUp()
     {
-        this.sinkMock = new Mock<IAppLogSink>();
-        this.unit = new AppLogStore([this.sinkMock.Object]);
+        this.sinkMock = new Mock<IAppLoggerSink>();
+        this.unit = new AppLoggerStore([this.sinkMock.Object]);
     }
 
     [Test]
@@ -26,7 +26,7 @@ public class AppLogStoreTests
         const int givenCapacity = 3;
         const int givenEntryCount = 5;
         string[] expectedMessages = ["entry 3", "entry 4", "entry 5"];
-        this.unit = new AppLogStore([], givenCapacity);
+        this.unit = new AppLoggerStore([], givenCapacity);
 
         // When:
         for (int i = 1; i <= givenEntryCount; i++)
@@ -57,7 +57,7 @@ public class AppLogStoreTests
     {
         // Given:
         const int givenEntryCount = 1000;
-        this.unit = new AppLogStore([], givenEntryCount);
+        this.unit = new AppLoggerStore([], givenEntryCount);
 
         // When:
         Parallel.For(0, givenEntryCount, i => this.unit.Append(CreateEntry($"entry {i}")));

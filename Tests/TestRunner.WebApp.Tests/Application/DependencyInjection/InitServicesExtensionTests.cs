@@ -58,7 +58,7 @@ public class InitServicesExtensionTests
 
         // Then:
         Assert.That(
-            this.unit.GetRequiredService<IAppLogStore>().GetEntries().Select(entry => entry.Source),
+            this.unit.GetRequiredService<IAppLoggerStore>().GetEntries().Select(entry => entry.Source),
             Is.EqualTo(expectedSources));
     }
 
@@ -69,7 +69,7 @@ public class InitServicesExtensionTests
         Type[] expectedTypes = [typeof(DiagnosticsLoggerSink)];
 
         // When:
-        IEnumerable<Type> result = this.unit.GetServices<IAppLogSink>().Select(sink => sink.GetType());
+        IEnumerable<Type> result = this.unit.GetServices<IAppLoggerSink>().Select(sink => sink.GetType());
 
         // Then:
         Assert.That(result, Is.EqualTo(expectedTypes));
@@ -118,7 +118,7 @@ public class InitServicesExtensionTests
         try
         {
             ServiceProvider provider = BuildProvider(givenBlockedPath);
-            var store = provider.GetRequiredService<IAppLogStore>();
+            var store = provider.GetRequiredService<IAppLoggerStore>();
 
             // When:
             provider.GetRequiredService<IAppLogger>().Info("message");

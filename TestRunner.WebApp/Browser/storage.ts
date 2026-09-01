@@ -3,7 +3,7 @@
 // all a SecurityError. Both functions catch that and answer as if nothing were stored - a caller
 // works without persistence rather than break over it.
 
-import { createLogger } from "/js/logging.js";
+import { createLogger } from "/browser/logging.js";
 
 const log = createLogger(import.meta.url);
 

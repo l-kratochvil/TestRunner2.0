@@ -16,7 +16,7 @@ public interface IJsModuleInteropFactory
     /// <param name="modulePath">
     /// Path of the module: either a collocated script relative to the web root, for example
     /// <c>./Components/Layout/SplitterBar.razor.js</c>, or the URL a shared module is served
-    /// under, for example <c>/js/logging.js</c>.
+    /// under, for example <c>/browser/logging.js</c>.
     /// </param>
     /// <returns>The wrapper, to be disposed by the caller that asked for it.</returns>
     JsModuleInterop Create(string modulePath);

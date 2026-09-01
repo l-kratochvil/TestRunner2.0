@@ -10,12 +10,12 @@
 // spells them: any other spelling would load a second copy of logging.js, holding a reference of
 // its own that nobody ever registers.
 
-import { ofType } from "/js/guards.js";
+import { ofType } from "/browser/guards.js";
 import {
   register as registerLogging,
   unregister as unregisterLogging,
   type BrowserLoggerReference,
-} from "/js/logging.js";
+} from "/browser/logging.js";
 
 /**
  * Hands the logging module the reference its diagnostics are sent through.

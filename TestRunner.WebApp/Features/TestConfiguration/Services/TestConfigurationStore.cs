@@ -1,5 +1,7 @@
 namespace TestRunner.WebApp.Features.TestConfiguration.Services;
 
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using TestRunner.WebApp.Shared.Logging;
 using TestRunner.WebApp.Shared.Stores;
 
 /// <summary>
@@ -8,11 +10,16 @@ using TestRunner.WebApp.Shared.Stores;
 /// across reloads.
 /// </summary>
 /// <param name="localStorage">Browser storage the configuration is remembered in.</param>
-public sealed class TestConfigurationStore(TestConfigurationLocalStorage localStorage)
-    : StoreBase<TestConfigurationState>, ITestConfigurationStore
+public sealed class TestConfigurationStore(
+    IAppLogger logger,
+    ProtectedLocalStorage protectedLocalStorage)
+    : StoreBase<TestConfigurationStoreState>, ITestConfigurationStore
 {
+    private readonly LocalStorage<LocalStorageData> localStorage =
+        new("test-configuration", protectedLocalStorage, logger);
+
     /// <inheritdoc/>
-    protected override TestConfigurationState DefaultState
+    protected override TestConfigurationStoreState DefaultState
         => new(IdeVersion: null);
 
     /// <summary>
@@ -22,11 +29,11 @@ public sealed class TestConfigurationStore(TestConfigurationLocalStorage localSt
     /// <returns>A task that completes once the browser has answered.</returns>
     public async Task RestoreAsync()
     {
-        TestConfigurationData? data = await localStorage.ReadAsync();
+        LocalStorageData? data = await this.localStorage.ReadAsync();
 
         if (data is not null)
         {
-            this.SetState(new TestConfigurationState(data.IdeVersion));
+            this.SetState(new TestConfigurationStoreState(data.IdeVersion));
         }
     }
 
@@ -36,10 +43,12 @@ public sealed class TestConfigurationStore(TestConfigurationLocalStorage localSt
     /// <param name="update">Produces the new configuration from the current one.</param>
     /// <returns>A task that completes once the browser has stored the configuration.</returns>
     public override async Task UpdateAsync(
-        Func<TestConfigurationState, TestConfigurationState> update)
+        Func<TestConfigurationStoreState, TestConfigurationStoreState> update)
     {
         await base.UpdateAsync(update);
 
-        await localStorage.WriteAsync(new TestConfigurationData(this.Current.IdeVersion));
+        await this.localStorage.WriteAsync(new LocalStorageData(this.Current.IdeVersion));
     }
+
+    private sealed record LocalStorageData(string? IdeVersion);
 }

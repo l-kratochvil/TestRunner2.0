@@ -15,7 +15,7 @@ using TestRunner.WebApp.Shared.Logging;
 /// way the application log reaches the disk: nothing writes to a file directly.
 /// </remarks>
 /// <param name="loggerFactory">Factory the category loggers are created from.</param>
-public sealed class DiagnosticsLoggerSink(ILoggerFactory loggerFactory) : IAppLogSink
+public sealed class DiagnosticsLoggerSink(ILoggerFactory loggerFactory) : IAppLoggerSink
 {
     /// <summary>
     /// Prefix every logger category of the application log starts with.
@@ -30,7 +30,7 @@ public sealed class DiagnosticsLoggerSink(ILoggerFactory loggerFactory) : IAppLo
     /// destination behind the pipeline is reported by whoever owns that destination, which is why
     /// the accessors are empty rather than backed by a delegate nobody ever invokes.
     /// </remarks>
-    event Action<string>? IAppLogSink.Failed
+    event Action<string>? IAppLoggerSink.Failed
     {
         add
         {

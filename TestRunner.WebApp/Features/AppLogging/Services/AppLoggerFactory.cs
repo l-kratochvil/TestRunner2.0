@@ -6,7 +6,7 @@ using TestRunner.WebApp.Shared.Logging;
 /// Creates <see cref="AppLogger"/> instances writing into the shared store.
 /// </summary>
 /// <param name="store">Store the created loggers append to.</param>
-public sealed class AppLoggerFactory(IAppLogStore store) : IAppLoggerFactory
+public sealed class AppLoggerFactory(IAppLoggerStore store) : IAppLoggerFactory
 {
     /// <inheritdoc/>
     public IAppLogger CreateLogger(string source)

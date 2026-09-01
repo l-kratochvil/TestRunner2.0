@@ -1,7 +1,7 @@
 // The way a front-end script writes into the log file. A module asks for a logger once, naming
 // itself with import.meta.url:
 //
-//   import { createLogger } from "/js/logging.js";
+//   import { createLogger } from "/browser/logging.js";
 //   const log = createLogger(import.meta.url);
 //
 // The reference below is module state, so it only works while there is one instance of this file

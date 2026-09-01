@@ -9,6 +9,7 @@ using TestRunner.WebApp.Features.AppLogging.Services;
 using TestRunner.WebApp.Features.TestDiscovery.Services;
 using TestRunner.WebApp.Shared.JsInterop;
 using TestRunner.WebApp.Shared.Logging;
+using TestRunner.WebApp.Shared.NUnitTestRunner;
 using TestRunner.WebApp.Shared.Stores;
 
 /// <summary>
@@ -29,5 +30,13 @@ public static class InitServicesExtension
     public static IServiceCollection InitSharedServices(this IServiceCollection services)
         => services
             .AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>()
-            .AddSingleton<BrowserLogger>();
+            .AddSingleton<BrowserLogger>()
+            .InitNUnitTestRunner();
+
+    private static IServiceCollection InitNUnitTestRunner(this IServiceCollection services)
+        => services
+            .AddSingleton<NUnitTestRunnerStore>()
+            .AddSingleton<INUnitTestRunnerStore>(
+                static provider => provider.GetRequiredService<NUnitTestRunnerStore>())
+            .AddHostedService(static provider => provider.GetRequiredService<NUnitTestRunnerStore>());
 }
