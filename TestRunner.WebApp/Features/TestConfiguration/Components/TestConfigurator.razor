@@ -1,5 +1,10 @@
 ﻿@* Feature: TestConfiguration — "the user can configure a test run". *@
 
+@using Fluxor
+@using Fluxor.Persist.Middleware
+
+@inherits Fluxor.Blazor.Web.Components.FluxorComponent
+
 <section class="test-configurator">
     <h2 class="pane-title">Test Configurator</h2>
 
@@ -10,12 +15,25 @@
 
     <dl class="placeholder-config">
         <dt>Runtime version</dt>
-        <dd>—</dd>
+        <dd>@(TestConfigurationState.Value.RuntimeVersion?.ToString() ?? "—")</dd>
         <dt>IDE version</dt>
-        <dd>—</dd>
+        <dd>@(TestConfigurationState.Value.IdeVersion?.ToString() ?? "—")</dd>
         <dt>Test station</dt>
         <dd>—</dd>
         <dt>Upload results to TestLink</dt>
         <dd>—</dd>
     </dl>
 </section>
+
+@code {
+    [Inject]
+    private IState<TestConfigurationState> TestConfigurationState { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        SubscribeToAction<InitializePersistMiddlewareResultSuccessAction>(
+            _ => StateHasChanged());
+    }
+}

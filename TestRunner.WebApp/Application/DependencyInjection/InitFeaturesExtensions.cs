@@ -2,8 +2,8 @@ namespace TestRunner.WebApp.Application.DependencyInjection;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using TestRunner.WebApp.Features.AppLogging.Services;
-using TestRunner.WebApp.Features.TestConfiguration.Services;
 using TestRunner.WebApp.Features.TestDiscovery.Services;
 using TestRunner.WebApp.Shared.Logging;
 using TestRunner.WebApp.Shared.Stores;
@@ -13,46 +13,42 @@ using TestRunner.WebApp.Shared.Stores;
 /// </summary>
 public static class InitFeaturesExtensions
 {
-    public static IServiceCollection InitFeatures(this IServiceCollection services)
-        => services
-            .InitAppLogging()
-            .InitTestDiscovery()
-            .InitTestConfiguration();
+    extension(IServiceCollection services)
+    {
+        public IServiceCollection InitFeatures()
+            => services
+                .InitAppLogging()
+                .InitTestDiscovery();
 
-    private static IServiceCollection InitAppLogging(this IServiceCollection services)
-        => services
-            .AddSingleton<IAppLoggerSink, DiagnosticsLoggerSink>()
-            .AddSingleton<IAppLoggerFactory, AppLoggerFactory>()
-            .AddSingleton(static provider =>
-                provider.GetRequiredService<IAppLoggerFactory>()
+        private IServiceCollection InitAppLogging()
+            => services
+                .AddSingleton<IAppLoggerSink, DiagnosticsLoggerSink>()
+                .AddSingleton<IAppLoggerFactory, AppLoggerFactory>()
+                .AddSingleton(static provider =>
+                    provider.GetRequiredService<IAppLoggerFactory>()
                         .CreateLogger(LogSources.App))
-            .AddSingleton<IAppLoggerHub>(
-                static provider =>
-                {
-                    var loggerHub = new AppLoggerHub(provider.GetServices<IAppLoggerSink>());
-
-                    // The log file sits at the far end of the pipeline the log itself feeds, so its
-                    // failures cannot travel back as ordinary entries. This is the one wire that carries
-                    // them, and it ends in the buffer alone.
-                    foreach (var fileLoggerProvider in provider
-                        .GetServices<ILoggerProvider>()
-                        .OfType<IExtendedLoggerProvider>())
+                .AddSingleton<IAppLoggerHub>(
+                    static provider =>
                     {
-                        fileLoggerProvider.Failed += loggerHub.ReportFailure;
-                    }
+                        var loggerHub = new AppLoggerHub(provider.GetServices<IAppLoggerSink>());
 
-                    return loggerHub;
-                });
+                        // The log file sits at the far end of the pipeline the log itself feeds, so its
+                        // failures cannot travel back as ordinary entries. This is the one wire that carries
+                        // them, and it ends in the buffer alone.
+                        foreach (var fileLoggerProvider in provider
+                                     .GetServices<ILoggerProvider>()
+                                     .OfType<IExtendedLoggerProvider>())
+                        {
+                            fileLoggerProvider.Failed += loggerHub.ReportFailure;
+                        }
 
-    private static IServiceCollection InitTestDiscovery(this IServiceCollection services)
+                        return loggerHub;
+                    });
+
+        private IServiceCollection InitTestDiscovery()
         => services
             .AddScoped<TestDiscoveryStore>()
             .AddScoped<ITestDiscoveryStore>(
                 provider => provider.GetRequiredService<TestDiscoveryStore>());
-
-    private static IServiceCollection InitTestConfiguration(this IServiceCollection services)
-        => services
-            .AddScoped<TestConfigurationStore>()
-            .AddScoped<ITestConfigurationStore>(
-                provider => provider.GetRequiredService<TestConfigurationStore>());
+    }
 }

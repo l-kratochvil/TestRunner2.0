@@ -1,5 +1,9 @@
 namespace TestRunner.WebApp.Shared.Stores;
 
+using TestRunner.WebApp.Shared.Domain;
+
 public record ChangedAction(
-    Version? NewIdeVersion,
-    Version? NewRuntimeVersion);
+    ValueChange<bool>? NewIsTestLinkEnabled,
+    ValueChange<TestedHwAssemblyType?>? NewTestedHwAssembly,
+    ValueChange<Version?>? NewIdeVersion,
+    ValueChange<Version?>? NewRuntimeVersion);

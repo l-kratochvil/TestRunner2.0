@@ -9,18 +9,38 @@ public static class Reducers
     public static TestConfigurationState OnChanged(
         TestConfigurationState current, ChangedAction action)
     {
-        var updated = new TestConfigurationState();
+        var updated = current;
 
-        if (action.NewRuntimeVersion is not null)
-        {
-            updated = current with { RuntimeVersion = action.NewRuntimeVersion };
-        }
-
-        if (action.NewIdeVersion is not null)
-        {
-            updated = current with { IdeVersion = action.NewIdeVersion };
-        }
+        updated = UpdateIfChanged(
+            updated,
+            action.NewRuntimeVersion,
+            (state, value) => state with { RuntimeVersion = value });
+        updated = UpdateIfChanged(
+            updated,
+            action.NewIdeVersion,
+            (state, value) => state with { IdeVersion = value });
+        updated = UpdateIfChanged(
+            updated,
+            action.NewIsTestLinkEnabled,
+            (state, value) => state with { IsTestLinkEnabled = value });
+        updated = UpdateIfChanged(
+            updated,
+            action.NewTestedHwAssembly,
+            (state, value) => state with { TestedHwAssembly = value });
 
         return updated;
+    }
+
+    private static TestConfigurationState UpdateIfChanged<TValue>(
+        TestConfigurationState current,
+        ValueChange<TValue>? change,
+        Func<TestConfigurationState, TValue, TestConfigurationState> update)
+    {
+        if (change is not null)
+        {
+            return update(current, change.Value);
+        }
+
+        return current;
     }
 }

@@ -1,9 +1,12 @@
 namespace TestRunner.WebApp.Features.TestDiscovery.Services;
 
 using System.Linq;
+
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+
 using TestRunner.Common.Model;
 using TestRunner.WebApp.Shared.Logging;
+using TestRunner.WebApp.Shared.Storage;
 using TestRunner.WebApp.Shared.Stores;
 
 /// <summary>
@@ -20,8 +23,8 @@ public sealed class TestDiscoveryStore(
     ProtectedLocalStorage protectedLocalStorage)
     : StoreBase<TestDiscoveryState>, ITestDiscoveryStore
 {
-    private readonly LocalStorage<LocalStorageData> localStorage =
-        new("test-discovery", protectedLocalStorage, logger);
+    private readonly NamedLocalStorage<LocalStorageData> localStorage =
+        new("test-discovery", protectedLocalStorage, logger, () => new LocalStorageData([]));
 
     /// <inheritdoc/>
     protected override TestDiscoveryState DefaultState
@@ -38,9 +41,8 @@ public sealed class TestDiscoveryStore(
     /// <returns>The remembered execution paths, empty when there are none.</returns>
     public async Task<IReadOnlyList<string>> ReadRememberedPathsAsync()
     {
-        LocalStorageData? data = await this.localStorage.ReadAsync();
-
-        return data?.SelectedTestCasesPaths ?? [];
+        LocalStorageData data = await this.localStorage.ReadAsync();
+        return data.SelectedTestCasesPaths;
     }
 
     /// <summary>

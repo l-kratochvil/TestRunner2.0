@@ -1,14 +1,17 @@
 namespace TestRunner.WebApp.Shared.Stores;
 
 using Fluxor;
+using TestRunner.WebApp.Shared.Domain;
 
 [FeatureState]
 public record TestConfigurationState(
-    Version IdeVersion,
-    Version RuntimeVersion)
+    bool IsTestLinkEnabled,
+    Version? IdeVersion,
+    Version? RuntimeVersion,
+    TestedHwAssemblyType? TestedHwAssembly)
 {
     public TestConfigurationState()
-        : this(new Version(), new Version())
+        : this(false, null, null, null)
     {
     }
 }

@@ -1,5 +1,3 @@
-using Fluxor;
-
 using TestRunner.WebApp.Application.DependencyInjection;
 using TestRunner.WebApp.Application.Logging;
 using TestRunner.WebApp.Components;
@@ -17,8 +15,6 @@ await using var nunitTestRunnerProxyConnector = await NUnitTestRunnerProxyConnec
 builder.Services
     .AddRazorComponents()
     .AddInteractiveServerComponents();
-
-builder.Services.AddFluxor(x => x.ScanAssemblies(typeof(Program).Assembly));
 
 builder.Logging.InitFileLogger();
 builder.Services.AddSingleton(nunitTestRunnerProxyConnector.Proxy);

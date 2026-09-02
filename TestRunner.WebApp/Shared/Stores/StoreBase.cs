@@ -1,14 +1,5 @@
 namespace TestRunner.WebApp.Shared.Stores;
 
-/// <summary>
-/// A holder of state that outlives the component reading it: components ask it what the state is,
-/// change it through <see cref="UpdateAsync"/> and learn about changes from <see cref="Changed"/>.
-/// </summary>
-/// <remarks>
-/// Remembering the state between visits is deliberately not part of this: a store that needs it
-/// takes a <see cref="LocalStorageBase{TData}"/> of its own and writes through on update, so that
-/// stores which have nothing worth remembering carry none of the machinery.
-/// </remarks>
 /// <typeparam name="TState">State the store hands out.</typeparam>
 public abstract class StoreBase<TState>
     where TState : class
