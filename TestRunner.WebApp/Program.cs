@@ -1,3 +1,5 @@
+using Fluxor;
+
 using TestRunner.WebApp.Application.DependencyInjection;
 using TestRunner.WebApp.Application.Logging;
 using TestRunner.WebApp.Components;
@@ -12,8 +14,11 @@ var builder = WebApplication.CreateBuilder(args);
 await using var nunitTestRunnerProxyConnector = await NUnitTestRunnerProxyConnector.ConnectAsync();
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
+builder.Services
+    .AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddFluxor(x => x.ScanAssemblies(typeof(Program).Assembly));
 
 builder.Logging.InitFileLogger();
 builder.Services.AddSingleton(nunitTestRunnerProxyConnector.Proxy);
@@ -38,7 +43,7 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+   .AddInteractiveServerRenderMode();
 
 // Lifecycle is developer detail, so it goes to the logging pipeline and not to the log panel.
 // The category is spelled out because the generated Program class has no namespace and would not

@@ -7,7 +7,10 @@
 @inject TestDiscoveryStore Store
 
 <section class="test-explorer">
-    <h2 class="pane-title">Test Explorer</h2>
+    <div class="pane-header">
+        <h2 class="pane-title">Test Explorer</h2>
+        @this.HeaderActions
+    </div>
 
     @if (this.viewModel.IsEmpty)
     {
@@ -26,6 +29,13 @@
 
 @code {
     private TestExplorerViewModel viewModel = new([]);
+
+    /// <summary>
+    /// Gets or sets what is drawn in the header row beside the title, such as the button that
+    /// starts a test run. Nothing when the explorer is used on its own.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? HeaderActions { get; set; }
 
     /// <inheritdoc/>
     protected override void OnInitialized()

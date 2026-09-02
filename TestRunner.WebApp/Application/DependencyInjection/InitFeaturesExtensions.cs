@@ -2,7 +2,6 @@ namespace TestRunner.WebApp.Application.DependencyInjection;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using TestRunner.WebApp.Application.Logging;
 using TestRunner.WebApp.Features.AppLogging.Services;
 using TestRunner.WebApp.Features.TestConfiguration.Services;
 using TestRunner.WebApp.Features.TestDiscovery.Services;

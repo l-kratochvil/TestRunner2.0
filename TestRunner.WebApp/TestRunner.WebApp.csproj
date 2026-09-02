@@ -11,6 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Fluxor.Blazor.Web" Version="6.11.0" />
+    <PackageReference Include="Fluxor.Blazor.Web.ReduxDevTools" Version="6.11.0" />
+    <PackageReference Include="Fluxor.Persist" Version="3.1.0" />
     <PackageReference Include="StreamJsonRpc" Version="2.21.10" />
   </ItemGroup>
 
@@ -20,9 +23,7 @@
     <ProjectReference Include="..\TestRunner.Common\TestRunner.Common.csproj" />
   </ItemGroup>
 
-  <Target Name="RestoreTypeScriptTooling"
-          BeforeTargets="CompileTypeScript"
-          Condition="!Exists('$(MSBuildProjectDirectory)\node_modules\.bin\tsc.cmd')">
+  <Target Name="RestoreTypeScriptTooling" BeforeTargets="CompileTypeScript" Condition="!Exists('$(MSBuildProjectDirectory)\node_modules\.bin\tsc.cmd')">
     <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 
@@ -36,8 +37,7 @@
        pipeline to grow beyond tsc without touching this project file. npm run puts
        node_modules/.bin on PATH, so the compiler is still the version pinned in package.json and
        never a globally installed one. -->
-  <Target Name="CompileTypeScript"
-          BeforeTargets="AssignTargetPaths;ResolveJSModuleStaticWebAssets">
+  <Target Name="CompileTypeScript" BeforeTargets="AssignTargetPaths;ResolveJSModuleStaticWebAssets">
     <Exec Command="npm run build" WorkingDirectory="$(MSBuildProjectDirectory)" />
 
     <!-- On a fresh clone the compiled .js files do not exist yet when MSBuild evaluates its item
@@ -48,8 +48,7 @@
          is what makes them reachable at all, and only a static web asset gets a fingerprint and an
          import map entry. -->
     <ItemGroup>
-      <None Include="**\*.razor.js;**\*.cshtml.js"
-            Exclude="@(None);@(Content);bin\**;obj\**;node_modules\**;wwwroot\**" />
+      <None Include="**\*.razor.js;**\*.cshtml.js" Exclude="@(None);@(Content);bin\**;obj\**;node_modules\**;wwwroot\**" />
       <Content Include="wwwroot\browser\**\*.js" Exclude="@(Content)" />
     </ItemGroup>
   </Target>

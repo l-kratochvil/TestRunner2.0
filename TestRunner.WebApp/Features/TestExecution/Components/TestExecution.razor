@@ -1,0 +1,23 @@
+@* Feature: TestExecution — "the user can execute a test". *@
+
+@using Fluxor
+
+@* Deliberately nothing but the button: where it is drawn is the caller's business, which is what
+   lets the test explorer take it into its header row. *@
+<button type="button"
+        class="@(this.isRunning ? "btn btn-sm btn-danger" : "btn btn-sm btn-success")"
+        @onclick="this.OnToggle">
+    @(this.isRunning ? "Stop" : "Start")
+</button>
+
+@code {
+    // Which of the two actions the button offers. Starting and stopping a test run is not wired up
+    // yet, so nothing outside the button has to know about it and a field is enough.
+    private bool isRunning;
+
+    [Inject]
+    private IState<TestConfigurationState> TestConfigurationState { get; set; } // Use TestConfigurationState.Value to access the current state
+
+    private void OnToggle()
+        => this.isRunning = !this.isRunning;
+}

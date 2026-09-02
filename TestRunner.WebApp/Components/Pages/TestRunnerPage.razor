@@ -8,7 +8,13 @@
 <div class="test-runner-page">
     <div class="main-pane">
         <div class="explorer-pane">
-            <TestExplorer />
+            @* Starting a run belongs to the tests it is started for, so the button is handed to
+               the explorer and drawn in its header row rather than in a bar of its own. *@
+            <TestExplorer>
+                <HeaderActions>
+                    <TestExecution />
+                </HeaderActions>
+            </TestExplorer>
         </div>
         @* The outer panes are the sized ones and the configurator takes what is left, so each
            handle only moves the boundary the user grabbed. *@

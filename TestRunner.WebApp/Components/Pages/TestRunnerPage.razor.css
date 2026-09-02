@@ -18,13 +18,20 @@
 .configurator-pane,
 .result-pane {
   min-width: 0;
-  overflow: auto;
   border: 1px solid #dee2e6;
   border-radius: 0.25rem;
   padding: 0.75rem;
 }
 
+.configurator-pane,
+.result-pane {
+  overflow: auto;
+}
+
+/* The header row with the run button has to stay in sight, so the pane does not scroll as a whole
+   and the test tree inside it does the scrolling. */
 .explorer-pane {
+  overflow: hidden;
   flex: 0 0 var(--test-explorer-width, 33.333%);
 }
 
