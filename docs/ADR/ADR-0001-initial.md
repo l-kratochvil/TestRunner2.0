@@ -312,6 +312,67 @@ library settles down. **Revisit when the library stabilises:** the natural trigg
 changing less often than its consumers, or a second consumer or CI pipeline appearing. At that
 point this decision is superseded by a package-feed one rather than amended.
 
+### 9. Configuring a test run: settings, property grid, validation
+
+Everything a run needs beyond the tests themselves is put together in the `TestConfiguration`
+feature: the runtime version, the test station, whether the result goes to TestLink and, when it
+does, the IDE version it is filed under.
+
+**Settings of the installation live on the server, not in the browser.** The runtime versions on
+offer are the folders under the IDE install folder, which is a path on the test machine and the
+same for everyone connecting. `AppSettings` therefore keeps it in a JSON file next to the log files
+(`%LOCALAPPDATA%\TestRunner.WebApp\user-settings.json`), behind a single `AppSettingsStore` started
+as a hosted service so the file is read before the first browser is answered. Keeping it in the
+browser instead — where the test selection and the configuration itself are kept — would give every
+tester a private idea of where the IDE is installed while all of them scan the same disk. Only the
+install folder is settable; a setting nobody reads is configuration for no one, and the TestLink
+token is a secret rather than a setting and deserves its own decision.
+
+**A runtime version is a folder name, not a number.** The install folder is scanned for names
+starting with a digit, and the name is what identifies the installation everywhere else, so it is
+kept as a `string`; parsing it into `Version` would throw on the first folder the installer names
+something else. The IDE version is the opposite case: its format is enforced, so it is kept as a
+`Version`, and the half-typed text on the way there stays in the configurator.
+
+**Property grid, not a form generator.** `Components/Primitives` holds `PropertyGrid` and
+`PropertyRow`: the grid lays out the label / input / message columns and both `TestConfiguration`
+and `AppSettings` draw their rows in it, but each supplies its own inputs. Handing the grid a
+description of the fields instead would make it draw the inputs too, and the first field with its
+own labels or its own visibility rule would need a way around it — so the layout is shared and the
+controls are not.
+
+**Settings are announced only once they are saved.** One instance of `AppSettingsStore` serves every
+circuit, and it tells its listeners on the thread of whoever changed it — which belongs to another
+browser as often as not, so each listener hands the work back to its own circuit before touching
+anything. The file is written before the change is announced, and a write that did not work leaves
+everything as it was: what the application says it is configured with is then always what a restart
+would find, and the tester is told to try again rather than shown a "Saved." that is not true.
+
+**FluentValidation, with no Blazor integration package and no `EditForm`.** The rules live in
+`TestConfigurationValidator` and are reached through `ITestConfigurationValidator`, which answers in
+plain messages keyed by field. `Blazored.FluentValidation` is archived and stops at FluentValidation
+11; the alternatives are young; and since the configurator draws its own rows there is nothing for
+`EditForm`'s `ValidationMessage` to add. The configurator is not a form anyway: nothing is
+submitted, every change goes straight into the state.
+
+**Whether a run may start is asked, not stored.** One rule — a runtime test needs a station —
+depends on which tests are selected, which the configuration cannot see. Rather than copying that
+flag into the configuration, where it would be persisted and go stale, the caller passes it: it
+knows the selection because it is the reason it is asking. `TestExecution` therefore combines two
+answers from the two features that own them, "tests are selected" and "the configuration is
+valid", instead of folding the selection into the configuration's rules, which would make the
+configuration invalid over something the configurator does not show.
+
+**Fields that are not asked for are hidden, and what was typed into them is kept.** The station
+appears only for a runtime test and the IDE version only when the result goes to TestLink, matching
+what the console application offers. Turning TestLink off leaves the version where it was: ticking a
+box off must not throw away work, and the rules ignore a value they do not ask for. A configuration
+put back from the browser is looked over first — a remembered runtime version that is no longer
+installed is dropped and said so in the log, because a run started against an installation that is
+not there fails much later and much less clearly. Repointing the install folder in the settings
+reaches the same hazard by another road and drops the version the same way; what counts as installed
+is decided in one place, `InstalledRuntimeVersions.Includes`.
+
 ## Consequences
 
 **Positive**

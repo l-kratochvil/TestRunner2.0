@@ -9,6 +9,7 @@ using Microsoft.JSInterop;
 
 using TestRunner.WebApp.Shared.JsInterop;
 using TestRunner.WebApp.Shared.NUnitTestRunner;
+using TestRunner.WebApp.Shared.Storage;
 using TestRunner.WebApp.Shared.Stores;
 
 /// <summary>
@@ -32,6 +33,7 @@ public static class InitServicesExtension
             => services
                 .AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>()
                 .AddSingleton<BrowserLogger>()
+                .AddSingleton<IDirectoryReader, DirectoryReader>()
                 .InitFluxor()
                 .InitNUnitTestRunner();
 
@@ -49,6 +51,10 @@ public static class InitServicesExtension
                         .ScanAssemblies(typeof(Program).Assembly)
                         .UsePersist(options =>
                         {
+                            // Only what is listed here is remembered by the browser, and it is
+                            // matched against the name of the feature. Fluxor names a feature after
+                            // the full name of its state unless the state says otherwise, so the
+                            // two only meet because TestConfigurationState names itself.
                             options.UseInclusionApproach();
                             options.SetWhiteList([nameof(TestConfigurationState)]);
                         }))

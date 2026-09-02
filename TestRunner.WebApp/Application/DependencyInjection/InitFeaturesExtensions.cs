@@ -2,10 +2,14 @@ namespace TestRunner.WebApp.Application.DependencyInjection;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using TestRunner.WebApp.Features.AppLogging.Services;
+using TestRunner.WebApp.Features.AppSettings.Services;
+using TestRunner.WebApp.Features.TestConfiguration.Services;
 using TestRunner.WebApp.Features.TestDiscovery.Services;
 using TestRunner.WebApp.Shared.Logging;
+using TestRunner.WebApp.Shared.Storage;
 using TestRunner.WebApp.Shared.Stores;
 
 /// <summary>
@@ -18,7 +22,9 @@ public static class InitFeaturesExtensions
         public IServiceCollection InitFeatures()
             => services
                 .InitAppLogging()
-                .InitTestDiscovery();
+                .InitAppSettings()
+                .InitTestDiscovery()
+                .InitTestConfiguration();
 
         private IServiceCollection InitAppLogging()
             => services
@@ -50,5 +56,30 @@ public static class InitFeaturesExtensions
             .AddScoped<TestDiscoveryStore>()
             .AddScoped<ITestDiscoveryStore>(
                 provider => provider.GetRequiredService<TestDiscoveryStore>());
+
+        /// <remarks>
+        /// The settings describe the machine the application runs on, so one instance serves every
+        /// circuit, and it is started as a hosted service to have read its file before the first
+        /// browser is answered.
+        /// </remarks>
+        private IServiceCollection InitAppSettings()
+            => services
+                .AddOptions<AppSettingsOptions>()
+                .BindConfiguration("AppSettings")
+                .Services
+                .AddSingleton(
+                    static provider => new JsonFileStorage<AppSettingsState>(
+                        provider.GetRequiredService<IOptions<AppSettingsOptions>>().Value.FilePath,
+                        provider.GetRequiredService<IAppLoggerFactory>().CreateLogger(LogSources.App),
+                        static () => new AppSettingsState(AppSettingsStore.DefaultIdeInstallFolderPath)))
+                .AddSingleton<AppSettingsStore>()
+                .AddSingleton<IAppSettingsStore>(
+                    static provider => provider.GetRequiredService<AppSettingsStore>())
+                .AddHostedService(static provider => provider.GetRequiredService<AppSettingsStore>());
+
+        private IServiceCollection InitTestConfiguration()
+            => services
+                .AddSingleton<IInstalledRuntimeVersionsProvider, InstalledRuntimeVersionsProvider>()
+                .AddSingleton<ITestConfigurationValidator, TestConfigurationValidator>();
     }
 }

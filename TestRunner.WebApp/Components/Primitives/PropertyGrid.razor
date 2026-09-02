@@ -1,0 +1,18 @@
+@* A two-column list of properties: what each one is called, and what it is set to.
+
+   The grid lays the rows out and shows what is wrong with them; the input of a row is whatever the
+   feature puts there. Handing the grid a description of the fields instead would make it draw the
+   inputs too, and the first field with its own labels or its own visibility rule would need a way
+   around it — so the layout is shared and the controls are not. *@
+
+<div class="property-grid">
+    @this.ChildContent
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the rows of the grid, which are <see cref="PropertyRow"/> components.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

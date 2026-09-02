@@ -1,4 +1,107 @@
-﻿@* Feature: AppSettings — "the user can view and change persistent application settings". *@
+@* Feature: AppSettings — "the user can view and change persistent application settings". *@
+
+@using System.IO
+@using TestRunner.WebApp.Features.AppSettings.Services
+
+@implements IDisposable
+
+@inject AppSettingsStore Store
 
 <section class="settings-editor">
+    <h2 class="pane-title">Settings</h2>
+
+    <PropertyGrid>
+        @* One folder, holding one folder per installed runtime version, which is where the test
+           configurator reads its choices from. *@
+        <PropertyRow Label="IDE install folder"
+                     For="settings-ide-install-folder"
+                     Message="@this.FolderNote"
+                     Severity="PropertyMessageSeverity.Warning">
+            <input id="settings-ide-install-folder"
+                   type="text"
+                   class="form-control form-control-sm"
+                   value="@this.ideInstallFolderPath"
+                   @oninput="this.OnIdeInstallFolderPathChanged" />
+        </PropertyRow>
+    </PropertyGrid>
+
+    <div class="settings-actions">
+        @* The settings go into a file everyone connecting reads, so they are saved when the tester
+           says so rather than on every keystroke, which would put half a path on disk. *@
+        <button type="button"
+                class="btn btn-sm btn-primary"
+                disabled="@(!this.HasUnsavedChanges)"
+                @onclick="this.OnSaveAsync">
+            Save
+        </button>
+
+        @if (this.isSaved)
+        {
+            <span class="settings-saved" role="status">Saved.</span>
+        }
+
+        @if (this.hasSaveFailed)
+        {
+            @* Nothing was changed, so the button stays live and the tester can try again once
+               whatever the log names has been dealt with. *@
+            <span class="settings-save-failed" role="alert">
+                The settings could not be written to their file — see the log.
+            </span>
+        }
+    </div>
 </section>
+
+@code {
+    private string ideInstallFolderPath = string.Empty;
+    private bool isSaved;
+    private bool hasSaveFailed;
+
+    private bool HasUnsavedChanges
+        => !string.Equals(
+            this.ideInstallFolderPath,
+            this.Store.Current.IdeInstallFolderPath,
+            StringComparison.Ordinal);
+
+    // A folder that is not there is worth pointing out, but it does not stop the settings being
+    // saved: the tester may well be writing down where an installation is about to land.
+    private string? FolderNote
+        => string.IsNullOrWhiteSpace(this.ideInstallFolderPath) || Directory.Exists(this.ideInstallFolderPath)
+            ? null
+            : "This folder does not exist yet, or cannot be reached from the test machine.";
+
+    /// <inheritdoc/>
+    public void Dispose()
+        => this.Store.Changed -= this.OnStoreChanged;
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        this.ideInstallFolderPath = this.Store.Current.IdeInstallFolderPath;
+
+        this.Store.Changed += this.OnStoreChanged;
+    }
+
+    // One instance of the store serves everyone connected and tells them on the thread of whoever
+    // changed it, which is somebody else's circuit as often as not. Rendering has to be handed back
+    // to this circuit; drawing straight from the caller's thread would throw here and stop the
+    // change reaching the listeners after us.
+    private void OnStoreChanged()
+        => _ = this.InvokeAsync(this.StateHasChanged);
+
+    private void OnIdeInstallFolderPathChanged(ChangeEventArgs args)
+    {
+        this.ideInstallFolderPath = args.Value as string ?? string.Empty;
+        this.isSaved = false;
+        this.hasSaveFailed = false;
+    }
+
+    private async Task OnSaveAsync()
+    {
+        this.isSaved = await this.Store.SaveAsync(settings => settings with
+        {
+            IdeInstallFolderPath = this.ideInstallFolderPath,
+        });
+
+        this.hasSaveFailed = !this.isSaved;
+    }
+}

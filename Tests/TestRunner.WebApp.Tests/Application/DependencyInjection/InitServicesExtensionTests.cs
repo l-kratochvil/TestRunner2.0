@@ -8,6 +8,7 @@ using NUnit.Framework;
 using TestRunner.WebApp.Application.DependencyInjection;
 using TestRunner.WebApp.Application.Logging;
 using TestRunner.WebApp.Features.AppLogging.Services;
+using TestRunner.WebApp.Features.AppSettings.Services;
 using TestRunner.WebApp.Shared.JsInterop;
 using TestRunner.WebApp.Shared.Logging;
 
@@ -76,17 +77,18 @@ public class InitServicesExtensionTests
     }
 
     [Test]
-    public void InitAppLogging__WhenHostedServicesAreResolved__ThenShouldRegisterNone()
+    public void InitFeatures__WhenHostedServicesAreResolved__ThenShouldRegisterOnlyTheSettingsStore()
     {
         // Given:
-        // The log file is owned by the logging pipeline now, so it no longer needs a lifecycle of
-        // its own.
+        // The log file is owned by the logging pipeline, so it needs no lifecycle of its own. The
+        // settings do: they are read from their file before the first browser is answered.
+        Type[] expectedTypes = [typeof(AppSettingsStore)];
 
         // When:
-        IEnumerable<IHostedService> result = this.unit.GetServices<IHostedService>();
+        IEnumerable<Type> result = this.unit.GetServices<IHostedService>().Select(service => service.GetType());
 
         // Then:
-        Assert.That(result, Is.Empty);
+        Assert.That(result, Is.EqualTo(expectedTypes));
     }
 
     [Test]
@@ -167,6 +169,7 @@ public class InitServicesExtensionTests
             .Build();
 
         var services = new ServiceCollection();
+        services.AddSingleton(configuration);
         services.AddLogging(builder => builder.InitFileLogger());
         services.Configure<FileLoggerOptions>(configuration);
         services.InitFeatures();

@@ -1,0 +1,53 @@
+@* One property of a property grid: its name, its input, and what is wrong with it.
+
+   The row renders no wrapper of its own, so its label and its value land straight in the grid of
+   the parent — which is what keeps every label in one column and every input in the other. *@
+
+@using TestRunner.WebApp.Components.Primitives
+
+<label class="property-label" for="@this.For">@this.Label</label>
+
+<div class="property-value">
+    @this.ChildContent
+
+    @if (!string.IsNullOrEmpty(this.Message))
+    {
+        <p class="property-message @(this.Severity == PropertyMessageSeverity.Warning ? "is-warning" : "is-error")"
+           role="@(this.Severity == PropertyMessageSeverity.Warning ? "status" : "alert")">
+            @this.Message
+        </p>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets what the property is called.
+    /// </summary>
+    [Parameter]
+    public string Label { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the id of the input the label belongs to, so that clicking the label reaches
+    /// the input and a screen reader reads the two together.
+    /// </summary>
+    [Parameter]
+    public string? For { get; set; }
+
+    /// <summary>
+    /// Gets or sets what is wrong with the value, or nothing when it is fine.
+    /// </summary>
+    [Parameter]
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// Gets or sets how seriously the message is meant.
+    /// </summary>
+    [Parameter]
+    public PropertyMessageSeverity Severity { get; set; } = PropertyMessageSeverity.Error;
+
+    /// <summary>
+    /// Gets or sets the input the property is set with.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

@@ -1,11 +1,21 @@
 @* Feature: TestExecution — "the user can execute a test". *@
 
+@using System.Linq
 @using Fluxor
+@using TestRunner.Common.Model
+
+@implements IDisposable
+
+@inject IState<TestConfigurationState> TestConfigurationState
+@inject ITestConfigurationValidator Validator
+@inject ITestDiscoveryStore TestDiscoveryStore
 
 @* Deliberately nothing but the button: where it is drawn is the caller's business, which is what
    lets the test explorer take it into its header row. *@
 <button type="button"
         class="@(this.isRunning ? "btn btn-sm btn-danger" : "btn btn-sm btn-success")"
+        disabled="@(!this.isRunning && this.WhyCannotStart is not null)"
+        title="@(this.isRunning ? null : this.WhyCannotStart)"
         @onclick="this.OnToggle">
     @(this.isRunning ? "Stop" : "Start")
 </button>
@@ -15,8 +25,53 @@
     // yet, so nothing outside the button has to know about it and a field is enough.
     private bool isRunning;
 
-    [Inject]
-    private IState<TestConfigurationState> TestConfigurationState { get; set; } // Use TestConfigurationState.Value to access the current state
+    // What stops a run from being started, or null when nothing does. Two things have to hold, and
+    // each is asked of the feature that owns it: tests have been selected, which is the test
+    // explorer's business, and the configuration is one that can be run with, which the
+    // configuration's own rules answer. Folding the selection into those rules would make the
+    // configuration invalid over something the configurator does not show.
+    private string? WhyCannotStart
+    {
+        get
+        {
+            IReadOnlyList<TestCaseEntity> selectedTestCases =
+                this.TestDiscoveryStore.Current.SelectedTestCases;
+
+            if (selectedTestCases.Count == 0)
+            {
+                return "Select the tests to run.";
+            }
+
+            TestConfigurationValidity validity = this.Validator.Validate(
+                TestConfigurationValues.From(
+                    this.TestConfigurationState.Value,
+                    selectedTestCases.Any(testCase => testCase.TestType is TestType.RuntimeTest)));
+
+            return validity.IsValid ? null : validity.Summary;
+        }
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        this.TestDiscoveryStore.Changed -= this.OnDependencyChanged;
+        this.TestConfigurationState.StateChanged -= this.OnStateChanged;
+    }
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        // Whether a run may start follows from the selection and from the configuration, so the
+        // button is redrawn whenever either of them moves.
+        this.TestDiscoveryStore.Changed += this.OnDependencyChanged;
+        this.TestConfigurationState.StateChanged += this.OnStateChanged;
+    }
+
+    private void OnStateChanged(object? sender, EventArgs args)
+        => this.OnDependencyChanged();
+
+    private void OnDependencyChanged()
+        => this.InvokeAsync(this.StateHasChanged);
 
     private void OnToggle()
         => this.isRunning = !this.isRunning;

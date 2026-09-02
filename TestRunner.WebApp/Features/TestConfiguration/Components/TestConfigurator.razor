@@ -1,39 +1,221 @@
-﻿@* Feature: TestConfiguration — "the user can configure a test run". *@
+@* Feature: TestConfiguration — "the user can configure a test run". *@
 
+@using System.Linq
 @using Fluxor
-@using Fluxor.Persist.Middleware
+@using TestRunner.Common.Model
+@using TestRunner.WebApp.Features.TestConfiguration.Models
+@using TestRunner.WebApp.Features.TestConfiguration.Services
+@using TestRunner.WebApp.Shared.Domain
 
 @inherits Fluxor.Blazor.Web.Components.FluxorComponent
+
+@inject IState<TestConfigurationState> TestConfigurationState
+@inject IDispatcher Dispatcher
+@inject ITestConfigurationValidator Validator
+@inject IInstalledRuntimeVersionsProvider InstalledRuntimeVersions
+@inject ITestDiscoveryStore TestDiscoveryStore
+@inject IAppSettingsStore AppSettingsStore
 
 <section class="test-configurator">
     <h2 class="pane-title">Test Configurator</h2>
 
-    <p class="placeholder-note">
-        Placeholder — configuration of the selected test run will live here
-        (runtime/IDE versions, test station, TestLink upload options).
-    </p>
+    <PropertyGrid>
+        <PropertyRow Label="Runtime version"
+                     For="configuration-runtime-version"
+                     Message="@this.RuntimeVersionMessage"
+                     Severity="@this.RuntimeVersionMessageSeverity">
+            <select id="configuration-runtime-version"
+                    class="form-select form-select-sm"
+                    @onchange="this.OnRuntimeVersionChanged">
+                <option value="" selected="@(this.viewModel.RuntimeVersion is null)">—</option>
+                @foreach (var version in this.viewModel.RuntimeVersions)
+                {
+                    <option value="@version" selected="@(version == this.viewModel.RuntimeVersion)">@version</option>
+                }
+            </select>
+        </PropertyRow>
 
-    <dl class="placeholder-config">
-        <dt>Runtime version</dt>
-        <dd>@(TestConfigurationState.Value.RuntimeVersion?.ToString() ?? "—")</dd>
-        <dt>IDE version</dt>
-        <dd>@(TestConfigurationState.Value.IdeVersion?.ToString() ?? "—")</dd>
-        <dt>Test station</dt>
-        <dd>—</dd>
-        <dt>Upload results to TestLink</dt>
-        <dd>—</dd>
-    </dl>
+        @* Only a runtime test runs against hardware, so for anything else there is no station to
+           ask about. Which tests are selected is the test explorer's business, so the condition is
+           read from the selection rather than kept in the configuration. *@
+        @if (this.viewModel.IsTestedHwAssemblyShown)
+        {
+            <PropertyRow Label="Test station"
+                         For="configuration-test-station"
+                         Message="@this.viewModel.ErrorFor(nameof(TestConfigurationValues.TestedHwAssembly))">
+                <select id="configuration-test-station"
+                        class="form-select form-select-sm"
+                        @onchange="this.OnTestedHwAssemblyChanged">
+                    <option value="" selected="@(this.viewModel.TestedHwAssembly is null)">—</option>
+                    @foreach (var station in TestStationLabels.Offered)
+                    {
+                        <option value="@station" selected="@(station == this.viewModel.TestedHwAssembly)">
+                            @TestStationLabels.For(station)
+                        </option>
+                    }
+                </select>
+            </PropertyRow>
+        }
+
+        <PropertyRow Label="Write to TestLink" For="configuration-testlink">
+            <input id="configuration-testlink"
+                   type="checkbox"
+                   class="form-check-input"
+                   checked="@this.viewModel.IsTestLinkEnabled"
+                   @onchange="this.OnTestLinkEnabledChanged" />
+        </PropertyRow>
+
+        @* The IDE version is what the result is filed under in TestLink, so it is asked for only
+           when the result goes there. *@
+        @if (this.viewModel.IsIdeVersionShown)
+        {
+            <PropertyRow Label="IDE version"
+                         For="configuration-ide-version"
+                         Message="@this.viewModel.ErrorFor(nameof(TestConfigurationValues.IdeVersionText))">
+                <input id="configuration-ide-version"
+                       type="text"
+                       class="form-control form-control-sm"
+                       placeholder="6.1 or 6.1.4"
+                       value="@this.viewModel.IdeVersionText"
+                       @oninput="this.OnIdeVersionTextChanged" />
+            </PropertyRow>
+        }
+    </PropertyGrid>
 </section>
 
 @code {
-    [Inject]
-    private IState<TestConfigurationState> TestConfigurationState { get; set; }
+    private TestConfiguratorViewModel viewModel = default!;
 
+    private string? RuntimeVersionError
+        => this.viewModel.ErrorFor(nameof(TestConfigurationValues.RuntimeVersion));
+
+    // Nothing to choose from is worth saying even before the tester has been to the field, and it
+    // is the more useful of the two messages: picking a version is not something they can do until
+    // it is dealt with.
+    private string? RuntimeVersionMessage
+        => this.viewModel.RuntimeVersionsNote ?? this.RuntimeVersionError;
+
+    private PropertyMessageSeverity RuntimeVersionMessageSeverity
+        => this.viewModel.RuntimeVersionsNote is null
+            ? PropertyMessageSeverity.Error
+            : PropertyMessageSeverity.Warning;
+
+    /// <inheritdoc/>
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        SubscribeToAction<InitializePersistMiddlewareResultSuccessAction>(
-            _ => StateHasChanged());
+        this.viewModel = new TestConfiguratorViewModel(this.Validator);
+        this.LoadFromState();
+        this.ReadInstalledRuntimeVersions();
+
+        // The configuration the browser remembers arrives after the first render, and is looked
+        // over before it is shown, see Effects.OnPersistRestored.
+        this.SubscribeToAction<RestoredAction>(_ =>
+        {
+            this.LoadFromState();
+            this.StateHasChanged();
+        });
+
+        this.TestDiscoveryStore.Changed += this.OnTestSelectionChanged;
+
+        // Where the runtime versions are installed is part of the settings, so what is on offer
+        // follows a change of them without the tester reloading the page.
+        this.AppSettingsStore.Changed += this.OnAppSettingsChanged;
+    }
+
+    /// <inheritdoc/>
+    protected override ValueTask DisposeAsyncCore(bool disposing)
+    {
+        if (disposing)
+        {
+            this.TestDiscoveryStore.Changed -= this.OnTestSelectionChanged;
+            this.AppSettingsStore.Changed -= this.OnAppSettingsChanged;
+        }
+
+        return base.DisposeAsyncCore(disposing);
+    }
+
+    private void LoadFromState()
+        => this.viewModel.Load(this.TestConfigurationState.Value, this.IsRuntimeTestSelected());
+
+    private void ReadInstalledRuntimeVersions()
+        => this.viewModel.SetInstalledRuntimeVersions(this.InstalledRuntimeVersions.Read());
+    private bool IsRuntimeTestSelected()
+        => this.TestDiscoveryStore.Current.SelectedTestCases
+            .Any(testCase => testCase.TestType is TestType.RuntimeTest);
+
+    private void OnTestSelectionChanged()
+    {
+        this.viewModel.SetRuntimeTestSelected(this.IsRuntimeTestSelected());
+        this.StateHasChanged();
+    }
+
+    private void OnAppSettingsChanged()
+        // One instance of the settings serves everyone connected and tells them on the thread of
+        // whoever changed them, which is somebody else's circuit as often as not. The work has to
+        // be handed back to this circuit: touching the view model or drawing from the caller's
+        // thread would throw here and stop the change reaching the listeners after us.
+        => _ = this.InvokeAsync(() =>
+        {
+            InstalledRuntimeVersions installed = this.InstalledRuntimeVersions.Read();
+            this.viewModel.SetInstalledRuntimeVersions(installed);
+
+            // Pointing the install folder somewhere else can leave behind a version that is not
+            // installed there, which is the same hazard a restored configuration is checked for
+            // (see Effects.OnPersistRestored) reached by another road. The emptied combo box and
+            // the note under it say what happened, so there is nothing to add to the log.
+            if (this.viewModel.RuntimeVersion is not null &&
+                !installed.Includes(this.viewModel.RuntimeVersion))
+            {
+                this.viewModel.SetRuntimeVersion(null);
+
+                this.Dispatcher.Dispatch(
+                    new ChangedAction(NewRuntimeVersion: new ValueChange<string?>(null)));
+            }
+
+            this.StateHasChanged();
+        });
+
+    private void OnRuntimeVersionChanged(ChangeEventArgs args)
+    {
+        this.viewModel.SetRuntimeVersion(args.Value as string);
+
+        this.Dispatcher.Dispatch(
+            new ChangedAction(NewRuntimeVersion: new ValueChange<string?>(this.viewModel.RuntimeVersion)));
+    }
+
+    private void OnTestedHwAssemblyChanged(ChangeEventArgs args)
+    {
+        this.viewModel.SetTestedHwAssembly(
+            Enum.TryParse<TestedHwAssemblyType>(args.Value as string, out var station) ? station : null);
+
+        this.Dispatcher.Dispatch(
+            new ChangedAction(
+                NewTestedHwAssembly: new ValueChange<TestedHwAssemblyType?>(this.viewModel.TestedHwAssembly)));
+    }
+
+    private void OnTestLinkEnabledChanged(ChangeEventArgs args)
+    {
+        this.viewModel.SetTestLinkEnabled(args.Value is true);
+
+        this.Dispatcher.Dispatch(
+            new ChangedAction(NewIsTestLinkEnabled: new ValueChange<bool>(this.viewModel.IsTestLinkEnabled)));
+    }
+
+    private void OnIdeVersionTextChanged(ChangeEventArgs args)
+    {
+        this.viewModel.SetIdeVersionText(args.Value as string);
+
+        // Only text that was found to be a version is kept, and text that is not clears what was
+        // kept before: a configuration still holding the last good version while the tester looks
+        // at something else would let a run start against a version nobody typed.
+        Version? ideVersion =
+            this.viewModel.ErrorFor(nameof(TestConfigurationValues.IdeVersionText)) is null
+                ? this.viewModel.IdeVersion
+                : null;
+
+        this.Dispatcher.Dispatch(
+            new ChangedAction(NewIdeVersion: new ValueChange<Version?>(ideVersion)));
     }
 }
