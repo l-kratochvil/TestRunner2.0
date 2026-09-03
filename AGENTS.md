@@ -22,6 +22,15 @@ doc you write in this repo: markdown docs, ADRs, and code doc comments alike.
 Domain knowledge lives in `CONTEXT.md` and `docs/ADR/` at the repo root. Read
 `docs/agents/domain.md` before exploring the codebase, and when writing a glossary term or an ADR.
 
+## Code docs
+
+Cross-reference symbols with `<paramref>`, `<typeparamref>`, and `<see cref>` instead of naming
+them in prose:
+
+```csharp
+/// <returns><see cref="TResult"/> if <paramref name="value"/> can be converted to <typeparamref name="TResult"/>, otherwise <see langword="null"/>.</returns>
+```
+
 ## Code changes
 
 ### Static analysis
