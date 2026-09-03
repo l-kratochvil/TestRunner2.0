@@ -4,33 +4,28 @@ using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
 /// <summary>
-/// Writes the diagnostics arriving from the browser into the logging pipeline.
+/// Routes browser diagnostics into the diagnostics pipeline.
 /// </summary>
 /// <remarks>
-/// This is the .NET end of the bridge: the front-end holds a <c>DotNetObjectReference</c> to it and
-/// calls <see cref="Log"/> over the circuit. Browser diagnostics reach the log file and nothing
-/// else — a script fault is developer detail, so it never appears in the log the tester reads.
+/// Browser diagnostics reach the log file only; they never become tester-facing log entries.
 /// </remarks>
-/// <param name="loggerFactory">Factory the category logger is created from.</param>
+/// <param name="loggerFactory">Factory used to create the browser diagnostics logger.</param>
 public sealed class BrowserLogger(ILoggerFactory loggerFactory)
 {
     /// <summary>
-    /// Logger category every browser diagnostic is written under.
+    /// Logger category used for browser diagnostics.
     /// </summary>
     /// <remarks>
-    /// One category for the whole front-end: it says where the code ran, which is the single thing
-    /// that separates these records from the ones written on the test machine. The script the
-    /// record came from is a field of the entry instead, because a category per script would have
-    /// to be configured per script too.
+    /// The whole browser shares one category; the script name stays in each diagnostic.
     /// </remarks>
     public const string Category = "TestRunner.WebApp.Browser";
 
     private readonly ILogger logger = loggerFactory.CreateLogger(Category);
 
     /// <summary>
-    /// Writes one diagnostic coming from the browser.
+    /// Writes one browser diagnostic.
     /// </summary>
-    /// <param name="diagnostic">The diagnostic to write.</param>
+    /// <param name="diagnostic">Browser diagnostic to write.</param>
     [JSInvokable]
     public void Log(BrowserDiagnostic diagnostic)
     {
@@ -57,15 +52,14 @@ public sealed class BrowserLogger(ILoggerFactory loggerFactory)
     }
 
     /// <summary>
-    /// Maps the severity as the browser spells it onto the pipeline's own.
+    /// Maps browser severity onto <see cref="LogLevel"/>.
     /// </summary>
     /// <remarks>
-    /// An unrecognized severity is a fault of the calling script, so the record is kept and raised
-    /// to <see cref="LogLevel.Warning"/>: dropping it would hide both the record and the fault, and
-    /// passing it off as information would hide only the fault.
+    /// An unknown severity is kept and raised to <see cref="LogLevel.Warning"/> so the bad value
+    /// stays visible.
     /// </remarks>
     /// <param name="level">Severity as the browser spells it.</param>
-    /// <returns>The level the record is written at.</returns>
+    /// <returns><see cref="LogLevel"/> used for the diagnostic.</returns>
     private static LogLevel GetLevel(string? level)
         => level?.ToLowerInvariant() switch
         {

@@ -1,23 +1,21 @@
 namespace TestRunner.WebApp.Shared.JsInterop;
 
 /// <summary>
-/// Creates the wrappers around JavaScript modules.
+/// Creates <see cref="JsModuleInterop"/> wrappers.
 /// </summary>
 /// <remarks>
-/// Components ask the factory instead of constructing a <see cref="JsModuleInterop"/> themselves,
-/// so that the JavaScript runtime and the logger are wired up in one place and a component only
-/// has to name its module.
+/// The factory centralizes <see cref="Microsoft.JSInterop.IJSRuntime"/> and logger wiring, so
+/// callers only name a module path.
 /// </remarks>
 public interface IJsModuleInteropFactory
 {
     /// <summary>
-    /// Creates a wrapper around the module at the given path.
+    /// Creates a <see cref="JsModuleInterop"/> for <paramref name="modulePath"/>.
     /// </summary>
     /// <param name="modulePath">
-    /// Path of the module: either a collocated script relative to the web root, for example
-    /// <c>./Components/Layout/SplitterBar.razor.js</c>, or the URL a shared module is served
-    /// under, for example <c>/browser/logging.js</c>.
+    /// Module path, either relative to the web root for a collocated script or absolute for a
+    /// shared module.
     /// </param>
-    /// <returns>The wrapper, to be disposed by the caller that asked for it.</returns>
+    /// <returns>A wrapper owned and disposed by the caller.</returns>
     JsModuleInterop Create(string modulePath);
 }

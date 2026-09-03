@@ -13,7 +13,7 @@ using TestRunner.WebApp.Shared.Storage;
 using TestRunner.WebApp.Shared.Stores;
 
 /// <summary>
-/// Registration of the application services, one method per feature.
+/// Feature-by-feature registration of application services.
 /// </summary>
 public static class InitFeaturesExtensions
 {
@@ -58,9 +58,8 @@ public static class InitFeaturesExtensions
                 provider => provider.GetRequiredService<TestDiscoveryStore>());
 
         /// <remarks>
-        /// The settings describe the machine the application runs on, so one instance serves every
-        /// circuit, and it is started as a hosted service to have read its file before the first
-        /// browser is answered.
+        /// The settings describe one machine, so one <see cref="AppSettingsStore"/> is shared across
+        /// circuits and started before the first browser response.
         /// </remarks>
         private IServiceCollection InitAppSettings()
             => services

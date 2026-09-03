@@ -6,18 +6,18 @@ using StreamJsonRpc;
 using TestRunner.Common.Services;
 
 /// <summary>
-/// Owns the out-of-process NUnit proxy server: launches it, connects to it over a named pipe and
-/// hands out the runner behind it. Disposing tears the connection down and stops the server.
+/// Owns the out-of-process NUnit proxy server: launches it, connects to it over a named pipe, and
+/// exposes <see cref="Proxy"/>. Disposing it closes the connection and stops the server.
 /// </summary>
 /// <remarks>
-/// The server targets .NET Framework so that it can load <c>net481</c> test assemblies this
-/// application cannot host, see the README next to the proxy project. It is therefore a process of
-/// its own, and everything said to it travels over StreamJsonRpc.
+/// The server runs out of process because it targets .NET Framework and can load <c>net481</c>
+/// test assemblies this application cannot host. Calls to <see cref="Proxy"/> cross that boundary
+/// through <see cref="JsonRpc"/>.
 /// </remarks>
 internal sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
 {
     /// <summary>
-    /// Where the build leaves the server, relative to our own output directory.
+    /// Path of the server executable relative to this application's output directory.
     /// </summary>
     private const string ServerRelativePath =
         @"TestRunner.NUnitTestRunnerProxy\TestRunner.NUnitTestRunnerProxy.exe";
@@ -41,7 +41,7 @@ internal sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
     }
 
     /// <summary>
-    /// Gets the runner living in the server process.
+    /// Gets the test runner proxy served by the connected process.
     /// </summary>
     public INUnitTestRunnerProxy Proxy { get; }
 
@@ -49,9 +49,9 @@ internal sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
     /// Launches the proxy server and connects to it.
     /// </summary>
     /// <param name="cancellationToken">Token abandoning the attempt.</param>
-    /// <returns>The connector owning the running server.</returns>
+    /// <returns>The connected connector.</returns>
     /// <exception cref="FileNotFoundException">
-    /// The server is missing from our output, which means the build did not copy it.
+    /// The server executable is missing from the output, so the build did not copy it.
     /// </exception>
     public static async Task<NUnitTestRunnerProxyConnector> ConnectAsync(
         CancellationToken cancellationToken = default)

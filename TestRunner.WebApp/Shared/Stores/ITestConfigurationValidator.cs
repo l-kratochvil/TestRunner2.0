@@ -1,19 +1,18 @@
 namespace TestRunner.WebApp.Shared.Stores;
 
 /// <summary>
-/// Says whether a test configuration is one that tests can be run with.
+/// Checks whether a test configuration can be used for a test run.
 /// </summary>
 /// <remarks>
-/// The one description of what a valid configuration is, so that the configurator and whoever
-/// starts a test run cannot disagree about it. Implemented by the TestConfiguration feature, which
-/// owns the rules; everyone else is handed this.
+/// The TestConfiguration feature owns these rules so other features cannot define validity for the
+/// same configuration differently.
 /// </remarks>
 public interface ITestConfigurationValidator
 {
     /// <summary>
-    /// Checks a configuration.
+    /// Checks <paramref name="values"/>.
     /// </summary>
-    /// <param name="values">Values to check, whether typed or already put together.</param>
-    /// <returns>What was found wrong, if anything.</returns>
+    /// <param name="values">Values to check.</param>
+    /// <returns>The problems found in <paramref name="values"/>.</returns>
     TestConfigurationValidity Validate(TestConfigurationValues values);
 }

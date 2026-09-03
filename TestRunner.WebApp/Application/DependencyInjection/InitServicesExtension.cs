@@ -13,20 +13,19 @@ using TestRunner.WebApp.Shared.Storage;
 using TestRunner.WebApp.Shared.Stores;
 
 /// <summary>
-/// Registration of the application services, one method per feature.
+/// Registration of services shared across features.
 /// </summary>
 public static class InitServicesExtension
 {
-    /// <param name="services">Service collection to register into.</param>
+    /// <param name="services">Service collection to extend.</param>
     extension(IServiceCollection services)
     {
         /// <summary>
-        /// Registers the services shared across features: the ones living under <c>Shared</c> and
-        /// belonging to no feature of their own.
+        /// Registers the services that belong to no feature of their own.
         /// </summary>
         /// <remarks>
-        /// The JS module wrappers are scoped because the <see cref="IJSRuntime"/> they are built
-        /// around is, see <see cref="JsModuleInteropFactory"/>.
+        /// The JS module services are scoped because <see cref="IJSRuntime"/> is scoped; see
+        /// <see cref="JsModuleInteropFactory"/>.
         /// </remarks>
         /// <returns>The service collection, to allow chaining.</returns>
         public IServiceCollection InitSharedServices()

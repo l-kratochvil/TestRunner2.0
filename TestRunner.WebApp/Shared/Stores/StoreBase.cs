@@ -1,23 +1,15 @@
 namespace TestRunner.WebApp.Shared.Stores;
 
 /// <typeparam name="TState">State the store hands out.</typeparam>
-public abstract class StoreBase<TState>
+public abstract class StoreBase<TState> : IStore<TState>
     where TState : class
 {
     private TState? current;
 
-    /// <summary>
-    /// Raised after the state has changed, on the thread of the caller that changed it.
-    /// </summary>
+    /// <inheritdoc/>
     public event Action? Changed;
 
-    /// <summary>
-    /// Gets the state as it stands now.
-    /// </summary>
-    /// <remarks>
-    /// Built on first use rather than in the constructor, so that a derived store may answer with
-    /// whatever it is made of without anything being read before it exists.
-    /// </remarks>
+    /// <inheritdoc/>
     public TState Current
         => this.current ??= this.DefaultState;
 

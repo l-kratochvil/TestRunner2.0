@@ -6,9 +6,9 @@ namespace TestRunner.WebApp.Shared.Logging;
 public interface IAppLoggerFactory
 {
     /// <summary>
-    /// Creates a logger writing every entry under the given source.
+    /// Creates a logger for <paramref name="source"/>.
     /// </summary>
     /// <param name="source">Source of the entries, see <see cref="LogSources"/>.</param>
-    /// <returns>The logger.</returns>
+    /// <returns>Logger bound to <paramref name="source"/>.</returns>
     IAppLogger CreateLogger(string source);
 }

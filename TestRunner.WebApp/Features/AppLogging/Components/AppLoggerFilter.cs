@@ -4,12 +4,11 @@ using TestRunner.WebApp.Features.AppLogging.Models;
 using TestRunner.WebApp.Shared.Logging;
 
 /// <summary>
-/// Selection of severities and sources shown in the log panel.
+/// Which severities and log sources are shown in the log panel.
 /// </summary>
 /// <remarks>
-/// Severities are tracked as what is <em>shown</em>, because they are known up front. Sources are
-/// tracked the other way round, as what is <em>hidden</em>, so that a source that is not known up
-/// front (see <see cref="LogSources.All"/>) is visible instead of being silently dropped.
+/// Severities are tracked as shown values because they are known up front. Log sources are tracked
+/// as hidden values so a source outside <see cref="LogSources.All"/> stays visible by default.
 /// </remarks>
 public sealed class AppLoggerFilter
 {
@@ -22,7 +21,7 @@ public sealed class AppLoggerFilter
     }
 
     /// <summary>
-    /// Creates the filter used when the panel is first shown: every severity and every source.
+    /// Creates the filter used when the panel first opens: every severity and log source is shown.
     /// </summary>
     /// <returns>The default filter.</returns>
     public static AppLoggerFilter CreateDefault()
@@ -31,30 +30,30 @@ public sealed class AppLoggerFilter
     }
 
     /// <summary>
-    /// Determines whether entries of the given severity are shown.
+    /// Determines whether log entries of <paramref name="severity"/> are shown.
     /// </summary>
     /// <param name="severity">Severity to test.</param>
-    /// <returns><see langword="true"/> when the severity is shown.</returns>
+    /// <returns><see langword="true"/> when <paramref name="severity"/> is shown.</returns>
     public bool IsSelected(LogSeverity severity)
     {
         return this.selectedSeverities.Contains(severity);
     }
 
     /// <summary>
-    /// Determines whether entries of the given source are shown.
+    /// Determines whether log entries of <paramref name="source"/> are shown.
     /// </summary>
-    /// <param name="source">Source to test.</param>
-    /// <returns><see langword="true"/> when the source is shown.</returns>
+    /// <param name="source">Log source to test.</param>
+    /// <returns><see langword="true"/> when <paramref name="source"/> is shown.</returns>
     public bool IsSelected(string source)
     {
         return !this.hiddenSources.Contains(source);
     }
 
     /// <summary>
-    /// Shows or hides entries of the given severity.
+    /// Shows or hides log entries of <paramref name="severity"/>.
     /// </summary>
     /// <param name="severity">Severity to change.</param>
-    /// <param name="selected">Whether the severity should be shown.</param>
+    /// <param name="selected">Whether <paramref name="severity"/> should be shown.</param>
     public void SetSelected(LogSeverity severity, bool selected)
     {
         if (selected)
@@ -68,10 +67,10 @@ public sealed class AppLoggerFilter
     }
 
     /// <summary>
-    /// Shows or hides entries of the given source.
+    /// Shows or hides log entries of <paramref name="source"/>.
     /// </summary>
-    /// <param name="source">Source to change.</param>
-    /// <param name="selected">Whether the source should be shown.</param>
+    /// <param name="source">Log source to change.</param>
+    /// <param name="selected">Whether <paramref name="source"/> should be shown.</param>
     public void SetSelected(string source, bool selected)
     {
         if (selected)
@@ -85,20 +84,20 @@ public sealed class AppLoggerFilter
     }
 
     /// <summary>
-    /// Determines whether the entry passes the filter.
+    /// Determines whether <paramref name="entry"/> passes the filter.
     /// </summary>
-    /// <param name="entry">Entry to test.</param>
-    /// <returns><see langword="true"/> when the entry should be shown.</returns>
+    /// <param name="entry">Log entry to test.</param>
+    /// <returns><see langword="true"/> when <paramref name="entry"/> should be shown.</returns>
     public bool Matches(LogEntry entry)
     {
         return this.IsSelected(entry.Severity) && this.IsSelected(entry.Source);
     }
 
     /// <summary>
-    /// Filters the entries.
+    /// Applies the filter to log entries.
     /// </summary>
-    /// <param name="entries">Entries to filter.</param>
-    /// <returns>Entries passing the filter, in the original order.</returns>
+    /// <param name="entries">Log entries to filter.</param>
+    /// <returns>Log entries that pass the filter, in the original order.</returns>
     public IEnumerable<LogEntry> Apply(IEnumerable<LogEntry> entries)
     {
         return entries.Where(this.Matches);

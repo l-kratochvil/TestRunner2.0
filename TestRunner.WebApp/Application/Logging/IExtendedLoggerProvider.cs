@@ -1,8 +1,7 @@
 public interface IExtendedLoggerProvider : ILoggerProvider
 {
     /// <summary>
-    /// Raised when writing to the log file fails, including when the failure happened before the
-    /// handler was attached.
+    /// Raised when writing to the log file fails, replaying an earlier failure to later handlers.
     /// </summary>
     event Action<string>? Failed;
 }

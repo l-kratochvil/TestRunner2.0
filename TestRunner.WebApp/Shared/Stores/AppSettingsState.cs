@@ -3,16 +3,15 @@ namespace TestRunner.WebApp.Shared.Stores;
 using System.Text.Json.Serialization;
 
 /// <summary>
-/// The settings of the installation: what the machine the application runs on looks like, as
-/// opposed to what one tester is about to run.
+/// The application settings describing the installation rather than one test run.
 /// </summary>
 /// <remarks>
-/// Kept in a file on the server and therefore the same for everyone connecting, see
-/// <c>AppSettingsStore</c>.
+/// Shared by every browser because
+/// <see cref="TestRunner.WebApp.Features.AppSettings.Services.AppSettingsStore"/> keeps them in a
+/// file on the server.
 /// </remarks>
 /// <param name="IdeInstallFolderPath">
-/// Folder the IDE is installed in. Every runtime version installed under it is a folder of its own,
-/// which is where the runtime versions offered to the tester come from.
+/// IDE install folder. Each subdirectory under it is treated as one installed runtime version.
 /// </param>
 public record AppSettingsState(
     [property: JsonPropertyName("ideInstallFolderPath")]

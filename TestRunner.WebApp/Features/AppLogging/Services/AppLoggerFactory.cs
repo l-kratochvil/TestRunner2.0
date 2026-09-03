@@ -3,7 +3,7 @@ namespace TestRunner.WebApp.Features.AppLogging.Services;
 using TestRunner.WebApp.Shared.Logging;
 
 /// <summary>
-/// Creates <see cref="AppLogger"/> instances writing into the shared hub.
+/// Creates application loggers writing into the shared hub.
 /// </summary>
 /// <param name="loggerHub">Hub the created loggers append to.</param>
 public sealed class AppLoggerFactory(IAppLoggerHub loggerHub) : IAppLoggerFactory

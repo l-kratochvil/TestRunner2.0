@@ -10,15 +10,14 @@ using Microsoft.Extensions.Logging.Configuration;
 public static class InitLoggingExtensions
 {
     /// <summary>
-    /// Adds the provider writing the log into a daily file, configured from the
-    /// <c>Logging:File</c> configuration section.
+    /// Adds the daily log file provider configured from <c>Logging:File</c>.
     /// </summary>
     /// <remarks>
-    /// The provider is also registered under its own type, so that the composition root can reach
-    /// the single instance to observe its failures.
+    /// Also registers the single <see cref="FileLoggerProvider"/> under its own type so the
+    /// composition root can observe its failures.
     /// </remarks>
-    /// <param name="builder">Logging builder to register into.</param>
-    /// <returns>The logging builder, to allow chaining.</returns>
+    /// <param name="builder">Logging builder to extend.</param>
+    /// <returns><paramref name="builder"/>, to allow chaining.</returns>
     public static ILoggingBuilder InitFileLogger(this ILoggingBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);

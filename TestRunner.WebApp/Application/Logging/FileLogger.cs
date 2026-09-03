@@ -3,15 +3,15 @@ namespace TestRunner.WebApp.Application.Logging;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Logger of one category writing into the log file.
+/// An <see cref="ILogger"/> that writes one logger category into the log file.
 /// </summary>
-/// <param name="category">Category the logger was created for.</param>
-/// <param name="writer">Writer the records are handed to.</param>
+/// <param name="category">Logger category written by this instance.</param>
+/// <param name="writer">Writer the entries are handed to.</param>
 internal sealed class FileLogger(string category, FileLogWriter writer) : ILogger
 {
     /// <inheritdoc/>
     /// <remarks>
-    /// Scopes are not written to the file, so there is nothing to push or pop.
+    /// Scopes do not reach the log file.
     /// </remarks>
     public IDisposable? BeginScope<TState>(TState state)
         where TState : notnull

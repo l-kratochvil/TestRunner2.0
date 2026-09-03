@@ -3,17 +3,16 @@ namespace TestRunner.WebApp.Shared.NUnitTestRunner;
 using TestRunner.Common.Model;
 
 /// <summary>
-/// The test tree the application discovered on start, as the rest of the application reads it.
+/// Store of the test tree discovered when the application starts.
 /// </summary>
 /// <remarks>
-/// Discovery happens once per run of the application rather than per browser tab, because the test
-/// assemblies belong to the test machine and not to whoever is looking at them.
+/// Shared by every browser because the test assemblies belong to the test machine, not to one
+/// tester.
 /// </remarks>
 public interface INUnitTestRunnerStore
 {
     /// <summary>
-    /// Gets the test suites discovered from the test assemblies. Empty when nothing was
-    /// discovered, including when discovery failed.
+    /// Gets the discovered test suites. Empty when discovery found none or failed.
     /// </summary>
     IReadOnlyList<TestSuiteEntity> LoadedTestSuites { get; }
 }

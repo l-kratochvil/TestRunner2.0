@@ -4,10 +4,10 @@ using TestRunner.WebApp.Features.AppLogging.Models;
 using TestRunner.WebApp.Shared.Logging;
 
 /// <summary>
-/// Thin wrapper over <see cref="IAppLoggerHub"/> that stamps every entry with a fixed source.
+/// Application log writer with a fixed log source.
 /// </summary>
-/// <param name="loggerHub">Hub the entries are appended to.</param>
-/// <param name="source">Source of the entries.</param>
+/// <param name="loggerHub">Hub entries are appended to.</param>
+/// <param name="source">Log source stamped on every entry.</param>
 public sealed class AppLogger(IAppLoggerHub loggerHub, string source) : IAppLogger
 {
     /// <inheritdoc/>

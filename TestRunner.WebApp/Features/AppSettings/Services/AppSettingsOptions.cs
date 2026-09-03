@@ -1,17 +1,16 @@
 namespace TestRunner.WebApp.Features.AppSettings.Services;
 
 /// <summary>
-/// Configuration of where the application settings are kept, bound from the <c>AppSettings</c>
-/// configuration section.
+/// Options configuring where the application settings file is kept.
 /// </summary>
 /// <remarks>
-/// The settings the tester edits describe the installation; where the file holding them lives is
-/// not one of them, which is why it is configuration of the store rather than part of its state.
+/// The application settings describe the installation. The file path configures the store and is
+/// not part of those settings.
 /// </remarks>
 public sealed class AppSettingsOptions
 {
     /// <summary>
-    /// Gets the full path of the file the settings are kept in.
+    /// Gets the full path of the application settings file.
     /// </summary>
     public string FilePath { get; init; } = System.IO.Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

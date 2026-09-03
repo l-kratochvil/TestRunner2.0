@@ -3,13 +3,12 @@ namespace TestRunner.WebApp.Shared.Stores;
 using TestRunner.WebApp.Shared.Domain;
 
 /// <summary>
-/// Changes part of the test configuration. What is not given is left as it stands, so that
-/// changing one field does not have to restate the rest of the configuration.
+/// Changes part of the test configuration without restating the rest.
 /// </summary>
-/// <param name="NewIsTestLinkEnabled">Whether the result is written to TestLink.</param>
-/// <param name="NewTestedHwAssembly">Test station the tests run on.</param>
-/// <param name="NewIdeVersion">Version of the IDE the result is filed under.</param>
-/// <param name="NewRuntimeVersion">Runtime version the tests run against.</param>
+/// <param name="NewIsTestLinkEnabled">Whether the test result is written to TestLink.</param>
+/// <param name="NewTestedHwAssembly">Test station the test run uses.</param>
+/// <param name="NewIdeVersion">IDE version the test result is filed under.</param>
+/// <param name="NewRuntimeVersion">Runtime version the test run uses.</param>
 public record ChangedAction(
     ValueChange<bool>? NewIsTestLinkEnabled = null,
     ValueChange<TestedHwAssemblyType?>? NewTestedHwAssembly = null,
@@ -17,10 +16,10 @@ public record ChangedAction(
     ValueChange<string?>? NewRuntimeVersion = null);
 
 /// <summary>
-/// Says that the configuration remembered by the browser has been put back and looked over.
+/// Says the remembered test configuration has been restored and revalidated.
 /// </summary>
 /// <remarks>
-/// Raised after whatever no longer holds has been dropped from the restored configuration, so that
-/// the configurator can show it without having to know whether the checking has happened yet.
+/// Raised after invalid remembered values have been dropped, so the configurator never sees stale
+/// state.
 /// </remarks>
 public record RestoredAction;

@@ -3,20 +3,18 @@ namespace TestRunner.WebApp.Shared.Stores;
 using TestRunner.WebApp.Shared.Domain;
 
 /// <summary>
-/// The values a test configuration is made of, as they are checked.
+/// The values a test configuration is validated from.
 /// </summary>
 /// <remarks>
-/// Held apart from <see cref="TestConfigurationState"/> for two reasons. The IDE version is a
-/// string here, because what the tester is typing is only a version once it has been found to be
-/// one, and checking has to be able to say that it is not yet. And whether a test station is needed
-/// follows from the tests that were selected, which the configuration itself cannot see: the caller
-/// knows the selection and says so, rather than the configuration keeping a copy that can go stale.
+/// Held apart from <see cref="TestConfigurationState"/> because the IDE version is raw text here
+/// until validation accepts it, and whether a test station is required comes from the current test
+/// selection rather than duplicated state.
 /// </remarks>
-/// <param name="RuntimeVersion">Runtime version the tests are to run against.</param>
-/// <param name="TestedHwAssembly">Test station the tests are to run on.</param>
-/// <param name="IsTestLinkEnabled">Whether the result is to be written to TestLink.</param>
-/// <param name="IdeVersionText">IDE version as text, empty while nothing has been typed.</param>
-/// <param name="IsRuntimeTestSelected">Whether any selected test case is a runtime test.</param>
+/// <param name="RuntimeVersion">Runtime version the test run uses.</param>
+/// <param name="TestedHwAssembly">Test station the test run uses.</param>
+/// <param name="IsTestLinkEnabled">Whether the test result is written to TestLink.</param>
+/// <param name="IdeVersionText">IDE version text, empty while nothing has been typed.</param>
+/// <param name="IsRuntimeTestSelected">Whether the test selection contains a runtime test case.</param>
 public sealed record TestConfigurationValues(
     string? RuntimeVersion,
     TestedHwAssemblyType? TestedHwAssembly,
@@ -25,11 +23,11 @@ public sealed record TestConfigurationValues(
     bool IsRuntimeTestSelected)
 {
     /// <summary>
-    /// Reads the values out of a configuration that was already put together.
+    /// Reads validation values from <paramref name="state"/>.
     /// </summary>
     /// <param name="state">Configuration to read.</param>
-    /// <param name="isRuntimeTestSelected">Whether any selected test case is a runtime test.</param>
-    /// <returns>The values, ready to be checked.</returns>
+    /// <param name="isRuntimeTestSelected">Whether the test selection contains a runtime test case.</param>
+    /// <returns>The validation values for <paramref name="state"/>.</returns>
     public static TestConfigurationValues From(
         TestConfigurationState state, bool isRuntimeTestSelected)
     {

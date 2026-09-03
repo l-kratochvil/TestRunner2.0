@@ -6,11 +6,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 /// <summary>
-/// Writes every record the logging pipeline routes to it into a daily log file.
+/// An <see cref="ILoggerProvider"/> that writes diagnostics to the log file.
 /// </summary>
 /// <remarks>
-/// Which records those are is decided by the standard <c>Logging:File:LogLevel</c> configuration,
-/// so the provider itself never filters.
+/// Filtering stays with the logging pipeline through <c>Logging:File:LogLevel</c>.
 /// </remarks>
 [ProviderAlias("File")]
 public sealed class FileLoggerProvider : IExtendedLoggerProvider
@@ -25,7 +24,7 @@ public sealed class FileLoggerProvider : IExtendedLoggerProvider
     /// <summary>
     /// Initializes a new instance of the <see cref="FileLoggerProvider"/> class.
     /// </summary>
-    /// <param name="options">Configuration of the log file.</param>
+    /// <param name="options">Options that configure the file logger.</param>
     public FileLoggerProvider(IOptions<FileLoggerOptions> options)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -37,10 +36,8 @@ public sealed class FileLoggerProvider : IExtendedLoggerProvider
 
     /// <inheritdoc/>
     /// <remarks>
-    /// The provider is created with the logging pipeline, long before whoever surfaces the failure
-    /// to the user exists, so a failure that happened before the handler was attached is replayed
-    /// to it. Without that, a log file broken at startup would fail silently — the one way a log
-    /// must never fail.
+    /// A handler added after an earlier failure still receives that failure, so startup breakage is
+    /// never silent.
     /// </remarks>
     public event Action<string>? Failed
     {

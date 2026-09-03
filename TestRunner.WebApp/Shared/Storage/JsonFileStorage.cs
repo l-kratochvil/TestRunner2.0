@@ -6,22 +6,20 @@ using System.Text.Json;
 using TestRunner.WebApp.Shared.Logging;
 
 /// <summary>
-/// Keeps one piece of data in a JSON file on the machine the application runs on.
+/// Keeps one shared value in a JSON file on the test machine.
 /// </summary>
 /// <remarks>
-/// The counterpart of <see cref="LocalStorage{TData}"/>: what is kept here belongs to the
-/// installation and is the same for everyone connecting, rather than to one browser.
+/// Unlike <see cref="LocalStorage{TData}"/>, this storage belongs to the installation rather than
+/// to one browser.
 /// <para>
-/// Reading never fails. A file that is missing, unreadable or no longer shaped like
-/// <typeparamref name="TData"/> answers with the fallback, because a tester who cannot start a test
-/// run over a broken settings file is worse off than one running with the defaults; the failure is
-/// reported to the log instead.
+/// Reading never fails. A missing, unreadable, or invalid file falls back to the value from
+/// <paramref name="fallbackFactory"/> and reports the failure to the log.
 /// </para>
 /// </remarks>
-/// <typeparam name="TData">Shape of the data kept in the file.</typeparam>
-/// <param name="filePath">Full path of the file the data is kept in.</param>
-/// <param name="logger">Log the read and write failures are reported to.</param>
-/// <param name="fallbackFactory">Produces the data to answer with when the file cannot be read.</param>
+/// <typeparam name="TData">Shape of the value kept in the file.</typeparam>
+/// <param name="filePath">Full path of the file.</param>
+/// <param name="logger">Log read and write failures are reported to.</param>
+/// <param name="fallbackFactory">Produces the fallback value when the file cannot be read.</param>
 public class JsonFileStorage<TData>(
     string filePath,
     IAppLogger logger,
@@ -31,9 +29,9 @@ public class JsonFileStorage<TData>(
     private static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true };
 
     /// <summary>
-    /// Reads what the file holds.
+    /// Reads the stored value.
     /// </summary>
-    /// <returns>The data read, or the fallback when there is none to be had.</returns>
+    /// <returns>The stored value, or the fallback when the file cannot be read.</returns>
     public async Task<TData> ReadAsync()
     {
         try
@@ -59,13 +57,10 @@ public class JsonFileStorage<TData>(
     }
 
     /// <summary>
-    /// Writes the data to the file, creating the folder it lives in when needed.
+    /// Writes <paramref name="data"/> to the file.
     /// </summary>
-    /// <param name="data">Data to write.</param>
-    /// <returns>
-    /// <see langword="true"/> when the data reached the file. A caller that told the user their
-    /// settings are saved has to be able to take it back.
-    /// </returns>
+    /// <param name="data">Value to write.</param>
+    /// <returns><see langword="true"/> when <paramref name="data"/> reached the file.</returns>
     public async Task<bool> WriteAsync(TData data)
     {
         try

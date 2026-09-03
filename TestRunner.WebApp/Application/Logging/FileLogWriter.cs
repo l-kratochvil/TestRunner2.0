@@ -6,12 +6,11 @@ using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
-/// Appends log records to the daily log file and keeps the retention of those files.
+/// Writes log entries to the daily log file in the background.
 /// </summary>
 /// <remarks>
-/// Records are handed over through a channel and written by a background loop, so that logging
-/// never blocks the caller on disk I/O. Writing is best effort: a failure is reported once and
-/// the application keeps running without the file.
+/// Writing is asynchronous and best effort: callers never wait on disk I/O, and the first failure
+/// is reported once.
 /// </remarks>
 internal sealed class FileLogWriter : IDisposable
 {
@@ -36,8 +35,8 @@ internal sealed class FileLogWriter : IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="FileLogWriter"/> class.
     /// </summary>
-    /// <param name="directoryPath">Directory the log files are written to.</param>
-    /// <param name="retainedFileCount">Number of log files kept on disk.</param>
+    /// <param name="directoryPath">Directory holding the log files.</param>
+    /// <param name="retainedFileCount">How many log files are kept.</param>
     public FileLogWriter(string directoryPath, int retainedFileCount)
     {
         this.directoryPath = directoryPath;
@@ -46,14 +45,14 @@ internal sealed class FileLogWriter : IDisposable
     }
 
     /// <summary>
-    /// Raised the first time writing fails, so that the failure can be surfaced to the user.
+    /// Raised on the first write failure so the fallback to memory-only logging can be surfaced.
     /// </summary>
     public event Action<string>? Failed;
 
     /// <summary>
-    /// Hands the record over to the background writer.
+    /// Queues a log entry for the background writer.
     /// </summary>
-    /// <param name="record">Record to write.</param>
+    /// <param name="record">Log entry to write.</param>
     public void Write(FileLogEntry record)
     {
         this.channel.Writer.TryWrite(record);
@@ -96,10 +95,10 @@ internal sealed class FileLogWriter : IDisposable
     }
 
     /// <summary>
-    /// Appends the record as one line, followed by its indented detail lines, to the builder.
+    /// Appends one log entry and its detail lines to <paramref name="builder"/>.
     /// </summary>
     /// <param name="builder">Builder to append to.</param>
-    /// <param name="record">Record to format.</param>
+    /// <param name="record">Log entry to append.</param>
     private static void AppendRecord(StringBuilder builder, FileLogEntry record)
     {
         string[] messageLines = record.Message.ReplaceLineEndings("\n").Split('\n');
@@ -198,8 +197,7 @@ internal sealed class FileLogWriter : IDisposable
     }
 
     /// <summary>
-    /// Makes the file current and applies retention, which happens on the first write and again
-    /// whenever the day changes underneath a running application.
+    /// Makes <paramref name="filePath"/> current and reapplies retention when the day changes.
     /// </summary>
     /// <param name="filePath">File the entries are about to be written to.</param>
     private void RollOverTo(string filePath)

@@ -3,33 +3,33 @@ namespace TestRunner.WebApp.Shared.Stores;
 using System.Linq;
 
 /// <summary>
-/// What checking a test configuration found: nothing, or what is wrong with it.
+/// The result of validating a test configuration.
 /// </summary>
-/// <param name="Errors">Everything found wrong, in the order the fields are shown in.</param>
+/// <param name="Errors">Problems found, in the order the fields are shown in.</param>
 public sealed record TestConfigurationValidity(IReadOnlyList<TestConfigurationError> Errors)
 {
     /// <summary>
-    /// A configuration with nothing wrong with it.
+    /// A valid test configuration.
     /// </summary>
     public static readonly TestConfigurationValidity Valid = new([]);
 
     /// <summary>
-    /// Gets a value indicating whether the configuration may be used to run tests.
+    /// Gets a value indicating whether the configuration may be used for a test run.
     /// </summary>
     public bool IsValid
         => this.Errors.Count == 0;
 
     /// <summary>
-    /// Gets everything found wrong as one line, for telling the user why they cannot start.
+    /// Gets all problem messages as one line for the tester.
     /// </summary>
     public string Summary
         => string.Join(" ", this.Errors.Select(static error => error.Message));
 
     /// <summary>
-    /// Reads what was found wrong with one field.
+    /// Reads the problem message for one field.
     /// </summary>
-    /// <param name="fieldName">Name of the field, see <see cref="TestConfigurationValues"/>.</param>
-    /// <returns>The message, or <see langword="null"/> when the field is fine.</returns>
+    /// <param name="fieldName">Name of a property on <see cref="TestConfigurationValues"/>.</param>
+    /// <returns>The message for <paramref name="fieldName"/>, or <see langword="null"/>.</returns>
     public string? ErrorFor(string fieldName)
         => this.Errors
             .FirstOrDefault(error => string.Equals(error.FieldName, fieldName, StringComparison.Ordinal))
@@ -37,8 +37,8 @@ public sealed record TestConfigurationValidity(IReadOnlyList<TestConfigurationEr
 }
 
 /// <summary>
-/// One thing found wrong with a test configuration.
+/// One problem found in a test configuration.
 /// </summary>
-/// <param name="FieldName">Field it was found on, see <see cref="TestConfigurationValues"/>.</param>
-/// <param name="Message">What is wrong, as the tester reads it.</param>
+/// <param name="FieldName">Name of a property on <see cref="TestConfigurationValues"/>.</param>
+/// <param name="Message">Problem text shown to the tester.</param>
 public sealed record TestConfigurationError(string FieldName, string Message);

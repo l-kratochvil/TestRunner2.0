@@ -1,17 +1,17 @@
 namespace TestRunner.WebApp.Components.Primitives;
 
 /// <summary>
-/// How seriously a message shown under a property is meant.
+/// Severity of a message shown under a property.
 /// </summary>
 public enum PropertyMessageSeverity
 {
     /// <summary>
-    /// The value cannot be used as it stands.
+    /// The property value is invalid.
     /// </summary>
     Error,
 
     /// <summary>
-    /// The value can be used, but is worth a second look.
+    /// The property value can be used, but needs attention.
     /// </summary>
     Warning,
 }

@@ -3,9 +3,11 @@ namespace TestRunner.WebApp.Shared.Storage;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using TestRunner.WebApp.Shared.Logging;
 
-/// <typeparam name="TData">Shape of the remembered data.</typeparam>
-/// <param name="protectedLocalStorage">Browser storage the data is kept in.</param>
-/// <param name="logger">Log a storage failure is reported to.</param>
+/// <typeparam name="TData">Shape of the remembered value.</typeparam>
+/// <param name="storageName">Key <typeparamref name="TData"/> is remembered under.</param>
+/// <param name="protectedLocalStorage">Browser storage <typeparamref name="TData"/> is kept in.</param>
+/// <param name="logger">Log storage failures are reported to.</param>
+/// <param name="fallbackFactory">Produces the value returned when nothing is remembered yet.</param>
 public class NamedLocalStorage<TData>(
     string storageName,
     ProtectedLocalStorage protectedLocalStorage,
@@ -17,17 +19,17 @@ public class NamedLocalStorage<TData>(
         protectedLocalStorage, logger, fallbackFactory);
 
     /// <summary>
-    /// Reads what the browser remembers.
+    /// Reads the value remembered in the browser.
     /// </summary>
-    /// <returns>The remembered data.</returns>
+    /// <returns>The remembered value.</returns>
     public async Task<TData> ReadAsync()
         => await this.localStorage.GetItemAsync(storageName);
 
     /// <summary>
-    /// Hands the data to the browser to remember.
+    /// Asks the browser to remember <paramref name="data"/>.
     /// </summary>
-    /// <param name="data">Data to remember.</param>
-    /// <returns>A task that completes once the browser has stored the data.</returns>
+    /// <param name="data">Value to remember.</param>
+    /// <returns>A task that completes once the browser has stored <paramref name="data"/>.</returns>
     public async Task WriteAsync(TData data)
         => await this.localStorage.SetItemAsync(storageName, data);
 }

@@ -15,9 +15,11 @@ public class LocalStringStateStorage(
     private readonly LocalStorage<string> localStorage = new(
         protectedLocalStorage, logger, () => string.Empty);
 
+    /// <inheritdoc/>
     public async ValueTask<string> GetStateJsonAsync(string statename)
         => await this.localStorage.GetItemAsync(statename);
 
+    /// <inheritdoc/>
     public async ValueTask StoreStateJsonAsync(string statename, string json)
         => await this.localStorage.SetItemAsync(statename, json);
 }

@@ -11,9 +11,6 @@ using TestRunner.Common.Model;
 /// Holds nothing but UI state and knows nothing about where the selection is kept, so the rules of
 /// selecting can be exercised on their own.
 /// </remarks>
-/// <remarks>
-/// Builds the tree from the discovered test suites.
-/// </remarks>
 /// <param name="testSuites">Test suites to show.</param>
 public sealed class TestExplorerViewModel(IEnumerable<TestSuiteEntity> testSuites)
 {

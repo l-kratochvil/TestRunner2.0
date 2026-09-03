@@ -1,12 +1,12 @@
 namespace TestRunner.WebApp.Application.Logging;
 
 /// <summary>
-/// Configuration of the log file, bound from the <c>Logging:File</c> configuration section.
+/// Options that configure the file logger, bound from <c>Logging:File</c>.
 /// </summary>
 public sealed class FileLoggerOptions
 {
     /// <summary>
-    /// Gets the directory the log files are written to.
+    /// Gets the directory holding the log files.
     /// </summary>
     public string Path { get; init; } = System.IO.Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -14,7 +14,7 @@ public sealed class FileLoggerOptions
         "logs");
 
     /// <summary>
-    /// Gets the number of log files kept on disk; the oldest ones are deleted.
+    /// Gets how many log files are kept on disk.
     /// </summary>
     public int RetainedFileCount { get; init; } = 5;
 }

@@ -17,7 +17,8 @@ using TestRunner.WebApp.Shared.Stores;
 /// Only this feature is handed the store itself; everyone else is handed
 /// <see cref="ITestDiscoveryStore"/>, which reads and cannot select.
 /// </remarks>
-/// <param name="localStorage">Browser storage the selection is remembered in.</param>
+/// <param name="logger">Log a storage failure is reported to.</param>
+/// <param name="protectedLocalStorage">Browser storage the selection is remembered in.</param>
 public sealed class TestDiscoveryStore(
     IAppLogger logger,
     ProtectedLocalStorage protectedLocalStorage)

@@ -6,16 +6,14 @@ using TestRunner.Common.Services;
 using TestRunner.WebApp.Shared.Logging;
 
 /// <summary>
-/// Reads the test tree from the test assemblies once, when the application starts, and holds it
-/// for everyone who shows or runs tests.
+/// Store of test suites discovered from the test machine when the application starts.
 /// </summary>
 /// <remarks>
-/// Discovery is part of starting up rather than of serving a request: the web server begins
-/// listening only after every hosted service has started, so by the time the first browser
-/// connects, <see cref="LoadedTestSuites"/> is already answered and nothing has to wait for it.
+/// Discovery runs during startup, so <see cref="LoadedTestSuites"/> is ready before the first
+/// browser connects.
 /// </remarks>
-/// <param name="proxy">Runner the test assembly is read through.</param>
-/// <param name="loggerFactory">Creates the log a discovery failure is reported to.</param>
+/// <param name="proxy">Proxy the test assembly is discovered through.</param>
+/// <param name="loggerFactory">Creates the log discovery failures are reported to.</param>
 public sealed class NUnitTestRunnerStore(INUnitTestRunnerProxy proxy, IAppLoggerFactory loggerFactory)
     : INUnitTestRunnerStore, IHostedService
 {
@@ -30,15 +28,14 @@ public sealed class NUnitTestRunnerStore(INUnitTestRunnerProxy proxy, IAppLogger
     public IReadOnlyList<TestSuiteEntity> LoadedTestSuites { get; private set; } = [];
 
     /// <summary>
-    /// Reads the test assembly and keeps what was discovered.
+    /// Discovers test suites from the configured test assembly.
     /// </summary>
     /// <remarks>
-    /// Never fails. A discovery that did not work leaves the application running with no tests to
-    /// show, which the user is told about and can act on; letting it throw would take down the
-    /// whole application, including the log that explains why.
+    /// Discovery failures do not stop the application. The store stays empty and the log explains
+    /// why.
     /// </remarks>
     /// <param name="cancellationToken">Token abandoning the start.</param>
-    /// <returns>A task that completes once discovery has been attempted.</returns>
+    /// <returns>A task that completes after discovery has been attempted.</returns>
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         try

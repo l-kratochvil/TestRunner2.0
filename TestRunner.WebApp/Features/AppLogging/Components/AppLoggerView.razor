@@ -106,8 +106,7 @@
     private bool isCollapsed;
 
     /// <summary>
-    /// Raised when the user collapses or expands the panel, so the surrounding layout can size
-    /// the pane accordingly.
+    /// Raised after the panel collapse state changes.
     /// </summary>
     [Parameter]
     public EventCallback<bool> CollapsedChanged { get; set; }

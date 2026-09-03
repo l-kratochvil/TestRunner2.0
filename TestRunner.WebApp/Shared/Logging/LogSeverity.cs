@@ -1,17 +1,16 @@
 namespace TestRunner.WebApp.Shared.Logging;
 
 /// <summary>
-/// Severity of a single application log entry, ordered from the most to the least verbose.
+/// Severity of a log entry.
 /// </summary>
 /// <remarks>
-/// There is no debug severity: the application log is what the user reads, so developer detail is
-/// logged through <see cref="Microsoft.Extensions.Logging.ILogger"/> instead and never reaches the
-/// panel.
+/// The log has no debug severity; diagnostics use <see cref="Microsoft.Extensions.Logging.ILogger"/>
+/// instead.
 /// </remarks>
 public enum LogSeverity
 {
     /// <summary>
-    /// Normal progress of the application, including successful outcomes.
+    /// Normal progress, including successful outcomes.
     /// </summary>
     Info,
 
@@ -21,7 +20,7 @@ public enum LogSeverity
     Warning,
 
     /// <summary>
-    /// An operation failed.
+    /// A failed operation.
     /// </summary>
     Error,
 }

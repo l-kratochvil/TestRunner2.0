@@ -1,13 +1,12 @@
 namespace TestRunner.WebApp.Shared.Logging;
 
 /// <summary>
-/// Channels the application log is split into. Sources are plain strings so that entries coming
-/// from outside the application (for example test runner output) can be routed without a mapping.
+/// Known log sources, kept as plain strings so outside entries can be routed without a mapping.
 /// </summary>
 public static class LogSources
 {
     /// <summary>
-    /// The application itself: lifecycle, navigation, settings.
+    /// The application itself: lifecycle, navigation, and settings.
     /// </summary>
     public const string App = "App";
 
@@ -22,7 +21,7 @@ public static class LogSources
     public const string TestLink = "TestLink";
 
     /// <summary>
-    /// Gets all sources known up front, in the order they should be offered in the UI.
+    /// Gets the known sources in UI order.
     /// </summary>
     public static IReadOnlyList<string> All { get; } = [App, TestRun, TestLink];
 }

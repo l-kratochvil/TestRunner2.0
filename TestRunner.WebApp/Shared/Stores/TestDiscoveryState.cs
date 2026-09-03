@@ -3,11 +3,10 @@ namespace TestRunner.WebApp.Shared.Stores;
 using TestRunner.Common.Model;
 
 /// <summary>
-/// What the user picked to run.
+/// The current test selection.
 /// </summary>
 /// <param name="SelectedTestCases">
-/// The selected test cases. Only test cases are ever selected: what a suite or a fixture looks
-/// like is derived from the test cases beneath it, so there is one description of what runs and it
-/// cannot disagree with itself.
+/// The selected test cases. Suites and fixtures are derived from these, so the test selection has
+/// one source of truth.
 /// </param>
 public sealed record TestDiscoveryState(IReadOnlyList<TestCaseEntity> SelectedTestCases);

@@ -1,21 +1,21 @@
 namespace TestRunner.WebApp.Shared.Stores;
 
 /// <summary>
-/// The test selection, as the features that did not make it read it.
+/// Store of the test selection for features that only read it.
 /// </summary>
 /// <remarks>
-/// Reading only. Selecting tests is what the TestDiscovery feature is for, so it owns the store
-/// that changes the selection and nobody else is handed a way to.
+/// The TestDiscovery feature owns changing the test selection and exposes only this read-only view
+/// to other features.
 /// </remarks>
 public interface ITestDiscoveryStore
 {
     /// <summary>
-    /// Raised after the selection has changed.
+    /// Raised after the test selection changes.
     /// </summary>
     event Action? Changed;
 
     /// <summary>
-    /// Gets the selection as it stands now.
+    /// Gets the current test selection.
     /// </summary>
     TestDiscoveryState Current { get; }
 }
