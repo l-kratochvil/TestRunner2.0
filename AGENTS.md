@@ -1,18 +1,17 @@
-## Agent skills
+# Agent skills
 
-### Issue tracker
+## Issue tracker
 
 Issues are tracked as GitHub issues in `i-m-luke/TestRunner2.0` (via the `gh` CLI). See `docs/agents/issue-tracker.md`.
 
-### Triage labels
+## Triage labels
 
 Default canonical labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
 
-### Domain docs
+## Domain docs
 
 Single-context: one `CONTEXT.md` + `docs/ADR/` at the repo root. See `docs/agents/domain.md`.
 
-###
 **Keep the glossary general.** A term defines a role and the rule that governs it, not the values
 that happen to exist today. Enumerating current values (severities, sources, statuses) puts a copy
 of the code into prose that goes stale on the next commit and makes the glossary read as a
