@@ -31,6 +31,13 @@ When your output names a domain concept (in an issue title, a refactor proposal,
 
 If the concept you need isn't in the glossary yet, that's a signal — either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/domain-modeling`).
 
+## Keep the glossary general
+
+A term defines a role and the rule that governs it, not the values that happen to exist today.
+Enumerating current values (severities, sources, statuses) copies the code into prose that goes
+stale on the next commit. Name the type or constant that holds the values and let the reader follow
+it.
+
 ## Flag ADR conflicts
 
 If your output contradicts an existing ADR, surface it explicitly rather than silently overriding:
