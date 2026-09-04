@@ -1,6 +1,7 @@
 # Issue tracker: GitHub
 
-Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all operations.
+Issues and specs for this repo live as GitHub issues in `i-m-luke/TestRunner2.0`. Use the `gh` CLI
+for all operations.
 
 > This clone has multiple remotes (a self-hosted GitLab primary and a GitHub mirror) and no `origin`. Point `gh` at the GitHub repo explicitly with `--repo i-m-luke/TestRunner2.0` (or set it once via `gh repo set-default i-m-luke/TestRunner2.0`) so it doesn't fall back to the GitLab remote.
 

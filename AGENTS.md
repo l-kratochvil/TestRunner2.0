@@ -2,9 +2,8 @@
 
 ## Issue tracker
 
-Issues are tracked as GitHub issues in `i-m-luke/TestRunner2.0` (via the `gh` CLI). Read
-`docs/agents/issue-tracker.md` before creating, reading, commenting on, labelling, or closing an
-issue or PR.
+Read `docs/agents/issue-tracker.md` before creating, reading, commenting on, labelling, or closing
+an issue or PR.
 
 ## Triage labels
 
@@ -37,9 +36,3 @@ them in prose:
 
 Read the analyzer output of every build and drive it to zero: fix errors, warnings and info-level
 diagnostics alike.
-
-## Repo layout
-
-### Tooling
-
-`tools/` holds developer tooling supporting work on the repo, kept apart from the shipped application code. Inside it, `tools/scripts/` holds runnable scripts for routine local tasks.
