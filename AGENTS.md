@@ -1,5 +1,8 @@
 # Agent skills
 
+If a doc referenced below is missing or unreadable, proceed using best judgment and note the
+missing file to the user.
+
 ## Issue tracker
 
 Read `docs/agents/issue-tracker.md` before creating, reading, commenting on, labelling, or closing
@@ -34,5 +37,28 @@ them in prose:
 
 ### Static analysis
 
-Read the analyzer output of every build and drive it to zero: fix errors, warnings and info-level
-diagnostics alike.
+Read the analyzer output of every build and drive it to zero: fix all analyzer diagnostics
+(errors, warnings, and info-level alike) introduced or surfaced by your changes; do not fix
+unrelated pre-existing diagnostics unless asked.
+
+### Committing
+
+Never commit on your own initiative — leave changes in the working tree until the user explicitly
+asks for a commit.
+
+#### Prefixing
+
+Write the subject in format `< prefix > - < project-name > - < file-name >: < imperative-summary >`:
+
+- **< prefix >**: Is required. Supports one of these options: a. `Feat`: for a new capability; b. `Fix`: for a defect; c. `Change`: for reworked behaviour; d. `Dev`: for work that leaves behaviour intact (refactoring, docs, warnings, tooling)
+- **< project-name >**: It's the project name minus the `TestRunner.` base prefix
+  (`TestRunner.WebApp` → `WebApp`); drop this part when the change spans the solution.
+- **< file-name >**: Name the single edited file, plus its follow-up tests; drop this part otherwise.
+
+##### Examples
+
+```text
+Fix - App - NUnitTestRunnerProxyConnector.cs: Fix hang on proxy process exit
+Feat - WebApp - TestExplorer.razor: Add test suite filter to discovery tree
+Dev: Update agents context
+```

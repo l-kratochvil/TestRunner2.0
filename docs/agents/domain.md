@@ -37,9 +37,3 @@ A term defines a role and the rule that governs it, not the values that happen t
 Enumerating current values (severities, sources, statuses) copies the code into prose that goes
 stale on the next commit. Name the type or constant that holds the values and let the reader follow
 it.
-
-## Flag ADR conflicts
-
-If your output contradicts an existing ADR, surface it explicitly rather than silently overriding:
-
-> _Contradicts ADR-0001 (Blazor Server for the web app) — but worth reopening because…_

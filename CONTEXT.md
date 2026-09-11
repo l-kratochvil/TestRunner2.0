@@ -33,4 +33,4 @@ For more decisions history see 'docs/ADR' folder.
 
 ## More context
 
-For more context see [README.md](README.md).
+If more context is needed see [README.md](README.md).
