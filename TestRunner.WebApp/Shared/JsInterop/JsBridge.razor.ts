@@ -4,7 +4,7 @@
 // from here too, rather than being called by the component directly.
 //
 // This is the .NET boundary, so the arguments arrive untyped and are checked before they are used
-// (see docs/guidelines/js-guidelines.md). Past this point they are ordinary typed values.
+// (see docs/rules/js-ts-rules.md). Past this point they are ordinary typed values.
 //
 // The imports name the modules by the URL they are served under, exactly as the import map
 // spells them: any other spelling would load a second copy of logging.js, holding a reference of

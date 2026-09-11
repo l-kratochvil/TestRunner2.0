@@ -1,4 +1,4 @@
-# C# guidelines
+# C# rules
 
 ## Contents
 

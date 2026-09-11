@@ -1,4 +1,7 @@
-# JS guidelines
+# JS/TS rules
+
+Rules for writing the browser code of this repository — the TypeScript that is authored and the
+JavaScript it compiles to.
 
 ## Contents
 
