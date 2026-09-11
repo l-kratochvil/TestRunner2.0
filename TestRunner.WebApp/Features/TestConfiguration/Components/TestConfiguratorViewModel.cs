@@ -2,7 +2,8 @@ namespace TestRunner.WebApp.Features.TestConfiguration.Components;
 
 using TestRunner.WebApp.Features.TestConfiguration.Models;
 using TestRunner.WebApp.Shared.Domain;
-using TestRunner.WebApp.Shared.Stores;
+using TestRunner.WebApp.Shared.TestConfiguration;
+using TestRunner.WebApp.Shared.Validation;
 
 /// <summary>
 /// The test configuration as the configurator shows it: the values being edited, which of them are

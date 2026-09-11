@@ -1,6 +1,7 @@
-namespace TestRunner.WebApp.Shared.Stores;
+namespace TestRunner.WebApp.Shared.Validation;
 
 using TestRunner.WebApp.Shared.Domain;
+using TestRunner.WebApp.Shared.TestConfiguration;
 
 /// <summary>
 /// The values a test configuration is validated from.

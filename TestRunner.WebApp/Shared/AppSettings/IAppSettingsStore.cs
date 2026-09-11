@@ -1,4 +1,4 @@
-namespace TestRunner.WebApp.Shared.Stores;
+namespace TestRunner.WebApp.Shared.AppSettings;
 
 /// <summary>
 /// Store of application settings for features that only read them.

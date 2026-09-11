@@ -1,4 +1,4 @@
-namespace TestRunner.WebApp.Shared.Stores;
+namespace TestRunner.WebApp.Shared.TestConfiguration;
 
 using TestRunner.WebApp.Shared.Domain;
 

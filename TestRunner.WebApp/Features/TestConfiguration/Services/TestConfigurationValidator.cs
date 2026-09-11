@@ -7,7 +7,7 @@ using FluentValidation;
 using FluentValidation.Results;
 
 using TestRunner.WebApp.Shared.Domain;
-using TestRunner.WebApp.Shared.Stores;
+using TestRunner.WebApp.Shared.Validation;
 
 /// <summary>
 /// The rules a test configuration has to meet before tests can be run with it.

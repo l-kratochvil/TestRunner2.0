@@ -1,4 +1,4 @@
-namespace TestRunner.WebApp.Shared.Stores;
+namespace TestRunner.WebApp.Shared.Validation;
 
 /// <summary>
 /// Checks whether a test configuration can be used for a test run.

@@ -2,6 +2,7 @@ namespace TestRunner.WebApp.Features.AppSettings.Services;
 
 using Microsoft.Extensions.Hosting;
 
+using TestRunner.WebApp.Shared.AppSettings;
 using TestRunner.WebApp.Shared.Storage;
 using TestRunner.WebApp.Shared.Stores;
 

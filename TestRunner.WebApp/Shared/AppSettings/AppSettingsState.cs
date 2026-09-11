@@ -1,4 +1,4 @@
-namespace TestRunner.WebApp.Shared.Stores;
+namespace TestRunner.WebApp.Shared.AppSettings;
 
 using System.Text.Json.Serialization;
 

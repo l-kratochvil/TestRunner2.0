@@ -6,9 +6,9 @@ using Moq;
 using NUnit.Framework;
 
 using TestRunner.WebApp.Features.AppSettings.Services;
+using TestRunner.WebApp.Shared.AppSettings;
 using TestRunner.WebApp.Shared.Logging;
 using TestRunner.WebApp.Shared.Storage;
-using TestRunner.WebApp.Shared.Stores;
 
 [TestFixture]
 public class AppSettingsStoreTests
