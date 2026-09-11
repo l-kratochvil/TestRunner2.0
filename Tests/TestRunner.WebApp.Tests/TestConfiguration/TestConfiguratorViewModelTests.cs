@@ -6,7 +6,8 @@ using TestRunner.WebApp.Features.TestConfiguration.Components;
 using TestRunner.WebApp.Features.TestConfiguration.Models;
 using TestRunner.WebApp.Features.TestConfiguration.Services;
 using TestRunner.WebApp.Shared.Domain;
-using TestRunner.WebApp.Shared.Stores;
+using TestRunner.WebApp.Shared.TestConfiguration;
+using TestRunner.WebApp.Shared.Validation;
 
 [TestFixture]
 public class TestConfiguratorViewModelTests

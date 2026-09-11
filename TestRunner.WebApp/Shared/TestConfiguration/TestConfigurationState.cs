@@ -1,7 +1,8 @@
-namespace TestRunner.WebApp.Shared.Stores;
+namespace TestRunner.WebApp.Shared.TestConfiguration;
 
 using Fluxor;
 using TestRunner.WebApp.Shared.Domain;
+using TestRunner.WebApp.Shared.Validation;
 
 /// <summary>
 /// The test run a tester is putting together, apart from the test selection.

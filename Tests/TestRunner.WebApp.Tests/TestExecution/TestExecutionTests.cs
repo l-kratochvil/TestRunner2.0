@@ -12,7 +12,9 @@ using NUnit.Framework;
 using TestRunner.Common.Model;
 using TestRunner.WebApp.Features.TestConfiguration.Services;
 using TestRunner.WebApp.Shared.Domain;
-using TestRunner.WebApp.Shared.Stores;
+using TestRunner.WebApp.Shared.TestConfiguration;
+using TestRunner.WebApp.Shared.TestDiscovery;
+using TestRunner.WebApp.Shared.Validation;
 using TestExecutionComponent = TestRunner.WebApp.Features.TestExecution.Components.TestExecution;
 
 [TestFixture]

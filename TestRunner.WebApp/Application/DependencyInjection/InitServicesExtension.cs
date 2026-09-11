@@ -11,6 +11,7 @@ using TestRunner.WebApp.Shared.JsInterop;
 using TestRunner.WebApp.Shared.NUnitTestRunner;
 using TestRunner.WebApp.Shared.Storage;
 using TestRunner.WebApp.Shared.Stores;
+using TestRunner.WebApp.Shared.TestConfiguration;
 
 /// <summary>
 /// Registration of services shared across features.
