@@ -9,10 +9,6 @@ using TestRunner.WebApp.Shared.Domain;
 /// <remarks>
 /// Belongs to one browser and is remembered there. Whether it can be run is checked through
 /// <see cref="ITestConfigurationValidator"/>, because that also depends on the test selection.
-/// <para>
-/// The feature keeps the name of <see cref="TestConfigurationState"/> so Fluxor does not persist
-/// the namespace into browser storage keys.
-/// </para>
 /// </remarks>
 /// <param name="IsTestLinkEnabled">Whether the test result is written to TestLink.</param>
 /// <param name="IdeVersion">
@@ -23,7 +19,7 @@ using TestRunner.WebApp.Shared.Domain;
 /// runtime version identifier elsewhere in the application.
 /// </param>
 /// <param name="TestedHwAssembly">Test station the test run uses.</param>
-[FeatureState(Name = nameof(TestConfigurationState))]
+[FeatureState]
 public record TestConfigurationState(
     bool IsTestLinkEnabled,
     Version? IdeVersion,

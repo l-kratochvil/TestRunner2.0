@@ -50,12 +50,11 @@ public static class InitServicesExtension
                         .ScanAssemblies(typeof(Program).Assembly)
                         .UsePersist(options =>
                         {
-                            // Only what is listed here is remembered by the browser, and it is
-                            // matched against the name of the feature. Fluxor names a feature after
-                            // the full name of its state unless the state says otherwise, so the
-                            // two only meet because TestConfigurationState names itself.
+                            // Only what is listed here is remembered by the browser. The list is
+                            // matched against the name of the feature, which Fluxor derives from
+                            // the full name of the state.
                             options.UseInclusionApproach();
-                            options.SetWhiteList([nameof(TestConfigurationState)]);
+                            options.SetWhiteList([typeof(TestConfigurationState).FullName]);
                         }))
                 .AddScoped<IStringStateStorage, LocalStringStateStorage>()
                 .AddScoped<IStoreHandler, JsonStoreHandler>();
