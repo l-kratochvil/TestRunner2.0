@@ -1,5 +1,7 @@
 namespace TestRunner.WebApp.Features.TestConfiguration.Components;
 
+using System.Linq;
+
 using TestRunner.WebApp.Features.TestConfiguration.Models;
 using TestRunner.WebApp.Shared.Domain;
 using TestRunner.WebApp.Shared.TestConfiguration;
@@ -78,7 +80,7 @@ public sealed class TestConfiguratorViewModel(ITestConfigurationValidator valida
     /// <summary>
     /// Gets what is wrong with the values as they stand.
     /// </summary>
-    public TestConfigurationValidity Validity { get; private set; } = TestConfigurationValidity.Valid;
+    public Validity Validity { get; private set; } = Validity.Valid;
 
     /// <summary>
     /// Gets the IDE version as it is to be kept, or <see langword="null"/> while the text is not a
@@ -176,7 +178,9 @@ public sealed class TestConfiguratorViewModel(ITestConfigurationValidator valida
     /// <param name="fieldName">Field to ask about, see <see cref="TestConfigurationValues"/>.</param>
     /// <returns>The message, or <see langword="null"/> when there is nothing to say yet.</returns>
     public string? ErrorFor(string fieldName)
-        => this.touchedFields.Contains(fieldName) ? this.Validity.ErrorFor(fieldName) : null;
+        => this.touchedFields.Contains(fieldName)
+            ? this.Validity.For(fieldName).Problems.FirstOrDefault()?.Message
+            : null;
 
     private void Touch(string fieldName)
     {

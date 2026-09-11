@@ -23,20 +23,23 @@ public sealed partial class TestConfigurationValidator : ITestConfigurationValid
     private readonly IValidator<TestConfigurationValues> rules = new Rules();
 
     /// <inheritdoc/>
-    public TestConfigurationValidity Validate(TestConfigurationValues values)
+    public Validity Validate(TestConfigurationValues values)
     {
         ArgumentNullException.ThrowIfNull(values);
 
         ValidationResult result = this.rules.Validate(values);
 
         return result.IsValid
-            ? TestConfigurationValidity.Valid
-            : new TestConfigurationValidity(
+            ? Validity.Valid
+            : new Validity(
                 [
                     ..result.Errors.Select(
-                        static failure => new TestConfigurationError(
+                        static failure => new Validity.Problem(
                             failure.PropertyName,
-                            failure.ErrorMessage))
+                            failure.ErrorMessage,
+                            failure.Severity is FluentValidation.Severity.Error
+                                ? Validity.Severity.Error
+                                : Validity.Severity.Warning))
                 ]);
     }
 

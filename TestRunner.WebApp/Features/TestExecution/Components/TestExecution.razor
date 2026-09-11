@@ -45,7 +45,7 @@
                 return "Select the tests to run.";
             }
 
-            TestConfigurationValidity validity = this.Validator.Validate(
+            Validity validity = this.Validator.Validate(
                 TestConfigurationValues.From(
                     this.TestConfigurationState.Value,
                     selectedTestCases.Any(testCase => testCase.TestType is TestType.RuntimeTest)));

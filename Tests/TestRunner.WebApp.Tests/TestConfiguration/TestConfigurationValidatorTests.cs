@@ -32,7 +32,7 @@ public class TestConfigurationValidatorTests
         };
 
         // When:
-        TestConfigurationValidity validity = this.unit.Validate(values);
+        Validity validity = this.unit.Validate(values);
 
         // Then:
         Assert.That(validity.IsValid, Is.True, validity.Summary);
@@ -43,18 +43,18 @@ public class TestConfigurationValidatorTests
     public void Validate__WhenNoRuntimeVersionWasChosen__ThenShouldSaySo(string? givenRuntimeVersion)
     {
         // When:
-        TestConfigurationValidity validity =
+        Validity validity =
             this.unit.Validate(Values() with { RuntimeVersion = givenRuntimeVersion });
 
         // Then:
-        Assert.That(validity.ErrorFor(nameof(TestConfigurationValues.RuntimeVersion)), Is.Not.Null);
+        Assert.That(validity.For(nameof(TestConfigurationValues.RuntimeVersion)).Problems, Is.Not.Empty);
     }
 
     [Test]
     public void Validate__WhenNoRuntimeTestIsSelected__ThenShouldNotAskForATestStation()
     {
         // When:
-        TestConfigurationValidity validity = this.unit.Validate(
+        Validity validity = this.unit.Validate(
             Values() with { IsRuntimeTestSelected = false, TestedHwAssembly = null });
 
         // Then:
@@ -75,17 +75,17 @@ public class TestConfigurationValidatorTests
         };
 
         // When:
-        TestConfigurationValidity validity = this.unit.Validate(values);
+        Validity validity = this.unit.Validate(values);
 
         // Then:
-        Assert.That(validity.ErrorFor(nameof(TestConfigurationValues.TestedHwAssembly)), Is.Not.Null);
+        Assert.That(validity.For(nameof(TestConfigurationValues.TestedHwAssembly)).Problems, Is.Not.Empty);
     }
 
     [Test]
     public void Validate__WhenTestLinkIsOff__ThenShouldNotAskForAnIdeVersion()
     {
         // When:
-        TestConfigurationValidity validity = this.unit.Validate(
+        Validity validity = this.unit.Validate(
             Values() with { IsTestLinkEnabled = false, IdeVersionText = null });
 
         // Then:
@@ -105,7 +105,7 @@ public class TestConfigurationValidatorTests
         };
 
         // When:
-        TestConfigurationValidity validity = this.unit.Validate(values);
+        Validity validity = this.unit.Validate(values);
 
         // Then:
         Assert.That(validity.IsValid, Is.True, validity.Summary);
@@ -117,7 +117,7 @@ public class TestConfigurationValidatorTests
     public void Validate__WhenTheIdeVersionIsWellFormed__ThenShouldAcceptIt(string givenIdeVersion)
     {
         // When:
-        TestConfigurationValidity validity = this.unit.Validate(
+        Validity validity = this.unit.Validate(
             Values() with { IsTestLinkEnabled = true, IdeVersionText = givenIdeVersion });
 
         // Then:
@@ -135,11 +135,11 @@ public class TestConfigurationValidatorTests
     public void Validate__WhenTheIdeVersionIsNotWellFormed__ThenShouldSaySo(string? givenIdeVersion)
     {
         // When:
-        TestConfigurationValidity validity = this.unit.Validate(
+        Validity validity = this.unit.Validate(
             Values() with { IsTestLinkEnabled = true, IdeVersionText = givenIdeVersion });
 
         // Then:
-        Assert.That(validity.ErrorFor(nameof(TestConfigurationValues.IdeVersionText)), Is.Not.Null);
+        Assert.That(validity.For(nameof(TestConfigurationValues.IdeVersionText)).Problems, Is.Not.Empty);
     }
 
     [Test]
@@ -155,10 +155,12 @@ public class TestConfigurationValidatorTests
         };
 
         // When:
-        TestConfigurationValidity validity = this.unit.Validate(values);
+        Validity validity = this.unit.Validate(values);
 
         // Then:
-        Assert.That(validity.Errors, Has.Exactly(1).Items);
+        Assert.That(
+            validity.For(nameof(TestConfigurationValues.IdeVersionText)).Problems,
+            Has.Exactly(1).Items);
     }
 
     [Test]
@@ -173,10 +175,10 @@ public class TestConfigurationValidatorTests
             IsRuntimeTestSelected: true);
 
         // When:
-        TestConfigurationValidity validity = this.unit.Validate(values);
+        Validity validity = this.unit.Validate(values);
 
         // Then:
-        Assert.That(validity.Errors, Has.Exactly(3).Items, validity.Summary);
+        Assert.That(validity.Problems, Has.Exactly(3).Items, validity.Summary);
     }
 
     [Test]
