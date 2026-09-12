@@ -4,7 +4,7 @@ using System.Linq;
 
 using TestRunner.WebApp.Features.TestConfiguration.Models;
 using TestRunner.WebApp.Shared.Domain;
-using TestRunner.WebApp.Shared.TestConfiguration;
+using TestRunner.WebApp.Shared.Stores.TestConfiguration;
 using TestRunner.WebApp.Shared.Validation;
 
 /// <summary>

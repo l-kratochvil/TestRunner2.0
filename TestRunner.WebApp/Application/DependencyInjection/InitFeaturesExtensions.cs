@@ -8,10 +8,10 @@ using TestRunner.WebApp.Features.AppLogging.Services;
 using TestRunner.WebApp.Features.AppSettings.Services;
 using TestRunner.WebApp.Features.TestConfiguration.Services;
 using TestRunner.WebApp.Features.TestDiscovery.Services;
-using TestRunner.WebApp.Shared.AppSettings;
 using TestRunner.WebApp.Shared.Logging;
 using TestRunner.WebApp.Shared.Storage;
-using TestRunner.WebApp.Shared.TestDiscovery;
+using TestRunner.WebApp.Shared.Stores.AppSettings;
+using TestRunner.WebApp.Shared.Stores.TestDiscovery;
 using TestRunner.WebApp.Shared.Validation;
 
 /// <summary>

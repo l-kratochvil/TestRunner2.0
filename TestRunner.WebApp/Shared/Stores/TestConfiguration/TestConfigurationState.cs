@@ -1,4 +1,4 @@
-namespace TestRunner.WebApp.Shared.TestConfiguration;
+namespace TestRunner.WebApp.Shared.Stores.TestConfiguration;
 
 using Fluxor;
 using TestRunner.WebApp.Shared.Domain;

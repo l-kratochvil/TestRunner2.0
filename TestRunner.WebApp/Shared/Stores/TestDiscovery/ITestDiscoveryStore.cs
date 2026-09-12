@@ -1,4 +1,4 @@
-namespace TestRunner.WebApp.Shared.TestDiscovery;
+namespace TestRunner.WebApp.Shared.Stores.TestDiscovery;
 
 /// <summary>
 /// Store of the test selection for features that only read it.

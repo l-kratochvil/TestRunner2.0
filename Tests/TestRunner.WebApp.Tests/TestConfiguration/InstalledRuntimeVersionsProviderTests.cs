@@ -7,9 +7,9 @@ using NUnit.Framework;
 
 using TestRunner.WebApp.Features.TestConfiguration.Models;
 using TestRunner.WebApp.Features.TestConfiguration.Services;
-using TestRunner.WebApp.Shared.AppSettings;
 using TestRunner.WebApp.Shared.Logging;
 using TestRunner.WebApp.Shared.Storage;
+using TestRunner.WebApp.Shared.Stores.AppSettings;
 
 [TestFixture]
 public class InstalledRuntimeVersionsProviderTests

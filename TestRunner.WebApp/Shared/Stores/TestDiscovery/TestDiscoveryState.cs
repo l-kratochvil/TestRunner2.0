@@ -1,4 +1,4 @@
-namespace TestRunner.WebApp.Shared.TestDiscovery;
+namespace TestRunner.WebApp.Shared.Stores.TestDiscovery;
 
 using TestRunner.Common.Model;
 

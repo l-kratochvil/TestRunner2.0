@@ -5,7 +5,7 @@ using Fluxor.Persist.Middleware;
 
 using TestRunner.WebApp.Features.TestConfiguration.Services;
 using TestRunner.WebApp.Shared.Logging;
-using TestRunner.WebApp.Shared.TestConfiguration;
+using TestRunner.WebApp.Shared.Stores.TestConfiguration;
 
 /// <summary>
 /// What has to happen to the test configuration beyond changing it.

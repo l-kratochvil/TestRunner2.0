@@ -8,7 +8,7 @@ using TestRunner.Common.Model;
 using TestRunner.WebApp.Shared.Logging;
 using TestRunner.WebApp.Shared.Storage;
 using TestRunner.WebApp.Shared.Stores;
-using TestRunner.WebApp.Shared.TestDiscovery;
+using TestRunner.WebApp.Shared.Stores.TestDiscovery;
 
 /// <summary>
 /// The test selection being put together. Selecting happens in one browser tab and belongs to it,

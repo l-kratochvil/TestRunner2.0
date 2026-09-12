@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 using TestRunner.WebApp.Features.TestConfiguration.Models;
-using TestRunner.WebApp.Shared.AppSettings;
 using TestRunner.WebApp.Shared.Logging;
 using TestRunner.WebApp.Shared.Storage;
+using TestRunner.WebApp.Shared.Stores.AppSettings;
 
 /// <summary>
 /// Reads the installed runtime versions from the folders the IDE installer creates, one per

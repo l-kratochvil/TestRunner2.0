@@ -1,7 +1,7 @@
 namespace TestRunner.WebApp.Features.TestConfiguration;
 
 using Fluxor;
-using TestRunner.WebApp.Shared.TestConfiguration;
+using TestRunner.WebApp.Shared.Stores.TestConfiguration;
 
 public static class Reducers
 {
