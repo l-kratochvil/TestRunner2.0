@@ -7,8 +7,11 @@ using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 
+using DevKit.Core.Utils;
+
 using StreamJsonRpc;
 
+using TestRunner.Common;
 using TestRunner.Common.Services;
 
 /// <summary>
@@ -21,7 +24,7 @@ internal sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
     // The server and its .NET Framework dependencies are copied here by the build (Exchange output).
     private const string ServerRelativePath = @"TestRunner.NUnitTestRunnerProxy\TestRunner.NUnitTestRunnerProxy.exe";
 
-    private static readonly TimeSpan ConnectTimeout = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan ConnectTimeout = TimeSpan.FromSeconds(60);
 
     private readonly Process serverProcess;
     private readonly NamedPipeServerStream pipe;
@@ -53,8 +56,11 @@ internal sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
 
         var pipeName = $"TestRunnerProxy_{Guid.NewGuid():N}";
         var pipe = new NamedPipeServerStream(
-            pipeName, PipeDirection.InOut, maxNumberOfServerInstances: 1,
-            PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+            pipeName,
+            PipeDirection.InOut,
+            maxNumberOfServerInstances: 1,
+            PipeTransmissionMode.Byte,
+            PipeOptions.Asynchronous);
 
         Process? serverProcess = null;
         try

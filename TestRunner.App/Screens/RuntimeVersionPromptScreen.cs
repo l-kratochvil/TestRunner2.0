@@ -9,9 +9,10 @@ using TestRunner.App.Stores;
 internal partial class RuntimeVersionPromptScreen(
     TestRunConfigStore testRunConfigStore,
     AppUserSettingsStore appUserSettingsStore,
+    Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
-    : BaseForwardedScreen(exitScreen, settingsScreen)
+    : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()
@@ -19,18 +20,25 @@ internal partial class RuntimeVersionPromptScreen(
         {
             Main = ct =>
             {
+                var installedRuntimeVersions = GetInstalledRuntimeVersions(appUserSettingsStore);
+                if (installedRuntimeVersions.Length == 0)
+                {
+                    ConsoleUtils.WaitForAnyKeyPress(Resources.NoRuntimesFoundUnderIdeInstallFolder_Message);
+                    return Task.FromResult<ShowPromptResult>(CompletedShowPrompt.Default);
+                }
+
                 var prompt = new SelectionPrompt<string>()
-                    .Title("# Select runtime version:")
+                    .Title("Select runtime version:")
                     .PageSize(10)
                     .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]")
-                    .AddChoices(GetInstalledRuntimeVersions(appUserSettingsStore));
+                    .AddChoices(installedRuntimeVersions);
 
                 return ShowPromptAsync(
                     prompt,
                     version =>
                     {
                         testRunConfigStore.RuntimeVersion = version;
-                        return new RenderOutput();
+                        return RenderOutput.Default;
                     },
                     ct);
             },

@@ -1,63 +1,38 @@
 namespace TestRunner.App.Stores;
 
-using System.Text.Json;
-
 using TestRunner.App;
 using TestRunner.App.Model;
 
-// TODO: Get settings from config file
-internal class AppUserSettingsStore
+internal class AppUserSettingsStore : IJsonPersistanceStore<AppUserSettings>
 {
     private const string DefaultIdeInstallationDirPath = @"C:\Program Files (x86)\Pertinax6";
 
-    private static readonly JsonSerializerOptions JsonSerializerOptions =
-        new()
-        {
-            WriteIndented = true,
-        };
+    private static readonly string JsonPath = Paths.Files.AppUserSettings;
+
+    private readonly JsonPersistanceStore<AppUserSettings> jsonPersistanceStore = new(CreateDefaultAppUserSettings, JsonPath);
 
     private AppUserSettingsStore()
     {
-        this.Current = new AppUserSettings(DefaultIdeInstallationDirPath);
     }
 
-    public AppUserSettings Current { get; private set; }
-
-    public void Update(AppUserSettings currentSettings)
-    {
-        this.Current = currentSettings;
-        JsonSerializer
-            .Serialize(currentSettings, JsonSerializerOptions)
-            .Visit(serialized => File.WriteAllText(Paths.Files.AppSettings, serialized));
-    }
+    /// <inheritdoc/>
+    public AppUserSettings Current
+        => this.jsonPersistanceStore.Current;
 
     public static AppUserSettingsStore Create()
-    {
-        var appSettingsFilePath = Paths.Files.AppSettings;
+        => JsonPersistanceStore<AppUserSettings>.InitStore(
+            JsonPath,
+            CreateDefaultAppUserSettings,
+            model => new AppUserSettingsStore().Visit(x => x.Update(model)));
 
-        AppUserSettings appUserSettings;
-        if (File.Exists(appSettingsFilePath))
-        {
-            appUserSettings = File.ReadAllText(appSettingsFilePath)
-                                  .Pipe(json => JsonSerializer.Deserialize<AppUserSettings>(json, JsonSerializerOptions))
-                              ?? new AppUserSettings(DefaultIdeInstallationDirPath);
-        }
-        else
-        {
-            appUserSettings = new AppUserSettings(DefaultIdeInstallationDirPath);
-            SaveSettings(appUserSettings);
-        }
+    /// <inheritdoc/>
+    public void Update(Func<AppUserSettings, AppUserSettings> updator)
+        => this.jsonPersistanceStore.Update(updator);
 
-        return new AppUserSettingsStore
-        {
-            Current = appUserSettings,
-        };
-    }
+    /// <inheritdoc/>
+    public void Update(AppUserSettings currentModel)
+        => this.jsonPersistanceStore.Update(currentModel);
 
-    public static void SaveSettings(AppUserSettings settings)
-    {
-        JsonSerializer
-            .Serialize(settings, JsonSerializerOptions)
-            .Visit(serialized => File.WriteAllText(Paths.Files.AppSettings, serialized));
-    }
+    private static AppUserSettings CreateDefaultAppUserSettings()
+        => new(DefaultIdeInstallationDirPath);
 }

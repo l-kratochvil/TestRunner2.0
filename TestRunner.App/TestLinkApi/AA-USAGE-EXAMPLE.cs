@@ -16,6 +16,8 @@ namespace TestRunner.App.TestLinkApi
     using System.Collections.Generic;
     using System.Linq;
 
+    using TestRunner.App.Common;
+
     class Program
     {
         private const string ApiKey = "dc7a17e14a9f1879d38583a38c3a81e8";

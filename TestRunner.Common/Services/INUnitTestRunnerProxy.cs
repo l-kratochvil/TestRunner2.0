@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using TestRunner.Common.ComplexTypes;
+using TestRunner.Common.Model;
 
 /// <summary>
 /// Surface of the out-of-process NUnit test runner. Implemented by the .NET Framework
@@ -13,12 +13,12 @@ using TestRunner.Common.ComplexTypes;
 public interface INUnitTestRunnerProxy
 {
     /// <summary>Loads the test assembly and returns its discovered test tree.</summary>
-    Task<TestAssemblyEntity> LoadTestAssemblyAsync(string path, CancellationToken cancellationToken = default);
+    Task<TestSuiteEntity[]> LoadTestAssemblyAsync(string assemblyDllPath, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Runs the supplied test entities. Cancelling <paramref name="cancellationToken"/> forcibly aborts the run.
     /// </summary>
-    Task<TestResult> RunTestAsync(IEnumerable<TestAssemblyEntity> testsToRun, CancellationToken cancellationToken = default);
+    Task<TestRunResult> RunTestAsync(IEnumerable<TestEntity> testsToRun, CancellationToken cancellationToken = default);
 
     /// <summary>Indicates whether a test assembly is currently loaded.</summary>
     Task<bool> GetIsAssemblyLoadedAsync(CancellationToken cancellationToken = default);

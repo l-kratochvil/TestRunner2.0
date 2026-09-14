@@ -1,19 +1,20 @@
 ﻿namespace TestRunner.App.Stores;
 
-using System.Collections.Generic;
-using System.Threading;
-
-using TestRunner.Common.Interfaces;
-
-internal class TestRunConfigStore
+/// <summary>
+/// This is the store for test run config that is used by the running test.
+/// </summary>
+/// <param name="appStateStore"></param>
+internal class TestRunConfigStore(AppStateStore appStateStore)
 {
-    private static readonly Lock currentConfigLock = new();
+    public string? RuntimeVersion
+    {
+        get => appStateStore.Current.RuntimeVersion;
+        set => appStateStore.Update(current => current with { RuntimeVersion = value });
+    }
 
-    public string? RuntimeVersion { get; set; } = null;
-
-    public string? IdeVersion { get; set; } = null;
-
-    public IEnumerable<ITestEntity> TestEntities { get; set; } = [];
-
-    public bool? IsRuntimeTest { get; set; } = false;
+    public string? TestStation
+    {
+        get => appStateStore.Current.TestStation;
+        set => appStateStore.Update(current => current with { TestStation = value });
+    }
 }

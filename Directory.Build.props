@@ -2,12 +2,19 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>			 
 		<!-- Common props -->
-		<LangVersion>latest</LangVersion>
+		<LangVersion>preview</LangVersion>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\Key.snk</AssemblyOriginatorKeyFile>
 		<!-- Output exchange props -->
-		<ExchangeDir>$(SolutionDir)Exchange\</ExchangeDir>
+		<!-- Anchored to this file rather than to $(SolutionDir), which is only defined when the
+		     build was started from the solution: a project built on its own (dotnet run or dotnet
+		     watch against a single project) would otherwise look for the exchange next to itself
+		     and silently copy nothing. -->
+		<ExchangeDir>$(MSBuildThisFileDirectory)Exchange\</ExchangeDir>
 		<NUnitTestRunnerProxyDir>$(ExchangeDir)NUnitTestRunnerProxy\</NUnitTestRunnerProxyDir>
+		<NUnitTestAssembliesDir>$(ExchangeDir)NUnitTestAssemblies\</NUnitTestAssembliesDir>
 		<IncludeNUnitTestRunnerProxyDirOutput Condition="'$(IncludeNUnitTestRunnerProxyDirOutput)' == ''">false</IncludeNUnitTestRunnerProxyDirOutput>
 	</PropertyGroup>
 </Project>

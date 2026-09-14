@@ -1,0 +1,217 @@
+@* Feature: AppLogging — "the user can see and filter what the application is doing".
+   Shown in MainLayout, so the log is reachable from every screen. *@
+
+@using Microsoft.Extensions.Options
+@using TestRunner.WebApp.Application.Logging
+@using TestRunner.WebApp.Features.AppLogging.Models
+@using TestRunner.WebApp.Features.AppLogging.Services
+@using TestRunner.WebApp.Shared.Logging
+
+@implements IAsyncDisposable
+
+<section class="app-log-panel @(this.isCollapsed ? "is-collapsed" : "is-expanded")">
+    <header class="app-log-header">
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary toggle-button"
+                title="@(this.isCollapsed ? "Expand the log" : "Collapse the log")"
+                @onclick="this.ToggleCollapsedAsync">
+            @(this.isCollapsed ? "▲" : "▼")
+        </button>
+
+        <span class="pane-title">Log</span>
+
+        @if (this.isCollapsed)
+        {
+            @* Collapsed means "no log content" — only the error count stays as a summary indicator. *@
+            <span class="error-count @(this.ErrorCount > 0 ? "has-errors" : null)">
+                @this.ErrorCount error(s)
+            </span>
+        }
+        else
+        {
+            <div class="filters">
+                <span class="filter-group">
+                    @foreach (LogSeverity severity in Enum.GetValues<LogSeverity>())
+                    {
+                        <label class="form-check-label filter-option">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   checked="@this.filter.IsSelected(severity)"
+                                   @onchange="args => this.filter.SetSelected(severity, (bool)args.Value!)" />
+                            @severity
+                        </label>
+                    }
+                </span>
+
+                <span class="filter-group">
+                    @foreach (string source in this.AvailableSources)
+                    {
+                        <label class="form-check-label filter-option">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   checked="@this.filter.IsSelected(source)"
+                                   @onchange="args => this.filter.SetSelected(source, (bool)args.Value!)" />
+                            @source
+                        </label>
+                    }
+                </span>
+            </div>
+
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary jump-button"
+                    @onclick="this.ScrollToNewestAsync">
+                Jump to newest
+            </button>
+        }
+    </header>
+
+    @if (!this.isCollapsed)
+    {
+        <div class="app-log-entries" @ref="this.entriesElement">
+            @foreach (LogEntry entry in this.filter.Apply(this.entries))
+            {
+                <div class="log-entry severity-@entry.Severity.ToString().ToLowerInvariant()">
+                    <span class="entry-time">@entry.Timestamp.ToString("HH:mm:ss.fff")</span>
+                    <span class="entry-severity">@entry.Severity</span>
+                    <span class="entry-source">@entry.Source</span>
+                    <span class="entry-message">@entry.Message</span>
+                </div>
+
+                if (!string.IsNullOrEmpty(entry.Detail))
+                {
+                    <pre class="entry-detail">@entry.Detail</pre>
+                }
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private const int RefreshIntervalMilliseconds = 150;
+
+    private const string ModulePath = "./Features/AppLogging/Components/AppLoggerView.razor.js";
+
+    private readonly AppLoggerFilter filter = AppLoggerFilter.CreateDefault();
+
+    private IReadOnlyList<LogEntry> entries = [];
+    private ElementReference entriesElement;
+    private JsModuleInterop? jsModuleInterop;
+    
+    private System.Threading.Timer? refreshTimer;
+    private volatile bool hasNewEntries;
+    private bool isCollapsed;
+
+    /// <summary>
+    /// Gets or sets the hub the shown log entries are read from.
+    /// </summary>
+    [Inject]
+    private IAppLoggerHub LoggerHub { get; set; } = default!;
+
+    /// <summary>
+    /// Gets or sets the options of the file logger, read to show where the log file is.
+    /// </summary>
+    [Inject]
+    private IOptions<FileLoggerOptions> FileLoggerOptions { get; set; } = default!;
+
+    /// <summary>
+    /// Gets or sets the factory the JS module interop is created through.
+    /// </summary>
+    [Inject]
+    private IJsModuleInteropFactory JsModuleInteropFactory { get; set; } = default!;
+
+    /// <summary>
+    /// Raised after the panel collapse state changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> CollapsedChanged { get; set; }
+
+    private int ErrorCount => this.entries.Count(entry => entry.Severity == LogSeverity.Error);
+
+    private JsModuleInterop JsModuleInterop 
+        => this.jsModuleInterop ??= this.JsModuleInteropFactory.Create(ModulePath);
+
+    private IEnumerable<string> AvailableSources 
+        => LogSources.All
+            .Concat(this.entries.Select(entry => entry.Source))
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        this.LoggerHub.EntryAppended -= this.OnEntryAppended;
+
+        if (this.refreshTimer is not null)
+        {
+            await this.refreshTimer.DisposeAsync();
+        }
+
+        // The module is only imported when the user jumps to the newest entry, so a panel nobody
+        // scrolled has nothing to release.
+        if (this.jsModuleInterop is not null)
+        {
+            await this.jsModuleInterop.DisposeAsync();
+        }
+    }
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        this.entries = this.LoggerHub.GetEntries();
+    }
+
+    /// <inheritdoc/>
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        // Subscribing here (and not in OnInitialized) keeps the prerendered instance out of the
+        // hub's subscriber list.
+        this.LoggerHub.EntryAppended += this.OnEntryAppended;
+        this.hasNewEntries = true;
+
+        // Entries arrive in bursts (test runner output), so the UI is refreshed on a timer
+        // instead of once per entry: one re-render per batch, not one per line.
+        this.refreshTimer = new System.Threading.Timer(
+            _ => this.Refresh(),
+            state: null,
+            dueTime: RefreshIntervalMilliseconds,
+            period: RefreshIntervalMilliseconds);
+    }
+
+    private void OnEntryAppended(LogEntry entry)
+    {
+        this.hasNewEntries = true;
+    }
+
+    private void Refresh()
+    {
+        if (!this.hasNewEntries)
+        {
+            return;
+        }
+
+        this.hasNewEntries = false;
+        this.entries = this.LoggerHub.GetEntries();
+
+        try
+        {
+            _ = this.InvokeAsync(this.StateHasChanged);
+        }
+        catch (ObjectDisposedException)
+        {
+            // The circuit is gone; the timer is disposed right after.
+        }
+    }
+
+    private async Task ToggleCollapsedAsync()
+    {
+        this.isCollapsed = !this.isCollapsed;
+        await this.CollapsedChanged.InvokeAsync(this.isCollapsed);
+    }
+
+    private Task ScrollToNewestAsync()
+        => this.JsModuleInterop.InvokeVoidSafeAsync("scrollToEnd", this.entriesElement);
+}

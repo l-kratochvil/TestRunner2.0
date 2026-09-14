@@ -2,64 +2,66 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
+using TestRunner.App.Common;
 using TestRunner.App.Stores;
-using TestRunner.Common.Interfaces;
+using TestRunner.Common.Model;
 
 internal sealed class HomeScreen(
+    TestRunStore testRunStore,
     TestRunConfigStore testRunConfigStore,
+    Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen,
     RuntimeVersionPromptScreen runtimeVersionPromptScreen,
     IdeVersionPromptScreen ideVersionPromptScreen,
-    TestEntitiesFromTestsuitesPromptScreen testEntitiesFromTestsuitesPromptScreen,
-    TestEntitiesFromTestCasesPromptScreen testEntitiesFromTestCasesPromptScreen,
-    EmptyScreen emptyScreen)
-    : BaseScreen(exitScreen, settingsScreen)
+    TestSuitesSelectionScreen testEntitiesFromTestsuitesPromptScreen,
+    TestCasesSelectionScreen testEntitiesFromTestCasesPromptScreen,
+    TestStationSelectionScreen testStationSelectionScreen,
+    RunTestScreen runTestScreen)
+    : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
+    /// <inheritdoc/>
+    protected override Configuration Config { get; init; } = new()
+    {
+        IsHomeCommandEnabled = false,
+        IsBackCommandEnabled = false,
+    };
+
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()
         => new()
         {
             Main = ct =>
             {
-                var choices = GetChoices(testRunConfigStore);
-                var prompt = new SelectionPrompt<Choice>()
+                var choices = this.GetChoices();
+                var prompt = new SelectionPrompt<Choice<IScreen>>()
                     .Title(string.Empty) // The console is buggy if no title is set
                     .PageSize(10)
-                    .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]")
+                    .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
                     .AddChoices(choices)
                     .UseConverter(choice => choice.Text)
                     .HighlightStyle(new Style(foreground: Color.Aqua, decoration: Spectre.Console.Decoration.Bold));
 
                 return ShowPromptAsync(
                     prompt,
-                    choice => new RenderOutput(NextScreen: choice.Type switch
-                    {
-                        Choice.TypeKind.RuntimeVersionPromptScreen => runtimeVersionPromptScreen,
-                        Choice.TypeKind.IdeVersionPromptScreen => ideVersionPromptScreen,
-                        Choice.TypeKind.TestEntitiesFromTestsuitesOnlyPromptScreen => testEntitiesFromTestsuitesPromptScreen,
-                        Choice.TypeKind.TestEntitiesFromTestCasesPromptScreen => testEntitiesFromTestCasesPromptScreen,
-                        // TODO: Rest screens
-                        _ => emptyScreen,
-                    }),
+                    choice => new RenderOutput(NextScreen: choice.Value),
                     ct);
             },
             Info = () =>
             {
-                var testSuites = testRunConfigStore.TestEntities.Where(e => e.Type == ITestEntity.TypeKind.TestSuite)
-                    .ToArray();
-                var testCases = testRunConfigStore.TestEntities.Where(e => e.Type == ITestEntity.TypeKind.TestCase)
-                    .ToArray();
+                var testFixtures = testRunStore
+                    .SelectedTestEntities.OfType<TestFixtureEntity>().ToArray();
+                var testCases = testRunStore
+                    .SelectedTestEntities.OfType<TestCaseEntity>().ToArray();
 
-                ITestEntity[] testEntities = [];
+                TestEntity[] testEntities = [];
 
-                if (testSuites.Length != 0)
+                if (testFixtures.Length != 0)
                 {
-                    testEntities = testSuites;
+                    testEntities = testFixtures;
                 }
-                else if (testCases.Length != 0 && testCases.Length < 10)
+                else if (testCases is { Length: > 0 and < 10 })
                 {
                     testEntities = testCases;
                 }
@@ -68,17 +70,19 @@ internal sealed class HomeScreen(
 
                 Write(new Rule("INFO").LeftJustified());
                 WriteLine();
-                MarkupLine(anyTestEntities ? "[bold]# Test entities:[/] [yellow]Selected[/]" : "[bold]# Test entities:[/] [gray]Unselected[/]");
+                MarkupLine(anyTestEntities
+                    ? $"[bold]# {Resources.TestEntities}:[/] [yellow]{Resources.Selected}[/]"
+                    : $"[bold]# {Resources.TestEntities}:[/] [gray]{Resources.Unselected}[/]");
 
                 if (anyTestEntities)
                 {
-                    MarkupLine($"[bold]# Selected entities count: [yellow]{testEntities.Length}[/][/]");
-                    MarkupLine("[bold]# Selected entities:[/]");
+                    MarkupLine($"[bold]# {Resources.SelectedEntitiesCount}: [yellow]{testEntities.Length}[/][/]");
+                    MarkupLine($"[bold]# {Resources.SelectedEntities}:[/]");
                 }
 
                 foreach (var testEntity in testEntities)
                 {
-                    MarkupLine($"  [yellow]{testEntity.Name}[/]");
+                    MarkupLine($"  [yellow]{(testEntity as TestCaseEntity)?.Id ?? testEntity.Name}[/]");
                 }
 
                 WriteLine();
@@ -86,90 +90,80 @@ internal sealed class HomeScreen(
             },
         };
 
-    private static List<Choice> GetChoices(TestRunConfigStore testRunConfigStore)
+    private IEnumerable<Choice<IScreen>> GetChoices()
     {
-        // TODO: Refactor using CHoR pattern
+        yield return new Choice<IScreen>(
+            value: runtimeVersionPromptScreen,
+            displayText: Resources.RuntimeVersion_ChoiceText,
+            displayValue: testRunConfigStore.RuntimeVersion);
 
-        List<Choice> choices = [];
-
-        bool InitChoices(
-            string identifier, string? value, Func<bool> returnPredicate, Choice.TypeKind typeKind)
+        if (testRunConfigStore.RuntimeVersion is null)
         {
-            choices.Add(new Choice
-            {
-                Type = typeKind,
-                Text = value is null ? $"[italic]{identifier}?[/]" : $"{identifier}: [yellow]{value}[/]",
-            });
-
-            return returnPredicate();
+            yield break;
         }
 
-        var config = testRunConfigStore;
-
-        if (InitChoices(
-                "Runtime version",
-                config.RuntimeVersion,
-                () => config.RuntimeVersion is null,
-                Choice.TypeKind.RuntimeVersionPromptScreen) ||
-            InitChoices(
-                "IDE version",
-                config.IdeVersion,
-                () => config.IdeVersion is null,
-                Choice.TypeKind.IdeVersionPromptScreen))
+        if (Choice.InitChoice<IScreen>(
+                ideVersionPromptScreen,
+                Resources.IdeVersion_ChoiceText,
+                testRunStore.IdeVersion)
+            .TryGetValue(out var ideVersionChoice))
         {
-            return choices;
+            yield return ideVersionChoice;
         }
 
-        choices.AddRange(
-        [
-            new Choice
-            {
-                Type = Choice.TypeKind.TestEntitiesFromTestsuitesOnlyPromptScreen,
-                Text = "Select test suites",
-            },
-            new Choice
-            {
-                Type = Choice.TypeKind.TestEntitiesFromTestCasesPromptScreen,
-                Text = "Select test cases",
-            }
-        ]);
-
-        if (!config.TestEntities.Any())
+        if (testRunStore.IdeVersion is null)
         {
-            return choices;
+            yield break;
         }
 
-        if (
-            string.IsNullOrEmpty(config.IdeVersion) ||
-            string.IsNullOrEmpty(config.RuntimeVersion) ||
-            !config.TestEntities.Any())
+        if (Choice.InitChoice<IScreen>(
+                testEntitiesFromTestsuitesPromptScreen,
+                Resources.SelectTestSuites_ChoiceText,
+                null)
+            .TryGetValue(out var selectTestSuiteChoice))
+        {
+            yield return selectTestSuiteChoice;
+        }
+
+        if (Choice.InitChoice<IScreen>(
+                testEntitiesFromTestCasesPromptScreen,
+                Resources.SelectTestCases_ChoiceText,
+                null)
+            .TryGetValue(out var selectTestCasesChoice))
+        {
+            yield return selectTestCasesChoice;
+        }
+
+        if (!testRunStore.SelectedTestEntities.Any())
+        {
+            yield break;
+        }
+
+        var runtimeTestEntitySelected = testRunStore.SelectedTestEntities.Any(x => x.TestType is TestType.RuntimeTest);
+        if (Choice.InitChoice<IScreen>(
+                testStationSelectionScreen,
+                Resources.SelectTestStation_ChoiceText,
+                testRunConfigStore.TestStation,
+                () => runtimeTestEntitySelected)
+            .TryGetValue(out var selectTestStationChoice))
+        {
+            yield return selectTestStationChoice;
+        }
+
+        if (runtimeTestEntitySelected && string.IsNullOrEmpty(testRunConfigStore.TestStation))
+        {
+            yield break;
+        }
+
+        if (string.IsNullOrEmpty(testRunStore.IdeVersion) ||
+            string.IsNullOrEmpty(testRunConfigStore.RuntimeVersion) ||
+            !testRunStore.SelectedTestEntities.Any())
         {
             throw new InvalidOperationException("Invalid config (some required values are missing)");
         }
 
-        choices.Add(
-            new Choice
-            {
-                Type = Choice.TypeKind.RunTest,
-                Text = "[italic]Run test?[/]",
-            });
-
-        return choices;
-    }
-
-    private record Choice
-    {
-        public required TypeKind Type { get; init; }
-
-        public required string Text { get; init; }
-
-        public enum TypeKind
-        {
-            RuntimeVersionPromptScreen,
-            IdeVersionPromptScreen,
-            TestEntitiesFromTestCasesPromptScreen,
-            TestEntitiesFromTestsuitesOnlyPromptScreen,
-            RunTest,
-        }
+        yield return new Choice<IScreen>(
+            runTestScreen,
+            displayText: Resources.RunTest_ChoiceText);
     }
 }

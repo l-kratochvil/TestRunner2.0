@@ -10,7 +10,7 @@
 *.userosscache
 *.sln.docstates
 
-[Ee]xchange/**/*
+[Ee]xchange/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -286,6 +286,18 @@ FakesAssemblies/
 # Node.js Tools for Visual Studio
 .ntvs_analysis.dat
 node_modules/
+
+# Everything outside wwwroot in TestRunner.WebApp is authored in TypeScript and compiled in place
+# to a sibling .js by the CompileTypeScript MSBuild target (see TestRunner.WebApp.csproj), so any
+# such .js is a build output. wwwroot holds static/vendored assets whose .js is source, hence the
+# carve-out; author new scripts as .ts outside wwwroot, not as .js inside it.
+TestRunner.WebApp/**/*.js
+TestRunner.WebApp/**/*.js.map
+!TestRunner.WebApp/wwwroot/**
+
+# The one part of wwwroot that is generated: the shared modules built out of TestRunner.WebApp/
+# Browser, which have to land under wwwroot to be served at all. Edit them there, never here.
+TestRunner.WebApp/wwwroot/browser/
 
 # Visual Studio 6 build log
 *.plg

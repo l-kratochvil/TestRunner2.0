@@ -12,15 +12,25 @@ using NUnit;
 using NUnit.Framework.Api;
 
 using TestRunner.App.Screens;
+using TestRunner.App.Stores;
+using TestRunner.Common.Services;
 
 internal class App
 {
     public static async Task RunAsync(IHost host)
     {
-        // TODO: create new empy config file
+        File.Delete(Paths.Files.TestRunnerConfig); // Clean up config file from previous run, if exists
 
         try
         {
+            var nunitTestRunnerProxy = host.Services.GetRequiredService<INUnitTestRunnerProxy>();
+            var testRunStore = host.Services.GetRequiredService<TestRunStore>();
+
+            // testRunStore.LoadedTestSuites = await nunitTestRunnerProxy.LoadTestAssemblyAsync(Paths.Files.TestAssemblyFilePath);
+            testRunStore.LoadedTestSuites
+                = await nunitTestRunnerProxy.LoadTestAssemblyAsync(
+                    @"c:\Users\l-kratochvil\source\repos\TestRunner2.0\Tests\NUnitTestAssembly.Net481\bin\Debug\net481\NUnitTestAssembly.Net481.dll");
+
             await MainRenderAsync(host.Services.GetRequiredService<HomeScreen>());
         }
         catch (Exception ex)
@@ -35,7 +45,7 @@ internal class App
         }
         finally
         {
-            // TODO: FileSystemUtils.DeleteFile(TestEnvironmentConfiguration.TestRunnerConfigFilePath);
+            File.Delete(Paths.Files.TestRunnerConfig); // Clean up config file from previous run, if exists
         }
     }
 

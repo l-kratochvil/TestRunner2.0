@@ -1,0 +1,115 @@
+@* Feature: TestExecution — "the user can execute a test". *@
+
+@using System.Linq
+@using Fluxor
+@using TestRunner.Common.Model
+@using TestRunner.WebApp.Shared.Domain
+@using TestRunner.WebApp.Shared.Stores.TestConfiguration
+@using TestRunner.WebApp.Shared.Stores.TestDiscovery
+@using TestRunner.WebApp.Shared.Validation
+
+@implements IDisposable
+@implements ITestConfigurationValidationSource
+
+@* Deliberately nothing but the button: where it is drawn is the caller's business, which is what
+   lets the test explorer take it into its header row. *@
+<button type="button"
+        class="@(this.isRunning ? "btn btn-sm btn-danger" : "btn btn-sm btn-success")"
+        disabled="@(!this.isRunning && this.TestBlockingReason is not null)"
+        title="@(this.isRunning ? null : this.TestBlockingReason)"
+        @onclick="this.OnToggle">
+    @(this.isRunning ? "Stop" : "Start")
+</button>
+
+@code {
+    // Which of the two actions the button offers. Starting and stopping a test run is not wired up
+    // yet, so nothing outside the button has to know about it and a field is enough.
+    private bool isRunning;
+
+    // The button is its own validation source: what a run would use is the configuration as it is
+    // stored and the selection as it stands, so there is nothing to copy anywhere first.
+
+    /// <inheritdoc/>
+    public string? RuntimeVersion
+        => this.TestConfigurationState.Value.RuntimeVersion;
+
+    /// <inheritdoc/>
+    public TestedHwAssemblyType? TestedHwAssembly
+        => this.TestConfigurationState.Value.TestedHwAssembly;
+
+    /// <inheritdoc/>
+    public bool IsTestLinkEnabled
+        => this.TestConfigurationState.Value.IsTestLinkEnabled;
+
+    /// <inheritdoc/>
+    public string? IdeVersionText
+        => this.TestConfigurationState.Value.IdeVersion?.ToString();
+
+    /// <inheritdoc/>
+    public bool IsRuntimeTestSelected
+        => this.TestDiscoveryStore.Current.SelectedTestCases.Any(
+            static testCase => testCase.TestType is TestType.RuntimeTest);
+
+    /// <summary>
+    /// Gets or sets the configuration a run would use, read to tell whether it can start.
+    /// </summary>
+    [Inject]
+    private IState<TestConfigurationState> TestConfigurationState { get; set; } = default!;
+
+    /// <summary>
+    /// Gets or sets the validator the configuration is checked against.
+    /// </summary>
+    [Inject]
+    private ITestConfigurationValidator Validator { get; set; } = default!;
+
+    /// <summary>
+    /// Gets or sets the store the test selection is read from.
+    /// </summary>
+    [Inject]
+    private ITestDiscoveryStore TestDiscoveryStore { get; set; } = default!;
+
+    // What stops a run from being started, or null when nothing does. Two things have to hold, and
+    // each is asked of the feature that owns it: tests have been selected, which is the test
+    // explorer's business, and the configuration is one that can be run with, which the
+    // configuration's own rules answer. Folding the selection into those rules would make the
+    // configuration invalid over something the configurator does not show.
+    private string? TestBlockingReason
+    {
+        get
+        {
+            if (this.TestDiscoveryStore.Current.SelectedTestCases.Count == 0)
+            {
+                return "Select the tests to run.";
+            }
+
+            Validity validity = this.Validator.Validate(this);
+
+            return validity.IsValid ? null : validity.Summary;
+        }
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        this.TestDiscoveryStore.Changed -= this.OnDependencyChanged;
+        this.TestConfigurationState.StateChanged -= this.OnStateChanged;
+    }
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        // Whether a run may start follows from the selection and from the configuration, so the
+        // button is redrawn whenever either of them moves.
+        this.TestDiscoveryStore.Changed += this.OnDependencyChanged;
+        this.TestConfigurationState.StateChanged += this.OnStateChanged;
+    }
+
+    private void OnStateChanged(object? sender, EventArgs args)
+        => this.OnDependencyChanged();
+
+    private void OnDependencyChanged()
+        => this.InvokeAsync(this.StateHasChanged);
+
+    private void OnToggle()
+        => this.isRunning = !this.isRunning;
+}

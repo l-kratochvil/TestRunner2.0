@@ -3,6 +3,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using TestRunner.App.Common;
 using TestRunner.App.TestLinkApi;
 using TestRunner.Common.Services;
 

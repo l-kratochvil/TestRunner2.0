@@ -1,0 +1,124 @@
+@* Feature: AppSettings — "the user can view and change persistent application settings". *@
+
+@using TestRunner.WebApp.Features.AppSettings.Models
+@using TestRunner.WebApp.Features.AppSettings.Services
+@using TestRunner.WebApp.Shared.Validation
+
+@implements IDisposable
+@implements IAppSettingsValidationSource
+
+<section class="settings-editor">
+    <h2 class="pane-title">Settings</h2>
+
+    <PropertyGrid>
+        @* One folder, holding one folder per installed runtime version, which is where the test
+           configurator reads its choices from. *@
+        <PropertyGridRow Label="IDE install folder"
+                         Validity="@this.validity.For(nameof(IAppSettingsValidationSource.IdeInstallFolderPath))">
+            <input type="text"
+                   class="form-control form-control-sm settings-ide-install-folder"
+                   value="@this.IdeInstallFolderPath"
+                   @oninput="this.OnIdeInstallFolderPathChanged" />
+        </PropertyGridRow>
+    </PropertyGrid>
+
+    <div class="settings-actions">
+        @* The settings go into a file everyone connecting reads, so they are saved when the tester
+           says so rather than on every keystroke, which would put half a path on disk. *@
+        <button type="button"
+                class="btn btn-sm btn-primary"
+                disabled="@(!this.CanSave)"
+                @onclick="this.OnSaveAsync">
+            Save
+        </button>
+
+        @if (this.saveStatus is SaveStatus.Saved)
+        {
+            <span class="settings-saved" role="status">Saved.</span>
+        }
+
+        @if (this.saveStatus is SaveStatus.Failed)
+        {
+            @* Nothing was changed, so the button stays live and the tester can try again once
+               whatever the log names has been dealt with. *@
+            <span class="settings-save-failed" role="alert">
+                The settings could not be written to their file — see the log.
+            </span>
+        }
+    </div>
+</section>
+
+@code {
+    private Validity validity = Validity.Valid;
+    private SaveStatus saveStatus;
+
+    /// <summary>
+    /// Gets the IDE install folder path as it is being edited, which is not what is saved until the
+    /// tester says so.
+    /// </summary>
+    public string IdeInstallFolderPath { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the store the application settings are read from and saved to.
+    /// </summary>
+    [Inject]
+    private AppSettingsStore Store { get; set; } = default!;
+
+    /// <summary>
+    /// Gets or sets the validator the edited settings are checked against.
+    /// </summary>
+    [Inject]
+    private IAppSettingsValidator Validator { get; set; } = default!;
+
+    // Saving what is already saved would only rewrite the file, and saving a folder the test
+    // machine cannot read would point the application at a place it can never offer a runtime
+    // version from.
+    private bool CanSave
+        => this.HasUnsavedChanges && this.validity.IsValid;
+
+    private bool HasUnsavedChanges
+        => !string.Equals(
+            this.IdeInstallFolderPath,
+            this.Store.Current.IdeInstallFolderPath,
+            StringComparison.Ordinal);
+
+    /// <inheritdoc/>
+    public void Dispose()
+        => this.Store.Changed -= this.OnStoreChanged;
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        this.IdeInstallFolderPath = this.Store.Current.IdeInstallFolderPath;
+        this.Revalidate();
+
+        this.Store.Changed += this.OnStoreChanged;
+    }
+
+    // One instance of the store serves everyone connected and tells them on the thread of whoever
+    // changed it, which is somebody else's circuit as often as not. Rendering has to be handed back
+    // to this circuit; drawing straight from the caller's thread would throw here and stop the
+    // change reaching the listeners after us.
+    private void OnStoreChanged()
+        => _ = this.InvokeAsync(this.StateHasChanged);
+
+    private void OnIdeInstallFolderPathChanged(ChangeEventArgs args)
+    {
+        this.IdeInstallFolderPath = args.Value as string ?? string.Empty;
+        this.Revalidate();
+
+        // What the last save did was said about the value that was saved, not about this one.
+        this.saveStatus = SaveStatus.None;
+    }
+
+    private void Revalidate()
+        => this.validity = this.Validator.Validate(this);
+
+    private async Task OnSaveAsync()
+        => this.saveStatus = await this.Store.SaveAsync(settings => settings with
+            {
+                IdeInstallFolderPath = this.IdeInstallFolderPath,
+            })
+            ? SaveStatus.Saved
+            : SaveStatus.Failed;
+}

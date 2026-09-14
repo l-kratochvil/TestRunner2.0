@@ -7,7 +7,7 @@ using CookComputing.XmlRpc;
 using TestRunner.App.TestLinkApi.Types;
 
 // TODO: Review method summaries
-public class TestLinkApiClient : ITestLinkApiClient
+internal class TestLinkApiClient : ITestLinkApiClient
 {
     private readonly string devkey;
 

@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using TestRunner.App.Common;
+
 internal class ScreenRenderer
 {
-    public delegate Task<InternalTypes.ShowPromptResult> MainRender(CancellationToken cancellationToken);
+    public delegate Task<ShowPromptResult> MainRender(CancellationToken cancellationToken);
 
     public delegate void StatusRender();
 
@@ -24,12 +26,12 @@ internal class ScreenRenderer
     {
         Write(new Table().Pipe(table =>
         {
-            this.InterruptionCommands
+            this.Commands
                 .Select(command => $"{command.Text} {$"[{command.Key}]".EscapeMarkup()}")
                 .ForEach(column => table.AddColumn(column));
             return table;
         }));
     }
 
-    public InterruptionCommand[] InterruptionCommands { get; set; } = [];
+    public ICommand[] Commands { get; set; } = [];
 }

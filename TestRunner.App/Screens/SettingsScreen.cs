@@ -1,29 +1,90 @@
 ﻿namespace TestRunner.App.Screens;
 
-using System.Threading.Tasks;
+using TestRunner.App.Common;
+using TestRunner.App.Stores;
 
-internal class SettingsScreen(Lazy<ExitScreen> exitScreen, Lazy<SettingsScreen> settingsScreen)
-    : BaseForwardedScreen(exitScreen, settingsScreen)
+internal class SettingsScreen(
+    AppUserSettingsStore appUserSettingsStore,
+    Lazy<HomeScreen> homeScreen,
+    Lazy<ExitScreen> exitScreen,
+    Lazy<SettingsScreen> settingsScreen)
+    : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
-    // TODO:
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()
         => new()
         {
-            Main = _ =>
+            Main = ct =>
             {
-                var table = new Table()
-                    .AddColumn(new TableColumn("*** EMPTY SCREEN ***"))
-                    .LeftAligned()
-                    .AddRow("*** (PRESS ANY KEY TO RETURN TO THE HOME SCREEN) ***");
-                table.Columns[0].Alignment = Justify.Center;
+                var choices = this.GetChoices();
+                var prompt = new SelectionPrompt<Choice<IScreen>>()
+                    .Title(string.Empty) // The console is buggy if no title is set
+                    .PageSize(10)
+                    .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
+                    .AddChoices(choices)
+                    .UseConverter(choice => choice.Text)
+                    .HighlightStyle(new Style(foreground: Color.Aqua, decoration: Spectre.Console.Decoration.Bold));
 
-                Write(table);
-
-                AnsiConsole.Console.Input.ReadKey(true);
-
-                return Task.FromResult<ShowPromptResult>(
-                    new CompletedShowPrompt(RenderOutput: new RenderOutput()));
+                return ShowPromptAsync(
+                    prompt,
+                    choice => new RenderOutput(NextScreen: choice.Value),
+                    ct);
             },
         };
+
+    private IEnumerable<Choice<IScreen>> GetChoices()
+    {
+        yield return new Choice<IScreen>(
+            value: new EnterIdeInstallFolderPathScreen(
+                appUserSettingsStore,
+                this.HomeScreenLazy,
+                this.ExitScreenLazy,
+                this.SettingsScreenLazy),
+            displayText: Resources.IdeInstallFolderPath_ChoiceText,
+            displayValue: appUserSettingsStore.Current.IdeInstallFolderPath);
+    }
+
+    private class EnterIdeInstallFolderPathScreen(
+        AppUserSettingsStore appUserSettingsStore,
+        Lazy<HomeScreen> homeScreen,
+        Lazy<ExitScreen> exitScreen,
+        Lazy<SettingsScreen> settingsScreen)
+        : ScreenBase(homeScreen, exitScreen, settingsScreen)
+    {
+        /// <inheritdoc/>
+        protected override ScreenRenderer CreateRenderer()
+            => new()
+            {
+                Main = ct => ShowPromptAsync(
+                    new TextPrompt<string>(Resources.EnterIdeInstallFolderPath_PromptText)
+                        .Validate(static path =>
+                        {
+                            if (string.IsNullOrWhiteSpace(path))
+                            {
+                                return Resources.PathCanNotBeEmpty_ErrorMessage
+                                    .Pipe(TextFormattors.AsErrorText)
+                                    .Pipe(ValidationResult.Error);
+                            }
+
+                            if (!Directory.Exists(path))
+                            {
+                                return Resources.PathDoesNotExist_ErrorMessage
+                                    .Pipe(TextFormattors.AsErrorText)
+                                    .Pipe(ValidationResult.Error);
+                            }
+
+                            return ValidationResult.Success();
+                        }),
+                    ideInstallFolderPath =>
+                    {
+                        appUserSettingsStore.Update(settings => settings with
+                        {
+                            IdeInstallFolderPath = ideInstallFolderPath,
+                        });
+
+                        return RenderOutput.Default;
+                    },
+                    ct),
+            };
+    }
 }

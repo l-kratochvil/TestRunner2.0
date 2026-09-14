@@ -1,0 +1,71 @@
+@* One property of a property grid: its name, its input, and what is wrong with it.
+
+   The name and the input are wrapped in one label element so that the label belongs to the input
+   without anybody writing an identifier for the two to agree on; the wrapper is laid out as if it
+   were not there, which is what keeps every label in one column and every input in the other. *@
+
+@using TestRunner.WebApp.Shared.Validation
+
+<label class="property-grid-row">
+    <span class="property-grid-row-label">@this.Label</span>
+
+    <span class="property-grid-row-value">
+        @this.ChildContent
+
+        @foreach (var problem in this.Validity.Problems)
+        {
+            <span class="property-grid-row-message @(problem.Severity is Validity.Severity.Warning ? "is-warning" : "is-error")"
+                  role="@(problem.Severity is Validity.Severity.Warning ? "status" : "alert")">
+                @problem.Message
+            </span>
+        }
+    </span>
+</label>
+
+@code {
+    /// <summary>
+    /// Gets or sets the property label.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public string Label { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets what is wrong with the property.
+    /// </summary>
+    /// <remarks>
+    /// Whether something is an error or a note is decided by whoever found the problem, so the row
+    /// is handed a <see cref="Shared.Validation.Validity"/> rather than a message and a severity
+    /// picked at the call site. Not required: a property nobody validates is nothing wrong, and a
+    /// caller made to write that out would only be writing the default.
+    /// </remarks>
+    [Parameter]
+    public Validity Validity { get; set; } = Validity.Valid;
+
+    /// <summary>
+    /// Gets or sets the input shown for the property.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Gets or sets the grid the row is laid out by.
+    /// </summary>
+    [CascadingParameter]
+    private PropertyGrid? Grid { get; set; }
+
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
+    {
+        // Outside a grid the row has no columns to fall into, which shows up as a quietly broken
+        // layout rather than as a mistake, so it is said out loud instead.
+        if (this.Grid is null)
+        {
+            throw new InvalidOperationException(
+                $"{nameof(PropertyGridRow)} must be placed inside a {nameof(PropertyGrid)}.");
+        }
+
+        base.OnParametersSet();
+    }
+}

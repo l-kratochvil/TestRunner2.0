@@ -3,5 +3,5 @@
 using System.Text.Json.Serialization;
 
 internal record AppUserSettings(
-    [property: JsonPropertyName("IdeInstallFolderPath")]
+    [property: JsonPropertyName("ideInstallFolderPath")]
     string IdeInstallFolderPath);

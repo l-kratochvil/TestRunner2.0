@@ -1,7 +1,10 @@
 ﻿namespace TestRunner.App.Screens;
 
-internal class ExitScreen(Lazy<ExitScreen> exitScreen, Lazy<SettingsScreen> settingsScreen)
-    : BaseForwardedScreen(exitScreen, settingsScreen)
+internal class ExitScreen(
+    Lazy<HomeScreen> homeScreen,
+    Lazy<ExitScreen> exitScreen,
+    Lazy<SettingsScreen> settingsScreen)
+    : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
     // TODO:
     /// <inheritdoc/>
@@ -9,7 +12,7 @@ internal class ExitScreen(Lazy<ExitScreen> exitScreen, Lazy<SettingsScreen> sett
         => new()
         {
             Main = ct => ShowPromptAsync(
-                new ConfirmationPrompt("Exit?").No('n').Yes('y'),
+                new ConfirmationPrompt($"{Resources.ExitApp}?").No('n').Yes('y'),
                 confirmed => confirmed ? new RenderOutput(Exit: true) : new RenderOutput(),
                 ct),
         };

@@ -37,7 +37,7 @@ namespace TestRunner.App.TestLinkApi
     /// basic exception thrown whenever Testlink returns an error
     /// </summary>
     [Serializable]
-    public class TestLinkApiException : ApplicationException
+    internal class TestLinkApiException : ApplicationException
     {
         /// <summary>
         /// temporarily stores current errors
