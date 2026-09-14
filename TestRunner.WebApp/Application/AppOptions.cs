@@ -1,4 +1,4 @@
-namespace TestRunner.WebApp.Application.Paths;
+namespace TestRunner.WebApp.Application;
 
 /// <summary>
 /// Options configuring where the application keeps its data, bound from <c>App</c>.

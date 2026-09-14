@@ -10,6 +10,25 @@ using Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class InitDependencyInjectionExtensions
 {
+    extension(IServiceCollection services)
+    {
+        public IServiceCollection InitAppOptions()
+        {
+            services
+                .AddOptions<AppOptions>()
+                .BindConfiguration(
+                    AppOptions.SectionName,
+                    static binderOptions => binderOptions.ErrorOnUnknownConfiguration = true)
+                .Validate(
+                    static options => !string.IsNullOrWhiteSpace(options.LocalAppDataPath)
+                                      && Path.IsPathFullyQualified(options.LocalAppDataPath),
+                    $"'{AppOptions.SectionName}:{nameof(AppOptions.LocalAppDataPath)}' has to be an absolute path.")
+                .ValidateOnStart();
+
+            return services;
+        }
+    }
+
     /// <param name="provider">Service provider to extend.</param>
     extension(IServiceProvider provider)
     {

@@ -244,7 +244,6 @@ public class FileLoggerProviderTests
         return new FileLoggerProvider(
             Options.Create(new FileLoggerOptions
             {
-                Path = this.directoryPath,
                 RetainedFileCount = retainedFileCount,
             }),
             CreatePaths(string.Empty));

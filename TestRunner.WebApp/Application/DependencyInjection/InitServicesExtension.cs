@@ -6,7 +6,7 @@ using Fluxor.Persist.Storage;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
-
+using TestRunner.WebApp.Application.Paths;
 using TestRunner.WebApp.Shared.JsInterop;
 using TestRunner.WebApp.Shared.NUnitTestRunner;
 using TestRunner.WebApp.Shared.Storage;
@@ -34,6 +34,7 @@ public static class InitServicesExtension
                 .AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>()
                 .AddSingleton<BrowserLogger>()
                 .AddSingleton<IDirectoryReader, DirectoryReader>()
+                .AddSingleton<IAppPathsProvider, AppPathsProvider>()
                 .InitFluxor()
                 .InitNUnitTestRunner();
 

@@ -1,7 +1,6 @@
 namespace TestRunner.WebApp.Application.DependencyInjection;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 using TestRunner.WebApp.Features.AppLogging.Services;
 using TestRunner.WebApp.Features.AppSettings.Services;
@@ -34,23 +33,7 @@ public static class InitFeaturesExtensions
                     provider
                         .GetRequiredService<IAppLoggerFactory>()
                         .CreateLogger(LogSources.App))
-                .AddSingleton<IAppLoggerHub>(
-                    static provider =>
-                    {
-                        var loggerHub = new AppLoggerHub(provider.GetServices<IAppLoggerSink>());
-
-                        // The log file sits at the far end of the pipeline the log itself feeds, so its
-                        // failures cannot travel back as ordinary entries. This is the one wire that carries
-                        // them, and it ends in the buffer alone.
-                        foreach (var fileLoggerProvider in provider
-                                     .GetServices<ILoggerProvider>()
-                                     .OfType<IExtendedLoggerProvider>())
-                        {
-                            fileLoggerProvider.Failed += loggerHub.ReportFailure;
-                        }
-
-                        return loggerHub;
-                    });
+                .AddSingleton<IAppLoggerHub, AppLoggerHub>();
 
         private IServiceCollection InitTestDiscovery()
             => services
