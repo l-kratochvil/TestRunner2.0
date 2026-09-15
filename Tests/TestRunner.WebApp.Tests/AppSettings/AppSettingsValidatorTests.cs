@@ -8,6 +8,7 @@ using NUnit.Framework;
 using TestRunner.WebApp.Features.AppSettings.Services;
 using TestRunner.WebApp.Shared.Storage;
 using TestRunner.WebApp.Shared.Validation;
+using TestRunner.WebApp.Tests.Shared.Validation;
 
 /// <summary>
 /// What an IDE install folder has to be before the settings naming it can be saved.

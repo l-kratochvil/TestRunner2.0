@@ -13,11 +13,6 @@ using System.Linq;
 public sealed record Validity(IReadOnlyList<Validity.Issue> Issues)
 {
     /// <summary>
-    /// Nothing wrong.
-    /// </summary>
-    public static readonly Validity Valid = new([]);
-
-    /// <summary>
     /// How serious a <see cref="Issue"/> is.
     /// </summary>
     public enum Severity
@@ -34,6 +29,12 @@ public sealed record Validity(IReadOnlyList<Validity.Issue> Issues)
     }
 
     /// <summary>
+    /// Gets a valid validity.
+    /// </summary>
+    public static Validity Valid
+        => new([]);
+
+    /// <summary>
     /// Gets a value indicating whether what was validated may be used.
     /// </summary>
     /// <remarks>
@@ -41,12 +42,6 @@ public sealed record Validity(IReadOnlyList<Validity.Issue> Issues)
     /// </remarks>
     public bool IsValid
         => !this.Issues.Any(static problem => problem.Severity is Severity.Error);
-
-    /// <summary>
-    /// Gets all problem messages as one line, for wherever a single summary is shown.
-    /// </summary>
-    public string Summary
-        => string.Join(" ", this.Issues.Select(static problem => problem.Message));
 
     /// <summary>
     /// Narrows this down to one field.

@@ -37,8 +37,6 @@ public sealed class Effects(
     public Task OnPersistRestored(
         InitializePersistMiddlewareResultSuccessAction action, IDispatcher dispatcher)
     {
-        ArgumentNullException.ThrowIfNull(dispatcher);
-
         var restoredVersion = state.Value.RuntimeVersion;
         if (restoredVersion is not null &&
             !installedRuntimeVersionsProvider.Read().Includes(restoredVersion))
@@ -47,7 +45,11 @@ public sealed class Effects(
                 $"The runtime version this browser remembers ({restoredVersion}) is not " +
                 "installed any more, so it has been cleared. Choose one that is.");
 
-            dispatcher.Dispatch(new ChangedAction(NewRuntimeVersion: new ValueChange<string?>(null)));
+            // Not runnable rather than checked against the rules: the rules also take the test
+            // selection into account, and running them in a second place is how the two places
+            // start to disagree. The configurator says what it really is a moment later.
+            dispatcher.Dispatch(
+                new ChangedAction(IsValid: false, NewRuntimeVersion: new ValueChange<string?>(null)));
         }
 
         dispatcher.Dispatch(new RestoredAction());

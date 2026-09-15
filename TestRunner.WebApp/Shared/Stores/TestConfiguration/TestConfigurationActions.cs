@@ -5,11 +5,18 @@ using TestRunner.WebApp.Shared.Domain;
 /// <summary>
 /// Changes part of the test configuration without restating the rest.
 /// </summary>
+/// <remarks>
+/// Whether the configuration can be run with is stated on every change rather than left out like
+/// the values are: it follows from all of them at once, so a change that did not say would leave
+/// the answer standing for a configuration that is no longer there.
+/// </remarks>
+/// <param name="IsValid">Whether a test run can be started with the changed configuration.</param>
 /// <param name="NewIsTestLinkEnabled">Whether the test result is written to TestLink.</param>
 /// <param name="NewTestedHwAssembly">Test station the test run uses.</param>
 /// <param name="NewIdeVersion">IDE version the test result is filed under.</param>
 /// <param name="NewRuntimeVersion">Runtime version the test run uses.</param>
 public record ChangedAction(
+    bool IsValid,
     ValueChange<bool>? NewIsTestLinkEnabled = null,
     ValueChange<TestedHwAssemblyType?>? NewTestedHwAssembly = null,
     ValueChange<Version?>? NewIdeVersion = null,

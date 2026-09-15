@@ -22,11 +22,7 @@ public sealed partial class TestConfigurationValidator : ITestConfigurationValid
 
     /// <inheritdoc/>
     public Validity Validate(ITestConfigurationValidationSource source)
-    {
-        ArgumentNullException.ThrowIfNull(source);
-
-        return this.rules.Validate(source).ToValidity();
-    }
+        => this.rules.Validate(source).ToValidity();
 
     // Semantic versioning with the patch left out, which is how the IDE versions are written down.
     [GeneratedRegex(@"^\d+\.\d+(\.\d+)?$")]

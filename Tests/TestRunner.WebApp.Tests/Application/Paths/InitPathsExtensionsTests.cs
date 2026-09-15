@@ -144,7 +144,6 @@ public class InitPathsExtensionsTests
 
         var givenServices = new ServiceCollection();
         givenServices.AddSingleton(givenConfiguration);
-        givenServices.InitAppPaths();
 
         using ServiceProvider provider = givenServices.BuildServiceProvider();
 

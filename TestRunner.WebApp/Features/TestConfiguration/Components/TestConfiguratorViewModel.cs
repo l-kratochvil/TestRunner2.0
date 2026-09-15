@@ -1,5 +1,6 @@
 namespace TestRunner.WebApp.Features.TestConfiguration.Components;
 
+using FluentValidation;
 using TestRunner.WebApp.Features.TestConfiguration.Models;
 using TestRunner.WebApp.Shared.Domain;
 using TestRunner.WebApp.Shared.Stores.TestConfiguration;
@@ -19,6 +20,14 @@ using TestRunner.WebApp.Shared.Validation;
 public sealed class TestConfiguratorViewModel(ITestConfigurationValidator validator)
     : ITestConfigurationValidationSource
 {
+    public class ConcreteValidator<TValidated> : AbstractValidator<TValidated>
+    {
+        public ConcreteValidator(Action<AbstractValidator<TValidated>> configure)
+        {
+            configure(this);
+        }
+    }
+
     private readonly HashSet<string> touchedFields = new(StringComparer.Ordinal);
 
     /// <summary>Gets the runtime versions that can be chosen, newest first.</summary>
@@ -191,4 +200,21 @@ public sealed class TestConfiguratorViewModel(ITestConfigurationValidator valida
 
     private void Revalidate()
         => this.Validity = validator.Validate(this);
+
+    private class ThisValidator : Validator<TestConfiguratorViewModel>
+    {
+        private readonly ConcreteValidator<string?> runtimeVersionValidator = new(
+            config => config
+                .RuleFor(x => x)
+                .NotEmpty()
+                .WithMessage("Select the runtime version the tests run against."));
+
+        public ThisValidator(TestConfiguratorViewModel viewModel)
+            : base(viewModel)
+        {
+            this.ValidatorFor(
+                x => x.RuntimeVersion,
+                x => this.runtimeVersionValidator.Validate(x));
+        }
+    }
 }

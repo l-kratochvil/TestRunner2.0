@@ -43,6 +43,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         new(["7", "6"], IsInstallFolderReadable: true);
 
     private Mock<IAppSettingsStore> appSettingsStore;
+    private Mock<ITestDiscoveryStore> testDiscoveryStore;
     private Mock<IDispatcher> dispatcher;
 
     [SetUp]
@@ -51,8 +52,8 @@ public class TestConfiguratorTests : Bunit.TestContext
         var configurationState = new Mock<IState<TestConfigurationState>>();
         configurationState.SetupGet(state => state.Value).Returns(() => this.configuration);
 
-        var testDiscoveryStore = new Mock<ITestDiscoveryStore>();
-        testDiscoveryStore.SetupGet(store => store.Current).Returns(() => this.testSelection);
+        this.testDiscoveryStore = new Mock<ITestDiscoveryStore>();
+        this.testDiscoveryStore.SetupGet(store => store.Current).Returns(() => this.testSelection);
 
         this.appSettingsStore = new Mock<IAppSettingsStore>();
         this.appSettingsStore
@@ -65,7 +66,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.dispatcher = new Mock<IDispatcher>();
 
         this.Services.AddSingleton(configurationState.Object);
-        this.Services.AddSingleton(testDiscoveryStore.Object);
+        this.Services.AddSingleton(this.testDiscoveryStore.Object);
         this.Services.AddSingleton(this.appSettingsStore.Object);
         this.Services.AddSingleton(runtimeVersions.Object);
         this.Services.AddSingleton(this.dispatcher.Object);
@@ -220,7 +221,58 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.RaiseAppSettingsChanged(component);
 
         // Then:
-        this.dispatcher.Verify(d => d.Dispatch(It.IsAny<ChangedAction>()), Times.Never);
+        this.dispatcher.Verify(
+            d => d.Dispatch(It.Is<ChangedAction>(action => action.NewRuntimeVersion != null)),
+            Times.Never);
+    }
+
+    [Test]
+    public void Render__WhenTheConfiguratorIsShown__ThenShouldSayWhetherTheConfigurationCanBeRunWith()
+    {
+        // Given:
+        // Nothing has been chosen, and the state comes back from the browser without the answer,
+        // which is not remembered with it.
+        this.configuration = new TestConfigurationState();
+
+        // When:
+        this.RenderConfigurator();
+
+        // Then:
+        this.dispatcher.Verify(d => d.Dispatch(It.Is<ChangedAction>(action => !action.IsValid)));
+    }
+
+    [Test]
+    public void OnRuntimeVersionChosen__WhenTheLastMissingValueIsGiven__ThenShouldSayItCanBeRunWith()
+    {
+        // Given:
+        // The run needs a runtime version and nothing else while no runtime test is selected, so
+        // choosing one is what makes this configuration runnable.
+        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+
+        // When:
+        component.Find(RuntimeVersionSelector).Change("6");
+
+        // Then:
+        this.dispatcher.Verify(d => d.Dispatch(It.Is<ChangedAction>(action => action.IsValid)));
+    }
+
+    [Test]
+    public void OnTestSelectionChanged__WhenARuntimeTestIsPicked__ThenShouldSayItCannotBeRunWith()
+    {
+        // Given:
+        // A runtime test runs against a station, which nothing has been chosen for, so the same
+        // configuration that was runnable a moment ago is not any more.
+        this.configuration = new TestConfigurationState() with { RuntimeVersion = "6" };
+
+        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+        this.dispatcher.Invocations.Clear();
+
+        // When:
+        this.GivenSelectedTestCase(TestType.RuntimeTest);
+        this.RaiseTestSelectionChanged(component);
+
+        // Then:
+        this.dispatcher.Verify(d => d.Dispatch(It.Is<ChangedAction>(action => !action.IsValid)));
     }
 
     private IRenderedComponent<TestConfiguratorComponent> RenderConfigurator()
@@ -231,6 +283,13 @@ public class TestConfiguratorTests : Bunit.TestContext
     private void RaiseAppSettingsChanged(IRenderedComponent<TestConfiguratorComponent> component)
     {
         this.appSettingsStore.Raise(store => store.Changed += null);
+
+        component.WaitForState(() => true);
+    }
+
+    private void RaiseTestSelectionChanged(IRenderedComponent<TestConfiguratorComponent> component)
+    {
+        this.testDiscoveryStore.Raise(store => store.Changed += null);
 
         component.WaitForState(() => true);
     }

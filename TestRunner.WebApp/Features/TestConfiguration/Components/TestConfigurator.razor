@@ -129,8 +129,11 @@
         base.OnInitialized();
 
         this.viewModel = new TestConfiguratorViewModel(this.Validator);
-        this.LoadFromState();
+
+        // What is on offer before what is chosen out of it, so the first word on whether the
+        // configuration can be run with is said about a configurator that is fully furnished.
         this.ReadInstalledRuntimeVersions();
+        this.LoadFromState();
 
         // The configuration the browser remembers arrives after the first render, and is looked
         // over before it is shown, see Effects.OnPersistRestored.
@@ -160,7 +163,13 @@
     }
 
     private void LoadFromState()
-        => this.viewModel.Load(this.TestConfigurationState.Value, this.IsRuntimeTestSelected());
+    {
+        this.viewModel.Load(this.TestConfigurationState.Value, this.IsRuntimeTestSelected());
+
+        // A configuration comes back from the browser without the answer, which is not remembered
+        // with it, so the first thing done with a loaded one is to say whether it can be run with.
+        this.DispatchValidity();
+    }
 
     private void ReadInstalledRuntimeVersions()
         => this.viewModel.SetInstalledRuntimeVersions(this.InstalledRuntimeVersions.Read());
@@ -171,8 +180,16 @@
     private void OnTestSelectionChanged()
     {
         this.viewModel.SetRuntimeTestSelected(this.IsRuntimeTestSelected());
+
+        // Which station a runtime test runs on is only asked for while one is selected, so picking
+        // different tests can make the same configuration runnable or stop it being so.
+        this.DispatchValidity();
+
         this.StateHasChanged();
     }
+
+    private void DispatchValidity()
+        => this.Dispatcher.Dispatch(new ChangedAction(this.viewModel.Validity.IsValid));
 
     private void OnAppSettingsChanged()
         // One instance of the settings serves everyone connected and tells them on the thread of
@@ -194,7 +211,9 @@
                 this.viewModel.SetRuntimeVersion(null);
 
                 this.Dispatcher.Dispatch(
-                    new ChangedAction(NewRuntimeVersion: new ValueChange<string?>(null)));
+                    new ChangedAction(
+                        this.viewModel.Validity.IsValid,
+                        NewRuntimeVersion: new ValueChange<string?>(null)));
             }
 
             this.StateHasChanged();
@@ -205,7 +224,9 @@
         this.viewModel.SetRuntimeVersion(args.Value as string);
 
         this.Dispatcher.Dispatch(
-            new ChangedAction(NewRuntimeVersion: new ValueChange<string?>(this.viewModel.RuntimeVersion)));
+            new ChangedAction(
+                this.viewModel.Validity.IsValid,
+                NewRuntimeVersion: new ValueChange<string?>(this.viewModel.RuntimeVersion)));
     }
 
     private void OnTestedHwAssemblyChanged(ChangeEventArgs args)
@@ -215,6 +236,7 @@
 
         this.Dispatcher.Dispatch(
             new ChangedAction(
+                this.viewModel.Validity.IsValid,
                 NewTestedHwAssembly: new ValueChange<TestedHwAssemblyType?>(this.viewModel.TestedHwAssembly)));
     }
 
@@ -223,7 +245,9 @@
         this.viewModel.SetTestLinkEnabled(args.Value is true);
 
         this.Dispatcher.Dispatch(
-            new ChangedAction(NewIsTestLinkEnabled: new ValueChange<bool>(this.viewModel.IsTestLinkEnabled)));
+            new ChangedAction(
+                this.viewModel.Validity.IsValid,
+                NewIsTestLinkEnabled: new ValueChange<bool>(this.viewModel.IsTestLinkEnabled)));
     }
 
     private void OnIdeVersionTextChanged(ChangeEventArgs args)
@@ -239,6 +263,8 @@
                 : null;
 
         this.Dispatcher.Dispatch(
-            new ChangedAction(NewIdeVersion: new ValueChange<Version?>(ideVersion)));
+            new ChangedAction(
+                this.viewModel.Validity.IsValid,
+                NewIdeVersion: new ValueChange<Version?>(ideVersion)));
     }
 }

@@ -4,16 +4,9 @@ using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
 
-public abstract class Validator<TValidated>
+public class Validator<TValidated>(TValidated validated)
 {
     private readonly ConcurrentDictionary<string, Func<TValidated, Validity>> propertyValidators = new();
-
-    private readonly TValidated validated;
-
-    protected Validator(TValidated validated)
-    {
-        this.validated = validated;
-    }
 
     /// <summary>
     /// Registers a validator for the specified property.
@@ -55,7 +48,7 @@ public abstract class Validator<TValidated>
         // A property nobody wrote a rule for is nothing to complain about, which is not the same as
         // a property whose rule found nothing wrong, but reads the same to whoever is shown it.
         return this.propertyValidators.TryGetValue(property.Name, out var validator)
-            ? validator(this.validated)
+            ? validator(validated)
             : Validity.Valid;
     }
 

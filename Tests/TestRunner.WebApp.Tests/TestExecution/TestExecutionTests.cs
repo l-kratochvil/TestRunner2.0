@@ -10,13 +10,18 @@ using Moq;
 using NUnit.Framework;
 
 using TestRunner.Common.Model;
-using TestRunner.WebApp.Features.TestConfiguration.Services;
-using TestRunner.WebApp.Shared.Domain;
 using TestRunner.WebApp.Shared.Stores.TestConfiguration;
 using TestRunner.WebApp.Shared.Stores.TestDiscovery;
-using TestRunner.WebApp.Shared.Validation;
 using TestExecutionComponent = TestRunner.WebApp.Features.TestExecution.Components.TestExecution;
 
+/// <summary>
+/// What the button offers and what stops it, which is all it does.
+/// </summary>
+/// <remarks>
+/// Whether a configuration can be run with is not asked here: the button only reads the answer the
+/// configurator put into the state, and the rules behind it are exercised in
+/// <see cref="TestConfiguration.TestConfigurationValidatorTests"/>.
+/// </remarks>
 [TestFixture]
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class TestExecutionTests : Bunit.TestContext
@@ -40,10 +45,6 @@ public class TestExecutionTests : Bunit.TestContext
 
         this.Services.AddSingleton(configurationState.Object);
         this.Services.AddSingleton(testDiscoveryStore.Object);
-
-        // The real rules rather than a stand-in: what the button refuses to do is exactly what they
-        // say, so a stand-in would test the wiring against itself.
-        this.Services.AddSingleton<ITestConfigurationValidator, TestConfigurationValidator>();
     }
 
     [TearDown]
@@ -91,7 +92,7 @@ public class TestExecutionTests : Bunit.TestContext
         // Given:
         // A run of nothing is not a run, and the reason sits on the button because that is what the
         // tester is looking at rather than the explorer beside it.
-        this.configuration = RunnableConfiguration();
+        this.configuration = ConfigurationSaidToBeRunnable();
         this.testSelection = new TestDiscoveryState([]);
 
         // When:
@@ -107,9 +108,11 @@ public class TestExecutionTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenTheConfigurationIsNotFinished__ThenShouldNotLetTheRunStart()
+    public void Render__WhenTheConfigurationCannotBeRunWith__ThenShouldNotLetTheRunStart()
     {
         // Given:
+        // What is wrong with it is not said here: the configurator is beside the button and says it
+        // field by field.
         this.configuration = new TestConfigurationState();
         this.GivenSelectedTestCase(TestType.ApplicationTest);
 
@@ -121,36 +124,15 @@ public class TestExecutionTests : Bunit.TestContext
         Assert.Multiple(() =>
         {
             Assert.That(IsDisabled(component), Is.True);
-            Assert.That(Reason(component), Is.Not.Empty);
+            Assert.That(Reason(component), Does.Contain("Complete the test configuration"));
         });
     }
 
     [Test]
-    public void Render__WhenARuntimeTestIsSelectedWithoutAStation__ThenShouldNotLetTheRunStart()
+    public void Render__WhenTheSelectionAndTheConfigurationAreBothThere__ThenShouldLetTheRunStart()
     {
         // Given:
-        // Which station a runtime test runs on is part of what is tested, and the selection is the
-        // only thing that knows a runtime test is in it.
-        this.configuration = RunnableConfiguration();
-        this.GivenSelectedTestCase(TestType.RuntimeTest);
-
-        // When:
-        IRenderedComponent<TestExecutionComponent> component =
-            this.RenderComponent<TestExecutionComponent>();
-
-        // Then:
-        Assert.That(IsDisabled(component), Is.True);
-    }
-
-    [Test]
-    public void Render__WhenARuntimeTestIsSelectedWithAStation__ThenShouldLetTheRunStart()
-    {
-        // Given:
-        this.configuration = RunnableConfiguration() with
-        {
-            TestedHwAssembly = TestedHwAssemblyType.HW01,
-        };
-        this.GivenSelectedTestCase(TestType.RuntimeTest);
+        this.GivenARunnableConfiguration();
 
         // When:
         IRenderedComponent<TestExecutionComponent> component =
@@ -160,12 +142,8 @@ public class TestExecutionTests : Bunit.TestContext
         Assert.That(IsDisabled(component), Is.False);
     }
 
-    private static TestConfigurationState RunnableConfiguration()
-        => new(
-            IsTestLinkEnabled: false,
-            IdeVersion: null,
-            RuntimeVersion: "6",
-            TestedHwAssembly: null);
+    private static TestConfigurationState ConfigurationSaidToBeRunnable()
+        => new() { IsValid = true };
 
     private static string Label(IRenderedComponent<TestExecutionComponent> component)
         => component.Find(ButtonSelector).TextContent.Trim();
@@ -178,7 +156,7 @@ public class TestExecutionTests : Bunit.TestContext
 
     private void GivenARunnableConfiguration()
     {
-        this.configuration = RunnableConfiguration();
+        this.configuration = ConfigurationSaidToBeRunnable();
         this.GivenSelectedTestCase(TestType.ApplicationTest);
     }
 

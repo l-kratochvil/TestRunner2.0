@@ -59,18 +59,4 @@ public class ValidityTests
         // Then:
         Assert.That(unit.For(GivenField).IsValid, Is.True);
     }
-
-    [Test]
-    public void Summary__WhenSeveralProblemsWereFound__ThenShouldStateThemAsOneLine()
-    {
-        // Given:
-        Validity unit = new(
-            [
-                new Validity.Issue(GivenField, "Choose one."),
-                new Validity.Issue(AnotherField, "Write it as x.y."),
-            ]);
-
-        // Then:
-        Assert.That(unit.Summary, Is.EqualTo("Choose one. Write it as x.y."));
-    }
 }
