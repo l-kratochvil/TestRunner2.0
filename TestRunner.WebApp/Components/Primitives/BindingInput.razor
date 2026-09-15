@@ -1,20 +1,15 @@
 @* An input bound to one property of the view model cascaded to it.
 
-   The binding names the property, which is all three things the input needs: what to show, where to
-   write an edit, and what to ask the view model about when showing what is wrong. Naming it once
-   instead of three times is what keeps the three from drifting apart. *@
+   What the tester types is text, so the input is what a value that is not text is converted through
+   on its way to the view model and back. *@
 
 @using System.ComponentModel
 @using System.Globalization
-@using System.Linq.Expressions
-@using System.Reflection
-@using TestRunner.WebApp.Shared.Validation
-@using TestRunner.WebApp.Shared.ViewModel
 
 @typeparam TViewModel where TViewModel : class, INotifyPropertyChanged
 @typeparam TBindingValue
 
-@inherits MvvmComponentBase<TViewModel>
+@inherits BindingComponentBase<TViewModel, TBindingValue>
 
 <Validated Validity="this.Validity">
     <input value="@BindConverter.FormatValue(this.CurrentValue)"
@@ -22,78 +17,6 @@
 </Validated>
 
 @code {
-    private PropertyInfo boundProperty = default!;
-
-    private Func<TViewModel, TBindingValue> readValue = default!;
-
-    /// <summary>
-    /// Gets or sets the property of the view model the input is bound to.
-    /// </summary>
-    [Parameter]
-    [EditorRequired]
-    public required Expression<Func<TViewModel, TBindingValue>> Binding { get; set; }
-
-    /// <summary>
-    /// Gets or sets what is told of an edit once it has been written to the view model.
-    /// </summary>
-    /// <remarks>
-    /// The view model is what the input edits, so this is for whoever has to hear about it as well
-    /// — a store the edit is dispatched to — and not for keeping a second copy of the value.
-    /// </remarks>
-    [Parameter]
-    public EventCallback<TBindingValue> OnInput { get; set; }
-
-    // What the input shows is read from the view model, so that the two cannot drift apart.
-    private TBindingValue CurrentValue
-        => this.readValue(this.ViewModel);
-
-    // Asked of the view model at every render rather than kept, so that what is shown is what the
-    // view model makes of the value now, including a problem another field's edit brought about.
-    private Validity Validity
-        => this.ViewModel is INotifyValidityInfo source
-            ? source.GetValidity(this.boundProperty.Name) ?? Validity.Valid
-            : Validity.Valid;
-
-    /// <inheritdoc/>
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-        this.boundProperty = ReadBoundProperty(this.Binding);
-
-        // A binding names one property of one view model, so it is compiled once rather than on
-        // every edit.
-        this.readValue = this.Binding.Compile();
-    }
-
-    /// <inheritdoc/>
-    protected override bool ShouldRerenderOn(string? propertyName)
-        // Only the bound property is drawn here, so a change to any other one is somebody else's to
-        // redraw. A view model that says everything changed at once is heard, because the property
-        // it means is every property.
-        => string.IsNullOrEmpty(propertyName)
-            || string.Equals(propertyName, this.boundProperty.Name, StringComparison.Ordinal);
-
-    private static PropertyInfo ReadBoundProperty(Expression<Func<TViewModel, TBindingValue>> binding)
-    {
-        // The input writes what the tester types back, so a binding it cannot write through is a
-        // mistake in the markup and not something to find out about at the first keystroke.
-        if (binding.Body is not MemberExpression { Member: PropertyInfo property })
-        {
-            throw new InvalidOperationException(
-                $"The binding of a {nameof(BindingInput<TViewModel, TBindingValue>)} must name a " +
-                $"property of {typeof(TViewModel).Name}.");
-        }
-
-        if (!property.CanWrite)
-        {
-            throw new InvalidOperationException(
-                $"Property '{typeof(TViewModel).Name}.{property.Name}' cannot be written to.");
-        }
-
-        return property;
-    }
-
     private async Task OnInputAsync(ChangeEventArgs args)
     {
         // The browser hands every edit over as text, so anything that is not text has to be
@@ -104,10 +27,6 @@
             return;
         }
 
-        // Writing through the property runs the view model's setter, which is what tells whoever is
-        // listening — this component among them — that the value and its validity have changed.
-        this.boundProperty.SetValue(this.ViewModel, value);
-
-        await this.OnInput.InvokeAsync(value);
+        await this.WriteAsync(value!);
     }
 }

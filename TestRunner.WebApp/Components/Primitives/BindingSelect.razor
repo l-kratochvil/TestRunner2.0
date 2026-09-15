@@ -1,0 +1,123 @@
+@* A choice among offered values, bound to one property of the view model cascaded to it.
+
+   What is offered is handed over as values rather than as text, so the choice written back is the
+   value itself and never something that has to be read back out of the markup. *@
+
+@using System.ComponentModel
+@using System.Globalization
+
+@typeparam TViewModel where TViewModel : class, INotifyPropertyChanged
+@typeparam TBindingValue
+
+@inherits BindingComponentBase<TViewModel, TBindingValue>
+
+@{
+    // Read once per render, so that what marks an option as chosen is not searched for anew for
+    // every option drawn.
+    var chosenIndex = this.ChosenIndex;
+}
+
+<Validated Validity="this.Validity">
+    <select @onchange="this.OnSelectedAsync">
+        @if (this.Placeholder is not null)
+        {
+            <option value="" selected="@(chosenIndex is null)">@this.Placeholder</option>
+        }
+
+        @for (var index = 0; index < this.offered.Count; index++)
+        {
+            @* An option is named by its place among the offered values, because that is the one
+               name every value has — including one the browser could not spell out as text. *@
+            <option value="@index" selected="@(index == chosenIndex)">@this.LabelOf(this.offered[index])</option>
+        }
+    </select>
+</Validated>
+
+@code {
+    // Held as a list, so that the place an option was drawn at is the place it is read back from.
+    private IReadOnlyList<TBindingValue> offered = [];
+
+    /// <summary>
+    /// Gets or sets the values that may be chosen.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public required IEnumerable<TBindingValue> Options { get; set; }
+
+    /// <summary>
+    /// Gets or sets how an offered value is named to the tester.
+    /// </summary>
+    /// <remarks>
+    /// A value says nothing about how it should read, so whoever offers it says instead. Left
+    /// unset, the value speaks for itself.
+    /// </remarks>
+    [Parameter]
+    public Func<TBindingValue, string>? OptionLabel { get; set; }
+
+    /// <summary>
+    /// Gets or sets what choosing nothing reads as, or <see langword="null"/> where a choice must
+    /// be made.
+    /// </summary>
+    /// <remarks>
+    /// Choosing this writes nothing back, so it belongs to a binding that can hold nothing.
+    /// </remarks>
+    [Parameter]
+    public string? Placeholder { get; set; }
+
+    // A value that is not among the offered ones is no choice, which is what nothing chosen means.
+    private int? ChosenIndex
+    {
+        get
+        {
+            var current = this.CurrentValue;
+
+            for (var index = 0; index < this.offered.Count; index++)
+            {
+                if (EqualityComparer<TBindingValue>.Default.Equals(this.offered[index], current))
+                {
+                    return index;
+                }
+            }
+
+            return null;
+        }
+    }
+
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        // A list is kept as it was handed over, so that values added to it after this show up
+        // without waiting for whoever offers them to hand over a new one.
+        this.offered = this.Options as IReadOnlyList<TBindingValue> ?? [..this.Options];
+
+        // Nothing chosen has to be something the property can hold, and a value type holds a value
+        // even when the tester meant none, so the offer of nothing is a mistake in the markup.
+        if (this.Placeholder is not null && default(TBindingValue) is not null)
+        {
+            throw new InvalidOperationException(
+                $"Property '{typeof(TViewModel).Name}.{this.BoundProperty.Name}' cannot hold " +
+                $"nothing, so a {nameof(BindingSelect<TViewModel, TBindingValue>)} bound to it " +
+                $"cannot offer a {nameof(this.Placeholder)}.");
+        }
+    }
+
+    private string LabelOf(TBindingValue option)
+        => this.OptionLabel is { } label
+            ? label(option)
+            : BindConverter.FormatValue(option, CultureInfo.CurrentCulture)?.ToString() ?? string.Empty;
+
+    private async Task OnSelectedAsync(ChangeEventArgs args)
+    {
+        // The browser hands the chosen option back by the place it was drawn at, so anything else
+        // — the placeholder among it — is the tester choosing none of the offered values.
+        var value = int.TryParse(args.Value as string, CultureInfo.InvariantCulture, out var index)
+                && index >= 0
+                && index < this.offered.Count
+            ? this.offered[index]
+            : default!;
+
+        await this.WriteAsync(value);
+    }
+}
