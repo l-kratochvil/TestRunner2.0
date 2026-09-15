@@ -15,7 +15,7 @@ using TestRunner.WebApp.Shared.Logging;
 using TestRunner.WebApp.Shared.Storage;
 using TestRunner.WebApp.Shared.Stores.AppSettings;
 using TestRunner.WebApp.Shared.Validation;
-using SettingsEditorComponent = TestRunner.WebApp.Features.AppSettings.Components.SettingsEditor;
+using SettingsEditorComponent = TestRunner.WebApp.Features.AppSettings.Components.AppSettings;
 
 /// <summary>
 /// What the editor lets the tester save, and what it says about the last attempt at it.
