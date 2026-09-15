@@ -18,7 +18,7 @@ public class ValidityTests
     public void IsValid__WhenAnErrorWasFound__ThenShouldSayItCannotBeUsed()
     {
         // Given:
-        Validity unit = new([new Validity.Problem(GivenField, "Choose one.")]);
+        Validity unit = new([new Validity.Issue(GivenField, "Choose one.")]);
 
         // Then:
         Assert.That(unit.IsValid, Is.False);
@@ -30,7 +30,7 @@ public class ValidityTests
         // Given:
         // A warning explains something to the tester without standing in their way.
         Validity unit = new(
-            [new Validity.Problem(GivenField, "Nothing is installed there.", Validity.Severity.Warning)]);
+            [new Validity.Issue(GivenField, "Nothing is installed there.", Validity.Severity.Warning)]);
 
         // Then:
         Assert.That(unit.IsValid, Is.True);
@@ -40,21 +40,21 @@ public class ValidityTests
     public void For__WhenAskedAboutAField__ThenShouldKeepOnlyWhatConcernsIt()
     {
         // Given:
-        Validity.Problem givenProblem = new(GivenField, "Choose one.");
-        Validity unit = new([givenProblem, new Validity.Problem(AnotherField, "Write it as x.y.")]);
+        Validity.Issue givenProblem = new(GivenField, "Choose one.");
+        Validity unit = new([givenProblem, new Validity.Issue(AnotherField, "Write it as x.y.")]);
 
         // When:
         Validity narrowed = unit.For(GivenField);
 
         // Then:
-        Assert.That(narrowed.Problems, Is.EqualTo(new[] { givenProblem }));
+        Assert.That(narrowed.Issues, Is.EqualTo(new[] { givenProblem }));
     }
 
     [Test]
     public void For__WhenTheFieldHasNoProblems__ThenShouldBeValid()
     {
         // Given:
-        Validity unit = new([new Validity.Problem(AnotherField, "Write it as x.y.")]);
+        Validity unit = new([new Validity.Issue(AnotherField, "Write it as x.y.")]);
 
         // Then:
         Assert.That(unit.For(GivenField).IsValid, Is.True);
@@ -66,8 +66,8 @@ public class ValidityTests
         // Given:
         Validity unit = new(
             [
-                new Validity.Problem(GivenField, "Choose one."),
-                new Validity.Problem(AnotherField, "Write it as x.y."),
+                new Validity.Issue(GivenField, "Choose one."),
+                new Validity.Issue(AnotherField, "Write it as x.y."),
             ]);
 
         // Then:

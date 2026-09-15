@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="Fluxor.Blazor.Web" Version="6.11.0" />
     <PackageReference Include="Fluxor.Blazor.Web.ReduxDevTools" Version="6.11.0" />

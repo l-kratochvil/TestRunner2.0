@@ -118,8 +118,6 @@ public sealed class TestConfiguratorViewModel(ITestConfigurationValidator valida
     /// <param name="installed">What was found in the IDE install folder.</param>
     public void SetInstalledRuntimeVersions(InstalledRuntimeVersions installed)
     {
-        ArgumentNullException.ThrowIfNull(installed);
-
         this.RuntimeVersions = installed.Versions;
         this.IsInstallFolderReadable = installed.IsInstallFolderReadable;
     }

@@ -64,7 +64,7 @@ public class PropertyGridRowTests : Bunit.TestContext
     public void Render__WhenTheValidityHoldsAnError__ThenShouldShowItAsAnError()
     {
         // Given:
-        var validity = new Validity([new Validity.Problem(GivenFieldName, GivenMessage)]);
+        var validity = new Validity([new Validity.Issue(GivenFieldName, GivenMessage)]);
 
         // When:
         IRenderedComponent<PropertyGrid> component = this.RenderRowInGrid(validity);
@@ -82,7 +82,7 @@ public class PropertyGridRowTests : Bunit.TestContext
     {
         // Given:
         var validity = new Validity(
-            [new Validity.Problem(GivenFieldName, GivenMessage, Validity.Severity.Warning)]);
+            [new Validity.Issue(GivenFieldName, GivenMessage, Validity.Severity.Warning)]);
 
         // When:
         IRenderedComponent<PropertyGrid> component = this.RenderRowInGrid(validity);

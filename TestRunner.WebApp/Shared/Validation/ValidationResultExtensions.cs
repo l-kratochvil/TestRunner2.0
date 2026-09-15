@@ -9,7 +9,7 @@ using FluentValidation.Results;
 /// </summary>
 /// <remarks>
 /// Kept in one place so that every validator written with FluentValidation reports a failure as the
-/// same <see cref="Validity.Problem"/>, and so that the library reaches no further than the
+/// same <see cref="Validity.Issue"/>, and so that the library reaches no further than the
 /// validators themselves.
 /// </remarks>
 internal static class ValidationResultExtensions
@@ -25,7 +25,7 @@ internal static class ValidationResultExtensions
             : new Validity(
                 [
                     ..result.Errors.Select(
-                        static failure => new Validity.Problem(
+                        static failure => new Validity.Issue(
                             FieldName: failure.PropertyName,
                             Message: failure.ErrorMessage,
                             Severity: failure.Severity is FluentValidation.Severity.Error

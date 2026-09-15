@@ -1,0 +1,31 @@
+@* The view model the controls placed inside are drawn from, which they find instead of being
+   handed it one by one.
+
+   Cascaded by type, so a control asks for the view model it understands and a data context of
+   another type placed alongside cannot be mistaken for it. Fixed, because a view model is one
+   object for as long as it is edited and says what changed about it through
+   INotifyPropertyChanged: replacing the instance would leave the controls drawing the old one. *@
+
+@using System.ComponentModel
+
+@typeparam TViewModel where TViewModel : class, INotifyPropertyChanged
+
+<CascadingValue TValue="TViewModel" Value="this.ViewModel" IsFixed="true">
+    @this.ChildContent
+</CascadingValue>
+
+@code {
+    /// <summary>
+    /// Gets or sets the view model the content is drawn from.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public required TViewModel ViewModel { get; set; }
+
+    /// <summary>
+    /// Gets or sets the content drawn from <see cref="ViewModel"/>.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public required RenderFragment ChildContent { get; set; }
+}

@@ -19,9 +19,8 @@ builder.Services
 
 builder.Logging.InitFileLogger();
 builder.Services.AddSingleton(nunitTestRunnerProxyConnector.Proxy);
-builder.Services.InitAppPaths();
-builder.Services.InitFeatures();
 builder.Services.InitSharedServices();
+builder.Services.InitFeatures();
 
 var app = builder.Build();
 

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Moq;
 using NUnit.Framework;
 using TestRunner.WebApp.Application.DependencyInjection;
 using TestRunner.WebApp.Application.Logging;
@@ -166,7 +167,6 @@ public class InitServicesExtensionTests
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Path"] = logsDirectoryPath,
-                ["App:LocalAppDataPath"] = Path.Combine(logsDirectoryPath, "data"),
             })
             .Build();
 
@@ -174,9 +174,24 @@ public class InitServicesExtensionTests
         services.AddSingleton(configuration);
         services.AddLogging(builder => builder.InitFileLogger());
         services.Configure<FileLoggerOptions>(configuration);
-        services.InitAppPaths();
+        services.AddSingleton(CreatePaths(logsDirectoryPath));
         services.InitFeatures();
 
         return services.BuildServiceProvider();
+    }
+
+    // Where the application keeps its files is the paths provider's own business, tested in its own
+    // fixture. Standing it in here keeps this fixture about the registrations it names, and puts
+    // the log file straight into the temporary directory the fixture owns and deletes.
+    private static IAppPathsProvider CreatePaths(string appDataPath)
+    {
+        var paths = new Mock<IAppPathsProvider>();
+
+        paths.SetupGet(provider => provider.Directories)
+             .Returns(new AppDirectoryPaths(AppData: appDataPath, Logs: appDataPath));
+        paths.SetupGet(provider => provider.Files)
+             .Returns(new AppFilePaths(UserSettings: Path.Combine(appDataPath, "user-settings.json")));
+
+        return paths.Object;
     }
 }

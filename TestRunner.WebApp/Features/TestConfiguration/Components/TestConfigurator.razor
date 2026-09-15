@@ -118,7 +118,7 @@
         => this.viewModel.RuntimeVersionsNote is { } note
             ? new Validity(
                 [
-                    new Validity.Problem(
+                    new Validity.Issue(
                         nameof(ITestConfigurationValidationSource.RuntimeVersion), note, Validity.Severity.Warning)
                 ])
             : this.viewModel.ValidityFor(nameof(ITestConfigurationValidationSource.RuntimeVersion));

@@ -12,7 +12,7 @@
     <span class="property-grid-row-value">
         @this.ChildContent
 
-        @foreach (var problem in this.Validity.Problems)
+        @foreach (var problem in this.Validity.Issues)
         {
             <span class="property-grid-row-message @(problem.Severity is Validity.Severity.Warning ? "is-warning" : "is-error")"
                   role="@(problem.Severity is Validity.Severity.Warning ? "status" : "alert")">

@@ -3,14 +3,14 @@ namespace TestRunner.WebApp.Shared.Validation;
 using System.Linq;
 
 /// <summary>
-/// The problems found in something, in the order the fields are shown in.
+/// The issues found in something, in the order the fields are shown in.
 /// </summary>
 /// <remarks>
 /// Every validator in the application answers in this, so a second feature does not invent a third
 /// way of saying that a field is wrong.
 /// </remarks>
-/// <param name="Problems">Problems found.</param>
-public sealed record Validity(IReadOnlyList<Validity.Problem> Problems)
+/// <param name="Issues">Issues found.</param>
+public sealed record Validity(IReadOnlyList<Validity.Issue> Issues)
 {
     /// <summary>
     /// Nothing wrong.
@@ -18,7 +18,7 @@ public sealed record Validity(IReadOnlyList<Validity.Problem> Problems)
     public static readonly Validity Valid = new([]);
 
     /// <summary>
-    /// How serious a <see cref="Problem"/> is.
+    /// How serious a <see cref="Issue"/> is.
     /// </summary>
     public enum Severity
     {
@@ -40,13 +40,13 @@ public sealed record Validity(IReadOnlyList<Validity.Problem> Problems)
     /// A warning explains something without blocking it, so only an error makes this false.
     /// </remarks>
     public bool IsValid
-        => !this.Problems.Any(static problem => problem.Severity is Severity.Error);
+        => !this.Issues.Any(static problem => problem.Severity is Severity.Error);
 
     /// <summary>
     /// Gets all problem messages as one line, for wherever a single summary is shown.
     /// </summary>
     public string Summary
-        => string.Join(" ", this.Problems.Select(static problem => problem.Message));
+        => string.Join(" ", this.Issues.Select(static problem => problem.Message));
 
     /// <summary>
     /// Narrows this down to one field.
@@ -56,17 +56,17 @@ public sealed record Validity(IReadOnlyList<Validity.Problem> Problems)
     public Validity For(string fieldName)
         => new(
             [
-                ..this.Problems.Where(
-                    problem => string.Equals(problem.FieldName, fieldName, StringComparison.Ordinal))
+                ..this.Issues.Where(
+                    issue => string.Equals(issue.FieldName, fieldName, StringComparison.Ordinal))
             ]);
 
     /// <summary>
-    /// One problem found in what was validated.
+    /// One issue found in what was validated.
     /// </summary>
-    /// <param name="FieldName">Name of the field the problem belongs to.</param>
-    /// <param name="Message">Problem text shown to the tester.</param>
-    /// <param name="Severity">How serious the problem is.</param>
-    public sealed record Problem(
+    /// <param name="FieldName">Name of the field the issue belongs to.</param>
+    /// <param name="Message">Issue text shown to the tester.</param>
+    /// <param name="Severity">How serious the issue is.</param>
+    public sealed record Issue(
         string FieldName,
         string Message,
         Severity Severity = Severity.Error);

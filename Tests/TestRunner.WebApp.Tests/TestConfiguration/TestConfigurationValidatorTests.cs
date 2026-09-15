@@ -48,7 +48,7 @@ public class TestConfigurationValidatorTests
 
         // Then:
         Assert.That(
-            validity.For(nameof(ITestConfigurationValidationSource.RuntimeVersion)).Problems,
+            validity.For(nameof(ITestConfigurationValidationSource.RuntimeVersion)).Issues,
             Is.Not.Empty);
     }
 
@@ -81,7 +81,7 @@ public class TestConfigurationValidatorTests
 
         // Then:
         Assert.That(
-            validity.For(nameof(ITestConfigurationValidationSource.TestedHwAssembly)).Problems,
+            validity.For(nameof(ITestConfigurationValidationSource.TestedHwAssembly)).Issues,
             Is.Not.Empty);
     }
 
@@ -144,7 +144,7 @@ public class TestConfigurationValidatorTests
 
         // Then:
         Assert.That(
-            validity.For(nameof(ITestConfigurationValidationSource.IdeVersionText)).Problems,
+            validity.For(nameof(ITestConfigurationValidationSource.IdeVersionText)).Issues,
             Is.Not.Empty);
     }
 
@@ -165,7 +165,7 @@ public class TestConfigurationValidatorTests
 
         // Then:
         Assert.That(
-            validity.For(nameof(ITestConfigurationValidationSource.IdeVersionText)).Problems,
+            validity.For(nameof(ITestConfigurationValidationSource.IdeVersionText)).Issues,
             Has.Exactly(1).Items);
     }
 
@@ -184,7 +184,7 @@ public class TestConfigurationValidatorTests
         Validity validity = this.unit.Validate(source);
 
         // Then:
-        Assert.That(validity.Problems, Has.Exactly(3).Items, validity.Summary);
+        Assert.That(validity.Issues, Has.Exactly(3).Items, validity.Summary);
     }
 
     [Test]

@@ -56,7 +56,7 @@ public class TestConfiguratorViewModelTests
         Assert.Multiple(() =>
         {
             Assert.That(
-                this.unit.ValidityFor(nameof(ITestConfigurationValidationSource.RuntimeVersion)).Problems,
+                this.unit.ValidityFor(nameof(ITestConfigurationValidationSource.RuntimeVersion)).Issues,
                 Is.Empty);
             Assert.That(this.unit.Validity.IsValid, Is.False);
         });
@@ -73,7 +73,7 @@ public class TestConfiguratorViewModelTests
 
         // Then:
         Assert.That(
-            this.unit.ValidityFor(nameof(ITestConfigurationValidationSource.RuntimeVersion)).Problems,
+            this.unit.ValidityFor(nameof(ITestConfigurationValidationSource.RuntimeVersion)).Issues,
             Is.Not.Empty);
     }
 
@@ -88,7 +88,7 @@ public class TestConfiguratorViewModelTests
 
         // Then:
         Assert.That(
-            this.unit.ValidityFor(nameof(ITestConfigurationValidationSource.TestedHwAssembly)).Problems,
+            this.unit.ValidityFor(nameof(ITestConfigurationValidationSource.TestedHwAssembly)).Issues,
             Is.Empty);
     }
 

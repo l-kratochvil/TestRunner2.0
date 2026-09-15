@@ -38,7 +38,7 @@ public class AppSettingsValidatorTests
         Validity validity = this.unit.Validate(new AppSettingsSource(AnyFolderPath));
 
         // Then:
-        Assert.That(validity.Problems, Is.Empty, validity.Summary);
+        Assert.That(validity.Issues, Is.Empty, validity.Summary);
     }
 
     [Test]
@@ -84,7 +84,7 @@ public class AppSettingsValidatorTests
         Assert.Multiple(() =>
         {
             Assert.That(validity.IsValid, Is.True, validity.Summary);
-            Assert.That(validity.Problems, Has.Exactly(1).Items);
+            Assert.That(validity.Issues, Has.Exactly(1).Items);
         });
     }
 
@@ -101,7 +101,7 @@ public class AppSettingsValidatorTests
 
         // Then:
         Assert.That(
-            validity.For(nameof(IAppSettingsValidationSource.IdeInstallFolderPath)).Problems,
+            validity.For(nameof(IAppSettingsValidationSource.IdeInstallFolderPath)).Issues,
             Has.Exactly(1).Items);
     }
 
