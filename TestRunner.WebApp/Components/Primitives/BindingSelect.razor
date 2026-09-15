@@ -18,10 +18,16 @@
 }
 
 <Validated Validity="this.Validity">
-    <select @onchange="this.OnSelectedAsync">
-        @if (this.Placeholder is not null)
+    <select @attributes="this.AdditionalAttributes" @onchange="this.OnSelectedAsync">
+        @if (this.Placeholder is not null || chosenIndex is null)
         {
-            <option value="" selected="@(chosenIndex is null)">@this.Placeholder</option>
+            @* Nothing chosen is drawn as an option of its own, because a browser left without one
+               shows the first option instead and the tester reads a value the view model does not
+               hold. Where nothing may be chosen it is only there to be seen. *@
+            <option value=""
+                    selected="@(chosenIndex is null)"
+                    disabled="@(this.Placeholder is null)"
+                    hidden="@(this.Placeholder is null)">@this.Placeholder</option>
         }
 
         @for (var index = 0; index < this.offered.Count; index++)
@@ -116,7 +122,7 @@
                 && index >= 0
                 && index < this.offered.Count
             ? this.offered[index]
-            : default!;
+            : default;
 
         await this.WriteAsync(value);
     }

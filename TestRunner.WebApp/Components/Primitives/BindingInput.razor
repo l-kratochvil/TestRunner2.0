@@ -12,7 +12,8 @@
 @inherits BindingComponentBase<TViewModel, TBindingValue>
 
 <Validated Validity="this.Validity">
-    <input value="@BindConverter.FormatValue(this.CurrentValue)"
+    <input @attributes="this.AdditionalAttributes"
+           value="@BindConverter.FormatValue(this.CurrentValue)"
            @oninput="this.OnInputAsync" />
 </Validated>
 
@@ -27,6 +28,6 @@
             return;
         }
 
-        await this.WriteAsync(value!);
+        await this.WriteAsync(value);
     }
 }

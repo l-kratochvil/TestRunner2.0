@@ -1,6 +1,7 @@
 namespace TestRunner.WebApp.Components;
 
 using System.ComponentModel;
+
 using Fluxor.Blazor.Web.Components;
 using Microsoft.AspNetCore.Components;
 
@@ -38,7 +39,7 @@ public abstract class MvvmComponentBase<TViewModel> : FluxorComponent
         => this.viewModel ??= this.ResolveViewModel();
 
     /// <summary>
-    /// Gets the view model cascaded to this component, if there is one.
+    /// Gets or sets the view model cascaded to this component, if there is one.
     /// </summary>
     /// <remarks>
     /// Read through <see cref="ViewModel"/> rather than directly, so that a component drawn from a
@@ -48,7 +49,7 @@ public abstract class MvvmComponentBase<TViewModel> : FluxorComponent
     private TViewModel? DataContext { get; set; }
 
     /// <summary>
-    /// Makes the view model this component is drawn from.
+    /// Creates the view model this component is drawn from.
     /// </summary>
     /// <returns>
     /// The view model, which this component owns from then on, or <see langword="null"/> to be

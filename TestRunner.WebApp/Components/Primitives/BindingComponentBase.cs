@@ -42,6 +42,17 @@ public abstract class BindingComponentBase<TViewModel, TBindingValue>
     public EventCallback<TBindingValue> OnChange { get; set; }
 
     /// <summary>
+    /// Gets or sets everything else written on the control in the markup.
+    /// </summary>
+    /// <remarks>
+    /// A binding says which value the control is about and nothing about how it looks or is found,
+    /// so what the page has to say about that — a class, an identifier, a label to read out — is
+    /// passed on to the element the control renders.
+    /// </remarks>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    /// <summary>
     /// Gets the property <see cref="Binding"/> names.
     /// </summary>
     protected PropertyInfo BoundProperty { get; private set; } = default!;
@@ -60,7 +71,9 @@ public abstract class BindingComponentBase<TViewModel, TBindingValue>
     /// </summary>
     /// <remarks>
     /// Asked of the view model at every render rather than kept, so that what is shown is what the
-    /// view model makes of the value now, including a problem another field's edit brought about.
+    /// view model makes of the value now, including a problem another field's edit brought about —
+    /// which is what a view model reporting <see cref="INotifyValidityInfo.IsValid"/> changed asks
+    /// every control to look at anew.
     /// </remarks>
     protected Validity Validity
         => this.ViewModel is INotifyValidityInfo source
@@ -70,31 +83,41 @@ public abstract class BindingComponentBase<TViewModel, TBindingValue>
     /// <inheritdoc/>
     protected override void OnInitialized()
     {
-        base.OnInitialized();
-
         this.BoundProperty = this.ReadBoundProperty();
 
         // A binding names one property of one view model, so it is compiled once rather than on
         // every edit.
         this.readValue = this.Binding.Compile();
+
+        // Listened to last, because a view model fed by a store says what changed on whatever
+        // thread it was changed on, and what is listened for is the property read just above.
+        base.OnInitialized();
     }
 
     /// <inheritdoc/>
     /// <remarks>
     /// Only the bound property is drawn here, so a change to any other one is somebody else's to
-    /// redraw. A view model that says everything changed at once is heard, because the property it
-    /// means is every property.
+    /// redraw. Two are heard besides it: a view model that says everything changed at once, because
+    /// the property it means is every property, and one that says whether it may be used has
+    /// changed, because what is wrong with this property may be another property's doing.
     /// </remarks>
     protected override bool ShouldRerenderOn(string? propertyName)
         => string.IsNullOrEmpty(propertyName)
-            || string.Equals(propertyName, this.BoundProperty.Name, StringComparison.Ordinal);
+            || string.Equals(propertyName, this.BoundProperty.Name, StringComparison.Ordinal)
+            || string.Equals(
+                propertyName,
+                nameof(INotifyValidityInfo.IsValid),
+                StringComparison.Ordinal);
 
     /// <summary>
     /// Writes an edit to the view model and tells <see cref="OnChange"/> of it.
     /// </summary>
-    /// <param name="value">The edited value.</param>
+    /// <param name="value">
+    /// The edited value, which is <see langword="null"/> where the tester left the control holding
+    /// nothing and the bound property can hold that.
+    /// </param>
     /// <returns>A task that completes once everyone has been told of the edit.</returns>
-    protected async Task WriteAsync(TBindingValue value)
+    protected async Task WriteAsync(TBindingValue? value)
     {
         // Writing through the property runs the view model's setter, which is what tells whoever is
         // listening — this component among them — that the value and its validity have changed.
@@ -105,13 +128,19 @@ public abstract class BindingComponentBase<TViewModel, TBindingValue>
 
     private PropertyInfo ReadBoundProperty()
     {
-        // The control writes what the tester did back, so a binding it cannot write through is a
-        // mistake in the markup and not something to find out about at the first edit.
-        if (this.Binding.Body is not MemberExpression { Member: PropertyInfo property })
+        // The control writes what the tester did back to the view model it was cascaded, so a
+        // binding that names anything else — a property of another object, or one reached through
+        // another property — is a mistake in the markup and not something to find out about at the
+        // first edit.
+        if (this.Binding.Body is not MemberExpression
+            {
+                Member: PropertyInfo property,
+                Expression: ParameterExpression,
+            })
         {
             throw new InvalidOperationException(
                 $"The binding of a {this.GetType().Name} must name a property of " +
-                $"{typeof(TViewModel).Name}.");
+                $"{typeof(TViewModel).Name} directly.");
         }
 
         if (!property.CanWrite)

@@ -8,7 +8,7 @@ public class ObservableObject
     : CommunityToolkit.Mvvm.ComponentModel.ObservableObject,
       INotifyValidityInfo
 {
-    public ConcurrentDictionary<string, Validity> propertyValidities = new();
+    private readonly ConcurrentDictionary<string, Validity> propertyValidities = new();
 
     /// <inheritdoc/>
     public bool IsValid
@@ -34,10 +34,17 @@ public class ObservableObject
         [CallerMemberName] string propertyName = "")
     {
         var validity = validator(value);
-        this.propertyValidities.AddOrUpdate(
-            propertyName,
-            _ => validity,
-            (_, _) => validity);
+
+        if (this.propertyValidities.TryGetValue(propertyName, out var looked) && looked == validity)
+        {
+            return validity;
+        }
+
+        this.propertyValidities[propertyName] = validity;
+
+        // What is wrong with one value is often another value's doing, so a control showing any of
+        // them is told that there is something new to read rather than only the one just looked at.
+        this.OnPropertyChanged(nameof(this.IsValid));
 
         return validity;
     }
