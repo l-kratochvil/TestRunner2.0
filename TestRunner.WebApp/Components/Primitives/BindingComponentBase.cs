@@ -3,7 +3,9 @@ namespace TestRunner.WebApp.Components.Primitives;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
+
 using Microsoft.AspNetCore.Components;
+
 using TestRunner.WebApp.Shared.Validation;
 using TestRunner.WebApp.Shared.ViewModel;
 
@@ -22,7 +24,7 @@ public abstract class BindingComponentBase<TViewModel, TBindingValue>
     : MvvmComponentBase<TViewModel>
     where TViewModel : class, INotifyPropertyChanged
 {
-    private Func<TViewModel, TBindingValue> readValue = default!;
+    private Func<TViewModel, TBindingValue> readValue = null!;
 
     /// <summary>
     /// Gets or sets the property of the view model the control is bound to.
@@ -55,7 +57,7 @@ public abstract class BindingComponentBase<TViewModel, TBindingValue>
     /// <summary>
     /// Gets the property <see cref="Binding"/> names.
     /// </summary>
-    protected PropertyInfo BoundProperty { get; private set; } = default!;
+    protected PropertyInfo BoundProperty { get; private set; } = null!;
 
     /// <summary>
     /// Gets the value to show.
@@ -103,11 +105,11 @@ public abstract class BindingComponentBase<TViewModel, TBindingValue>
     /// </remarks>
     protected override bool ShouldRerenderOn(string? propertyName)
         => string.IsNullOrEmpty(propertyName)
-            || string.Equals(propertyName, this.BoundProperty.Name, StringComparison.Ordinal)
-            || string.Equals(
-                propertyName,
-                nameof(INotifyValidityInfo.HasErrors),
-                StringComparison.Ordinal);
+           || string.Equals(propertyName, this.BoundProperty.Name, StringComparison.Ordinal)
+           || string.Equals(
+               propertyName,
+               nameof(INotifyValidityInfo.HasErrors),
+               StringComparison.Ordinal);
 
     /// <summary>
     /// Writes an edit to the view model and tells <see cref="OnChange"/> of it.

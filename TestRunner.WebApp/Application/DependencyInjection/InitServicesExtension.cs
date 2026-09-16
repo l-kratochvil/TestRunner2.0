@@ -33,7 +33,6 @@ public static class InitServicesExtension
             => services
                 .AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>()
                 .AddSingleton<BrowserLogger>()
-                .AddSingleton<IDirectoryReader, DirectoryReader>()
                 .AddSingleton<IAppPathsProvider, AppPathsProvider>()
                 .InitFluxor()
                 .InitNUnitTestRunner();

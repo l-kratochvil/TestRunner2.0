@@ -105,19 +105,19 @@
     /// Gets or sets the hub the shown log entries are read from.
     /// </summary>
     [Inject]
-    private IAppLoggerHub LoggerHub { get; set; } = default!;
+    private IAppLoggerHub LoggerHub { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the options of the file logger, read to show where the log file is.
     /// </summary>
     [Inject]
-    private IOptions<FileLoggerOptions> FileLoggerOptions { get; set; } = default!;
+    private IOptions<FileLoggerOptions> FileLoggerOptions { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the factory the JS module interop is created through.
     /// </summary>
     [Inject]
-    private IJsModuleInteropFactory JsModuleInteropFactory { get; set; } = default!;
+    private IJsModuleInteropFactory JsModuleInteropFactory { get; set; } = null!;
 
     /// <summary>
     /// Raised after the panel collapse state changes.

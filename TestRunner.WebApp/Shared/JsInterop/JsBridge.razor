@@ -16,13 +16,13 @@
     /// Gets or sets the factory the JS module interop is created through.
     /// </summary>
     [Inject]
-    private IJsModuleInteropFactory JsModuleInteropFactory { get; set; } = default!;
+    private IJsModuleInteropFactory JsModuleInteropFactory { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the logger the browser's diagnostics are handed to.
     /// </summary>
     [Inject]
-    private BrowserLogger BrowserLogger { get; set; } = default!;
+    private BrowserLogger BrowserLogger { get; set; } = null!;
 
     private JsModuleInterop JsModuleInterop
         => this.jsModuleInterop ??= this.JsModuleInteropFactory.Create(ModulePath);

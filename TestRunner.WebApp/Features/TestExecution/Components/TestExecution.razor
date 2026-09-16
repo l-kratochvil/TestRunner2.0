@@ -25,13 +25,13 @@
     /// Gets or sets the configuration a run would use, read to tell whether it can start.
     /// </summary>
     [Inject]
-    private IState<TestConfigurationState> TestConfigurationState { get; set; } = default!;
+    private IState<TestConfigurationState> TestConfigurationState { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the store the test selection is read from.
     /// </summary>
     [Inject]
-    private ITestDiscoveryStore TestDiscoveryStore { get; set; } = default!;
+    private ITestDiscoveryStore TestDiscoveryStore { get; set; } = null!;
 
     // What stops a run from being started, or null when nothing does. Two things have to hold, and
     // each is asked of the feature that owns it: tests have been selected, which is the test

@@ -1,5 +1,6 @@
 namespace TestRunner.WebApp.Features.TestConfiguration.Components;
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 using Fluxor;
@@ -29,6 +30,7 @@ public partial class TestConfigurationViewModel : ViewModelBase
     private readonly IAppLogger logger;
     private readonly IDispatcher dispatcher;
 
+    private readonly Lazy<bool> isWriteToTestLinkEnabledLazy;
     private readonly TestConfigurationViewModelValidator validator;
 
     public TestConfigurationViewModel(
@@ -60,7 +62,7 @@ public partial class TestConfigurationViewModel : ViewModelBase
     public string? RuntimeVersion
     {
         get => field ??= this.state.Value.RuntimeVersion;
-        private set => this.SetProperty(
+        set => this.SetProperty(
             field,
             value,
             value =>
@@ -81,7 +83,7 @@ public partial class TestConfigurationViewModel : ViewModelBase
     public Version? IdeVersion
     {
         get => field ??= this.state.Value.IdeVersion;
-        private set => this.SetProperty(
+        set => this.SetProperty(
             field,
             value,
             value =>
@@ -102,7 +104,7 @@ public partial class TestConfigurationViewModel : ViewModelBase
     public TestedHwAssemblyType? TestedHwAssembly
     {
         get => field ??= this.state.Value.TestedHwAssembly;
-        private set => this.SetProperty(
+        set => this.SetProperty(
             field,
             value,
             value =>
@@ -123,7 +125,7 @@ public partial class TestConfigurationViewModel : ViewModelBase
     public bool? IsWriteToTestLinkEnabled
     {
         get => field ??= this.state.Value.IsWriteToTestLinkEnabled;
-        private set => this.SetProperty(
+        set => this.SetProperty(
             field,
             value,
             value => this.dispatcher.Dispatch(
@@ -143,11 +145,13 @@ public partial class TestConfigurationViewModel : ViewModelBase
         IReadOnlyList<string> folderNames;
         try
         {
-            folderNames = [
+            folderNames =
+            [
                 ..Directory
                     .GetDirectories(installFolderPath)
                     .Select(Path.GetFileName)
-                    .OfType<string>()];
+                    .OfType<string>()
+            ];
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {

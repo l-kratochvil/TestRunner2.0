@@ -1,11 +1,8 @@
 @* Feature: TestConfiguration — "the user can configure a test run". *@
 
-@using System.Linq
-
 @using Fluxor
 
 @using TestRunner.WebApp.Shared.Stores.AppSettings
-@using TestRunner.WebApp.Shared.Domain
 @using TestRunner.WebApp.Shared.Stores.TestConfiguration
 @using TestRunner.WebApp.Shared.Stores.TestDiscovery
 
@@ -15,7 +12,7 @@
     <h2 class="pane-title">Configuration</h2>
 
     <PropertyGrid>
-        <PropertyGridRow Label="Runtime version" Validity="@this.RuntimeVersionValidity">
+        <PropertyGridRow Label="Runtime version">
             <Validated Validity="@this.viewModel.GetValidity(nameof(TestConfigurationViewModel.RuntimeVersion))">
                 <select class="form-select form-select-sm configuration-runtime-version"
                         @bind="@this.viewModel.RuntimeVersion">
@@ -54,14 +51,14 @@
             </Validated>
         </PropertyGridRow>
 
-        @if (this.viewModel.IsWriteToTestLinkEnabled)
+        @if (this.viewModel.IsWriteToTestLinkEnabled.HasValue && this.viewModel.IsWriteToTestLinkEnabled.Value)
         {
             <Validated Validity="@this.viewModel.GetValidity(nameof(TestConfigurationViewModel.IdeVersion))">
                 <PropertyGridRow Label="IDE version">
                     <input type="text"
                         class="form-control form-control-sm configuration-ide-version"
                         placeholder="6.1 or 6.1.4"
-                        @bind="@this.viewModel.IdeVersionText" />
+                        @bind="@this.viewModel.IdeVersion" />
                 </PropertyGridRow>
             </Validated>
         }
@@ -69,31 +66,34 @@
 </section>
 
 @code {
-    private TestConfigurationViewModel viewModel = default!;
+    private TestConfigurationViewModel viewModel = null!;
 
     /// <summary>
     /// Gets or sets the configuration this component reads and edits.
     /// </summary>
     [Inject]
-    private IState<TestConfigurationState> TestConfigurationState { get; set; } = default!;
+    private IState<TestConfigurationState> TestConfigurationState { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the dispatcher configuration changes are sent through.
     /// </summary>
     [Inject]
-    private IDispatcher Dispatcher { get; set; } = default!;
+    private IDispatcher Dispatcher { get; set; } = null!;
+
+    [Inject]
+    private IAppLoggerFactory LoggerFactory { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the store the test selection is read from.
     /// </summary>
     [Inject]
-    private ITestDiscoveryStore TestDiscoveryStore { get; set; } = default!;
+    private ITestDiscoveryStore TestDiscoveryStore { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the store the application settings are read from.
     /// </summary>
     [Inject]
-    private IAppSettingsStore AppSettingsStore { get; set; } = default!;
+    private IAppSettingsStore AppSettingsStore { get; set; } = null!;
 
     /// <inheritdoc/>
     protected override void OnInitialized()
@@ -102,20 +102,8 @@
 
         this.viewModel = new TestConfigurationViewModel(
             this.TestConfigurationState,
-            this.DirectoryReader,
-            this.TestDiscoveryStore,
             this.AppSettingsStore,
+            this.LoggerFactory,
             this.Dispatcher);
-    }
-
-    /// <inheritdoc/>
-    protected override ValueTask DisposeAsyncCore(bool disposing)
-    {
-        if (disposing)
-        {
-            this.TestDiscoveryStore.Changed -= this.OnTestSelectionChanged;
-        }
-
-        return base.DisposeAsyncCore(disposing);
     }
 }

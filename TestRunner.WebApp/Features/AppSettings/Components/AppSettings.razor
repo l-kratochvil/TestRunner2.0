@@ -61,13 +61,13 @@
     /// Gets or sets the store the application settings are read from and saved to.
     /// </summary>
     [Inject]
-    private AppSettingsStore Store { get; set; } = default!;
+    private AppSettingsStore Store { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the validator the edited settings are checked against.
     /// </summary>
     [Inject]
-    private IAppSettingsValidator Validator { get; set; } = default!;
+    private IAppSettingsValidator Validator { get; set; } = null!;
 
     // Saving what is already saved would only rewrite the file, and saving a folder the test
     // machine cannot read would point the application at a place it can never offer a runtime

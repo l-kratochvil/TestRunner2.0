@@ -42,13 +42,13 @@
     /// Gets or sets the logger navigation is reported to.
     /// </summary>
     [Inject]
-    private ILogger<MainLayout> Logger { get; set; } = default!;
+    private ILogger<MainLayout> Logger { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the navigation manager whose location changes are logged.
     /// </summary>
     [Inject]
-    private NavigationManager Navigation { get; set; } = default!;
+    private NavigationManager Navigation { get; set; } = null!;
 
     /// <inheritdoc/>
     public void Dispose()

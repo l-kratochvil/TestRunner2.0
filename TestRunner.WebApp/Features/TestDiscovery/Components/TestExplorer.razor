@@ -31,13 +31,13 @@
     /// Gets or sets the store the loaded test suites are read from.
     /// </summary>
     [Inject]
-    private INUnitTestRunnerStore TestRunnerStore { get; set; } = default!;
+    private INUnitTestRunnerStore TestRunnerStore { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the store the test selection is read from and saved to.
     /// </summary>
     [Inject]
-    private TestDiscoveryStore Store { get; set; } = default!;
+    private TestDiscoveryStore Store { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets what is drawn in the header row beside the title, such as the button that
