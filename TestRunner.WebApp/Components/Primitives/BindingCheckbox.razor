@@ -6,15 +6,15 @@
 @using System.ComponentModel
 @using System.Globalization
 
-@typeparam TViewModel where TViewModel : class, INotifyPropertyChanged
-@typeparam TBindingValue
+@typeparam TViewModel where TViewModel : class, INotifyPropertyChanged  
 
-@inherits BindingComponentBase<TViewModel, TBindingValue>
+@inherits BindingComponentBase<TViewModel, bool>
 
 <Validated Validity="this.Validity">
     @* TODO: Use @bind instead of value and @oninput? *@
     <input @attributes="this.AdditionalAttributes"
-           value="@BindConverter.FormatValue(this.CurrentValue)"
+           type="checkbox"
+           checked="@this.CurrentValue"
            @oninput="this.OnInputAsync" />
 </Validated>
 
@@ -24,7 +24,7 @@
         // The browser hands every edit over as text, so anything that is not text has to be
         // converted before it can be written back. What does not convert is not something the view
         // model could hold, and is left where the tester typed it instead of overwriting it.
-        if (!BindConverter.TryConvertTo(args.Value, CultureInfo.CurrentCulture, out TBindingValue? value))
+        if (!BindConverter.TryConvertTo(args.Value, CultureInfo.CurrentCulture, out bool value))
         {
             return;
         }

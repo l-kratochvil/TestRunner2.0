@@ -11,14 +11,6 @@
 
     <span class="property-grid-row-value">
         @this.ChildContent
-
-        @foreach (var problem in this.Validity.Issues)
-        {
-            <span class="property-grid-row-message @(problem.Severity is Validity.Severity.Warning ? "is-warning" : "is-error")"
-                  role="@(problem.Severity is Validity.Severity.Warning ? "status" : "alert")">
-                @problem.Message
-            </span>
-        }
     </span>
 </label>
 
@@ -29,18 +21,6 @@
     [Parameter]
     [EditorRequired]
     public string Label { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets what is wrong with the property.
-    /// </summary>
-    /// <remarks>
-    /// Whether something is an error or a note is decided by whoever found the problem, so the row
-    /// is handed a <see cref="Shared.Validation.Validity"/> rather than a message and a severity
-    /// picked at the call site. Not required: a property nobody validates is nothing wrong, and a
-    /// caller made to write that out would only be writing the default.
-    /// </remarks>
-    [Parameter]
-    public Validity Validity { get; set; } = Validity.Valid;
 
     /// <summary>
     /// Gets or sets the input shown for the property.

@@ -26,7 +26,7 @@ public class Validator<TValidated>(TValidated validated)
         // compiled here rather than at every validation, because a rule is added once.
         var readValue = propertyAccessor.Compile();
 
-        this.propertyValidators[property.Name] = value => validator(readValue(value));
+        this.propertyValidators[property.Name] = validated => validator(readValue(validated));
 
         return this;
     }

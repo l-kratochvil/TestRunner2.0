@@ -11,10 +11,12 @@ using TestRunner.WebApp.Shared.Validation;
 /// </remarks>
 public interface INotifyValidityInfo
 {
+    event Action<bool>? HasErrorsChanged;
+
     /// <summary>
     /// Gets a value indicating whether every value held may be used.
     /// </summary>
-    bool IsValid { get; }
+    bool HasErrors { get; }
 
     /// <summary>
     /// Reads what is wrong with one property.

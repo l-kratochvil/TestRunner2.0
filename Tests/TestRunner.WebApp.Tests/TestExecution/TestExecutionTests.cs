@@ -143,7 +143,7 @@ public class TestExecutionTests : Bunit.TestContext
     }
 
     private static TestConfigurationState ConfigurationSaidToBeRunnable()
-        => new() { IsValid = true };
+        => new() { HasErrors = true };
 
     private static string Label(IRenderedComponent<TestExecutionComponent> component)
         => component.Find(ButtonSelector).TextContent.Trim();

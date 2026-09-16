@@ -2,7 +2,6 @@ namespace TestRunner.WebApp.Features.AppSettings.Services;
 
 using FluentValidation;
 
-using TestRunner.WebApp.Shared.Storage;
 using TestRunner.WebApp.Shared.Validation;
 
 /// <summary>
@@ -15,9 +14,9 @@ using TestRunner.WebApp.Shared.Validation;
 /// from the text.
 /// </remarks>
 /// <param name="directoryReader">Reads what the install folder contains.</param>
-public sealed class AppSettingsValidator(IDirectoryReader directoryReader) : IAppSettingsValidator
+public sealed class AppSettingsValidator : IAppSettingsValidator
 {
-    private readonly Rules rules = new(directoryReader);
+    private readonly Rules rules = new();
 
     /// <inheritdoc/>
     public Validity Validate(IAppSettingsValidationSource source)
@@ -33,7 +32,7 @@ public sealed class AppSettingsValidator(IDirectoryReader directoryReader) : IAp
     /// </remarks>
     private sealed class Rules : AbstractValidator<IAppSettingsValidationSource>
     {
-        public Rules(IDirectoryReader directoryReader)
+        public Rules()
         {
             // A folder the test machine cannot read leaves the application pointed at a place it
             // will never find a runtime version in, so it is refused rather than noted. Holding no
@@ -43,22 +42,27 @@ public sealed class AppSettingsValidator(IDirectoryReader directoryReader) : IAp
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .WithMessage("Enter the folder the IDE is installed in.")
-                .Must(path => ReadSubFolderNames(directoryReader, path) is not null)
+                .Must(path => ReadSubFolderNames(path) is not null)
                 .WithMessage("This folder does not exist, or cannot be reached from the test machine.")
-                .Must(path => ReadSubFolderNames(directoryReader, path) is not { Count: 0 })
-                .WithSeverity(FluentValidation.Severity.Warning)
+                .Must(path => ReadSubFolderNames(path) is not { Count: 0 })
+                .WithSeverity(Severity.Warning)
                 .WithMessage("No runtime version is installed in this folder.");
         }
 
         /// <returns>
         /// What the folder contains, or <see langword="null"/> when it could not be read.
         /// </returns>
-        private static IReadOnlyList<string>? ReadSubFolderNames(
-            IDirectoryReader directoryReader, string path)
+        private static IReadOnlyList<string>? ReadSubFolderNames(string path)
         {
             try
             {
-                return directoryReader.ReadSubFolderNames(path);
+                return
+                [
+                    ..Directory
+                        .GetDirectories(path)
+                        .Select(Path.GetFileName)
+                        .OfType<string>()
+                ];
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {

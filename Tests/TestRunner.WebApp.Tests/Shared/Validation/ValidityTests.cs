@@ -12,7 +12,7 @@ public class ValidityTests
 
     [Test]
     public void IsValid__WhenNothingWasFound__ThenShouldSayItCanBeUsed()
-        => Assert.That(Validity.Valid.IsValid, Is.True);
+        => Assert.That(Validity.Valid.HasErrors, Is.True);
 
     [Test]
     public void IsValid__WhenAnErrorWasFound__ThenShouldSayItCannotBeUsed()
@@ -21,7 +21,7 @@ public class ValidityTests
         Validity unit = new([new Validity.Issue(GivenField, "Choose one.")]);
 
         // Then:
-        Assert.That(unit.IsValid, Is.False);
+        Assert.That(unit.HasErrors, Is.False);
     }
 
     [Test]
@@ -33,7 +33,7 @@ public class ValidityTests
             [new Validity.Issue(GivenField, "Nothing is installed there.", Validity.Severity.Warning)]);
 
         // Then:
-        Assert.That(unit.IsValid, Is.True);
+        Assert.That(unit.HasErrors, Is.True);
     }
 
     [Test]
@@ -57,6 +57,6 @@ public class ValidityTests
         Validity unit = new([new Validity.Issue(AnotherField, "Write it as x.y.")]);
 
         // Then:
-        Assert.That(unit.For(GivenField).IsValid, Is.True);
+        Assert.That(unit.For(GivenField).HasErrors, Is.True);
     }
 }

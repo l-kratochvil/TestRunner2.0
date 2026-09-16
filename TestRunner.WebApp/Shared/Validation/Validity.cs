@@ -35,13 +35,18 @@ public sealed record Validity(IReadOnlyList<Validity.Issue> Issues)
         => new([]);
 
     /// <summary>
-    /// Gets a value indicating whether what was validated may be used.
+    /// Gets a value indicating whether what was validated has errors.
     /// </summary>
-    /// <remarks>
-    /// A warning explains something without blocking it, so only an error makes this false.
-    /// </remarks>
-    public bool IsValid
-        => !this.Issues.Any(static problem => problem.Severity is Severity.Error);
+    public bool HasErrors
+        => !this.Issues.Any(
+            static problem => problem.Severity is Severity.Error);
+
+    /// <summary>
+    /// Gets a value indicating whether what was validated has warnings.
+    /// </summary>
+    public bool HasWarnings
+        => this.Issues.Any(
+            static problem => problem.Severity is Severity.Warning);
 
     /// <summary>
     /// Narrows this down to one field.

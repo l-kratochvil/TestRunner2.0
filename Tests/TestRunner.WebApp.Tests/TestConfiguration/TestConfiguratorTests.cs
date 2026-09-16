@@ -204,7 +204,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         // Then:
         this.dispatcher.Verify(
             d => d.Dispatch(
-                It.Is<ChangedAction>(action =>
+                It.Is<DataChangedAction>(action =>
                     action.NewRuntimeVersion != null && action.NewRuntimeVersion.Value == null)));
     }
 
@@ -222,7 +222,7 @@ public class TestConfiguratorTests : Bunit.TestContext
 
         // Then:
         this.dispatcher.Verify(
-            d => d.Dispatch(It.Is<ChangedAction>(action => action.NewRuntimeVersion != null)),
+            d => d.Dispatch(It.Is<DataChangedAction>(action => action.NewRuntimeVersion != null)),
             Times.Never);
     }
 
@@ -238,7 +238,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.RenderConfigurator();
 
         // Then:
-        this.dispatcher.Verify(d => d.Dispatch(It.Is<ChangedAction>(action => !action.IsValid)));
+        this.dispatcher.Verify(d => d.Dispatch(It.Is<DataChangedAction>(action => !action.IsValid)));
     }
 
     [Test]
@@ -253,7 +253,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         component.Find(RuntimeVersionSelector).Change("6");
 
         // Then:
-        this.dispatcher.Verify(d => d.Dispatch(It.Is<ChangedAction>(action => action.IsValid)));
+        this.dispatcher.Verify(d => d.Dispatch(It.Is<DataChangedAction>(action => action.IsValid)));
     }
 
     [Test]
@@ -272,7 +272,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.RaiseTestSelectionChanged(component);
 
         // Then:
-        this.dispatcher.Verify(d => d.Dispatch(It.Is<ChangedAction>(action => !action.IsValid)));
+        this.dispatcher.Verify(d => d.Dispatch(It.Is<DataChangedAction>(action => !action.IsValid)));
     }
 
     private IRenderedComponent<TestConfiguratorComponent> RenderConfigurator()

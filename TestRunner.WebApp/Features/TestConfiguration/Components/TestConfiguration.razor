@@ -1,0 +1,121 @@
+@* Feature: TestConfiguration — "the user can configure a test run". *@
+
+@using System.Linq
+
+@using Fluxor
+
+@using TestRunner.WebApp.Shared.Stores.AppSettings
+@using TestRunner.WebApp.Shared.Domain
+@using TestRunner.WebApp.Shared.Stores.TestConfiguration
+@using TestRunner.WebApp.Shared.Stores.TestDiscovery
+
+@inherits Fluxor.Blazor.Web.Components.FluxorComponent
+
+<section class="test-configurator">
+    <h2 class="pane-title">Configuration</h2>
+
+    <PropertyGrid>
+        <PropertyGridRow Label="Runtime version" Validity="@this.RuntimeVersionValidity">
+            <Validated Validity="@this.viewModel.GetValidity(nameof(TestConfigurationViewModel.RuntimeVersion))">
+                <select class="form-select form-select-sm configuration-runtime-version"
+                        @bind="@this.viewModel.RuntimeVersion">
+                    <option value="" selected="@(this.viewModel.RuntimeVersion is null)">—</option>
+                    @foreach (var version in this.viewModel.RuntimeVersions)
+                    {
+                        <option value="@version" selected="@(version == this.viewModel.RuntimeVersion)">@version</option>
+                    }
+                </select>
+            </Validated>
+        </PropertyGridRow>
+
+        @if (this.viewModel.IsRuntimeTest)
+        {
+            <PropertyGridRow Label="HW assembly type">
+                <Validated Validity="@this.viewModel.GetValidity(nameof(TestConfigurationViewModel.TestedHwAssembly))">
+                    <select class="form-select form-select-sm configuration-test-station"
+                            @bind="@this.viewModel.TestedHwAssembly">
+                        <option value="" selected="@(this.viewModel.TestedHwAssembly is null)">—</option>
+                        @foreach (var station in TestStationLabels.Offered)
+                        {
+                            <option value="@station" selected="@(station == this.viewModel.TestedHwAssembly)">
+                                @TestStationLabels.For(station)
+                            </option>
+                        }
+                    </select>
+                </Validated>
+            </PropertyGridRow>
+        }
+
+        <PropertyGridRow Label="Write to TestLink">
+            <Validated Validity="@this.viewModel.GetValidity(nameof(TestConfigurationViewModel.IsWriteToTestLinkEnabled))">
+                <input type="checkbox"
+                        class="form-check-input configuration-testlink"
+                        @bind="@this.viewModel.IsWriteToTestLinkEnabled" />
+            </Validated>
+        </PropertyGridRow>
+
+        @if (this.viewModel.IsWriteToTestLinkEnabled)
+        {
+            <Validated Validity="@this.viewModel.GetValidity(nameof(TestConfigurationViewModel.IdeVersion))">
+                <PropertyGridRow Label="IDE version">
+                    <input type="text"
+                        class="form-control form-control-sm configuration-ide-version"
+                        placeholder="6.1 or 6.1.4"
+                        @bind="@this.viewModel.IdeVersionText" />
+                </PropertyGridRow>
+            </Validated>
+        }
+    </PropertyGrid>
+</section>
+
+@code {
+    private TestConfigurationViewModel viewModel = default!;
+
+    /// <summary>
+    /// Gets or sets the configuration this component reads and edits.
+    /// </summary>
+    [Inject]
+    private IState<TestConfigurationState> TestConfigurationState { get; set; } = default!;
+
+    /// <summary>
+    /// Gets or sets the dispatcher configuration changes are sent through.
+    /// </summary>
+    [Inject]
+    private IDispatcher Dispatcher { get; set; } = default!;
+
+    /// <summary>
+    /// Gets or sets the store the test selection is read from.
+    /// </summary>
+    [Inject]
+    private ITestDiscoveryStore TestDiscoveryStore { get; set; } = default!;
+
+    /// <summary>
+    /// Gets or sets the store the application settings are read from.
+    /// </summary>
+    [Inject]
+    private IAppSettingsStore AppSettingsStore { get; set; } = default!;
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        this.viewModel = new TestConfigurationViewModel(
+            this.TestConfigurationState,
+            this.DirectoryReader,
+            this.TestDiscoveryStore,
+            this.AppSettingsStore,
+            this.Dispatcher);
+    }
+
+    /// <inheritdoc/>
+    protected override ValueTask DisposeAsyncCore(bool disposing)
+    {
+        if (disposing)
+        {
+            this.TestDiscoveryStore.Changed -= this.OnTestSelectionChanged;
+        }
+
+        return base.DisposeAsyncCore(disposing);
+    }
+}

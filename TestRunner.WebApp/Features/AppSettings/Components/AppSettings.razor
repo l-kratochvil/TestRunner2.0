@@ -10,21 +10,20 @@
 <section class="settings-editor">
     <h2 class="pane-title">Settings</h2>
 
+    @* DISABLED
     <PropertyGrid>
-        @* One folder, holding one folder per installed runtime version, which is where the test
-           configurator reads its choices from. *@
-        <PropertyGridRow Label="IDE install folder"
-                         Validity="@this.validity.For(nameof(IAppSettingsValidationSource.IdeInstallFolderPath))">
-            <input type="text"
-                   class="form-control form-control-sm settings-ide-install-folder"
-                   value="@this.IdeInstallFolderPath"
-                   @oninput="this.OnIdeInstallFolderPathChanged" />
+        One folder, holding one folder per installed runtime version, which is where the test
+        configurator reads its choices from. 
+       <PropertyGridRow Label="IDE install folder"
+                        Validity="@this.validity.For(nameof(IAppSettingsValidationSource.IdeInstallFolderPath))">
+         <input type="text"
+                class="form-control form-control-sm settings-ide-install-folder"
+                value="@this.IdeInstallFolderPath"
+                @oninput="this.OnIdeInstallFolderPathChanged" />
         </PropertyGridRow>
     </PropertyGrid>
 
     <div class="settings-actions">
-        @* The settings go into a file everyone connecting reads, so they are saved when the tester
-           says so rather than on every keystroke, which would put half a path on disk. *@
         <button type="button"
                 class="btn btn-sm btn-primary"
                 disabled="@(!this.CanSave)"
@@ -39,13 +38,13 @@
 
         @if (this.saveStatus is SaveStatus.Failed)
         {
-            @* Nothing was changed, so the button stays live and the tester can try again once
-               whatever the log names has been dealt with. *@
             <span class="settings-save-failed" role="alert">
                 The settings could not be written to their file — see the log.
             </span>
         }
     </div>
+
+    *@
 </section>
 
 @code {
@@ -74,7 +73,7 @@
     // machine cannot read would point the application at a place it can never offer a runtime
     // version from.
     private bool CanSave
-        => this.HasUnsavedChanges && this.validity.IsValid;
+        => this.HasUnsavedChanges && this.validity.HasErrors;
 
     private bool HasUnsavedChanges
         => !string.Equals(

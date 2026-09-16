@@ -39,10 +39,10 @@
     // answers by the rules it owns. What exactly is missing from the configuration is left to the
     // configurator beside the button, which says it field by field.
     private string? TestBlockingReason
-        => (this.TestDiscoveryStore.Current.SelectedTestCases.Count, this.TestConfigurationState.Value.IsValid) switch
+        => (this.TestDiscoveryStore.Current.SelectedTestCases.Count, this.TestConfigurationState.Value.HasErrors) switch
         {
-            (0, _) => "Select the tests to run.",
-            (_, false) => "Complete the test configuration.",
+            (0, _) => "No tests selected",
+            (_, false) => "Configuration has errors",
             _ => null,
         };
 

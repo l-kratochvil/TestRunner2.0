@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 using TestRunner.WebApp.Features.AppLogging.Services;
 using TestRunner.WebApp.Features.AppSettings.Services;
-using TestRunner.WebApp.Features.TestConfiguration.Services;
 using TestRunner.WebApp.Features.TestDiscovery.Services;
 using TestRunner.WebApp.Shared.Logging;
 using TestRunner.WebApp.Shared.Stores.AppSettings;
@@ -54,8 +53,6 @@ public static class InitFeaturesExtensions
                 .AddSingleton<IAppSettingsValidator, AppSettingsValidator>();
 
         private IServiceCollection InitTestConfiguration()
-            => services
-                .AddSingleton<IInstalledRuntimeVersionsProvider, InstalledRuntimeVersionsProvider>()
-                .AddSingleton<ITestConfigurationValidator, TestConfigurationValidator>();
+            => services;
     }
 }

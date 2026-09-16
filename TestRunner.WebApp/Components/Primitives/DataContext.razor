@@ -8,9 +8,9 @@
 
 @using System.ComponentModel
 
-@typeparam TViewModel where TViewModel : class, INotifyPropertyChanged
+@typeparam TData where TData : class, INotifyPropertyChanged
 
-<CascadingValue TValue="TViewModel" Value="this.ViewModel" IsFixed="true">
+<CascadingValue TValue="TData" Value="this.Data" IsFixed="true">
     @this.ChildContent
 </CascadingValue>
 
@@ -20,10 +20,10 @@
     /// </summary>
     [Parameter]
     [EditorRequired]
-    public required TViewModel ViewModel { get; set; }
+    public required TData Data { get; set; }
 
     /// <summary>
-    /// Gets or sets the content drawn from <see cref="ViewModel"/>.
+    /// Gets or sets the content drawn from <see cref="Data"/>.
     /// </summary>
     [Parameter]
     [EditorRequired]

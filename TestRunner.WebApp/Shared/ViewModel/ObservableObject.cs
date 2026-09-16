@@ -4,15 +4,18 @@ using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using TestRunner.WebApp.Shared.Validation;
 
-public class ObservableObject
+public class ViewModelBase
     : CommunityToolkit.Mvvm.ComponentModel.ObservableObject,
       INotifyValidityInfo
 {
     private readonly ConcurrentDictionary<string, Validity> propertyValidities = new();
 
     /// <inheritdoc/>
-    public bool IsValid
-        => this.propertyValidities.All(x => x.Value.IsValid);
+    public event Action<bool>? HasErrorsChanged;
+
+    /// <inheritdoc/>
+    public bool HasErrors
+        => this.propertyValidities.All(x => x.Value.HasErrors);
 
     /// <inheritdoc/>
     public Validity? GetValidity(string propertyName)
@@ -42,9 +45,18 @@ public class ObservableObject
 
         this.propertyValidities[propertyName] = validity;
 
+        var oldHasErrors = this.HasErrors;
+        this.propertyValidities[propertyName] = validity;
+        var newHasErrors = this.HasErrors;
+
+        if (oldHasErrors != newHasErrors)
+        {
+            this.HasErrorsChanged?.Invoke(newHasErrors);
+        }
+
         // What is wrong with one value is often another value's doing, so a control showing any of
         // them is told that there is something new to read rather than only the one just looked at.
-        this.OnPropertyChanged(nameof(this.IsValid));
+        this.OnPropertyChanged(nameof(this.HasErrors));
 
         return validity;
     }

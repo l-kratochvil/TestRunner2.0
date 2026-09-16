@@ -36,7 +36,7 @@ public class TestConfigurationValidatorTests
         Validity validity = this.unit.Validate(source);
 
         // Then:
-        Assert.That(validity.IsValid, Is.True, validity.Summary);
+        Assert.That(validity.HasErrors, Is.True, validity.Summary);
     }
 
     [TestCase(null)]
@@ -61,7 +61,7 @@ public class TestConfigurationValidatorTests
             Source() with { IsRuntimeTestSelected = false, TestedHwAssembly = null });
 
         // Then:
-        Assert.That(validity.IsValid, Is.True, validity.Summary);
+        Assert.That(validity.HasErrors, Is.True, validity.Summary);
     }
 
     [TestCase(null)]
@@ -94,7 +94,7 @@ public class TestConfigurationValidatorTests
             Source() with { IsTestLinkEnabled = false, IdeVersionText = null });
 
         // Then:
-        Assert.That(validity.IsValid, Is.True, validity.Summary);
+        Assert.That(validity.HasErrors, Is.True, validity.Summary);
     }
 
     [Test]
@@ -113,7 +113,7 @@ public class TestConfigurationValidatorTests
         Validity validity = this.unit.Validate(source);
 
         // Then:
-        Assert.That(validity.IsValid, Is.True, validity.Summary);
+        Assert.That(validity.HasErrors, Is.True, validity.Summary);
     }
 
     [TestCase("6.1")]
@@ -126,7 +126,7 @@ public class TestConfigurationValidatorTests
             Source() with { IsTestLinkEnabled = true, IdeVersionText = givenIdeVersion });
 
         // Then:
-        Assert.That(validity.IsValid, Is.True, validity.Summary);
+        Assert.That(validity.HasErrors, Is.True, validity.Summary);
     }
 
     [TestCase(null, Description = "nothing typed")]

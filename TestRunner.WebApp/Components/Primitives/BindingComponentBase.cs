@@ -72,7 +72,7 @@ public abstract class BindingComponentBase<TViewModel, TBindingValue>
     /// <remarks>
     /// Asked of the view model at every render rather than kept, so that what is shown is what the
     /// view model makes of the value now, including a problem another field's edit brought about —
-    /// which is what a view model reporting <see cref="INotifyValidityInfo.IsValid"/> changed asks
+    /// which is what a view model reporting <see cref="INotifyValidityInfo.HasErrors"/> changed asks
     /// every control to look at anew.
     /// </remarks>
     protected Validity Validity
@@ -106,7 +106,7 @@ public abstract class BindingComponentBase<TViewModel, TBindingValue>
             || string.Equals(propertyName, this.BoundProperty.Name, StringComparison.Ordinal)
             || string.Equals(
                 propertyName,
-                nameof(INotifyValidityInfo.IsValid),
+                nameof(INotifyValidityInfo.HasErrors),
                 StringComparison.Ordinal);
 
     /// <summary>

@@ -12,28 +12,32 @@ public static class Reducers
 {
     private static readonly StateUpdater<TestConfigurationState> Updater = new();
 
-    /// <summary>
-    /// Takes over the values the change carries and leaves the rest as it stands.
-    /// </summary>
-    /// <param name="current">Configuration as it stands.</param>
-    /// <param name="action">The change to take over.</param>
-    /// <returns>Configuration with the changed values taken over.</returns>
     [ReducerMethod]
-    public static TestConfigurationState OnChanged(
-        TestConfigurationState current, ChangedAction action)
+    public static TestConfigurationState OnDataChanged(
+        TestConfigurationState current, DataChangedAction action)
         => Updater
             .UpdateIfChanged(
-                current with { IsValid = action.IsValid },
+                current,
                 action.NewRuntimeVersion,
                 (state, value) => state with { RuntimeVersion = value })
             .UpdateIfChanged(
                 action.NewIdeVersion,
                 (state, value) => state with { IdeVersion = value })
             .UpdateIfChanged(
-                action.NewIsTestLinkEnabled,
-                (state, value) => state with { IsTestLinkEnabled = value })
+                action.NewIsWriteToTestLinkEnabled,
+                (state, value) => state with { IsWriteToTestLinkEnabled = value })
             .UpdateIfChanged(
                 action.NewTestedHwAssembly,
                 (state, value) => state with { TestedHwAssembly = value })
+            .Complete();
+
+    [ReducerMethod]
+    public static TestConfigurationState OnStatusChanged(
+        TestConfigurationState current, StatusChangedAction action)
+        => Updater
+            .UpdateIfChanged(
+                current,
+                action.NewHasErrors,
+                (state, value) => state with { HasErrors = value })
             .Complete();
 }

@@ -125,7 +125,8 @@
     [Parameter]
     public EventCallback<bool> CollapsedChanged { get; set; }
 
-    private int ErrorCount => this.entries.Count(entry => entry.Severity == LogSeverity.Error);
+    private int ErrorCount 
+        => this.entries.Count(entry => entry.Severity == LogSeverity.Error);
 
     private JsModuleInterop JsModuleInterop 
         => this.jsModuleInterop ??= this.JsModuleInteropFactory.Create(ModulePath);

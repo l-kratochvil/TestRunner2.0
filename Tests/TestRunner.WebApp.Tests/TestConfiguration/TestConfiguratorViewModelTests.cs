@@ -27,7 +27,7 @@ public class TestConfiguratorViewModelTests
     {
         // Given:
         TestConfigurationState state = new(
-            IsTestLinkEnabled: true,
+            IsWriteToTestLinkEnabled: true,
             IdeVersion: new Version(6, 1),
             RuntimeVersion: "6",
             TestedHwAssembly: TestedHwAssemblyType.HW01);
