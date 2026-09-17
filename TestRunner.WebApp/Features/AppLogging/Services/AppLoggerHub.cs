@@ -1,6 +1,7 @@
 namespace TestRunner.WebApp.Features.AppLogging.Services;
 
 using System.Threading;
+
 using TestRunner.WebApp.Features.AppLogging.Models;
 using TestRunner.WebApp.Shared.Logging;
 
@@ -31,7 +32,7 @@ public sealed class AppLoggerHub : IAppLoggerHub
         this.capacity = capacity;
         this.sinks = [..sinks];
 
-        foreach (IAppLoggerSink sink in this.sinks)
+        foreach (var sink in this.sinks)
         {
             sink.Failed += this.ReportFailure;
         }
@@ -45,7 +46,7 @@ public sealed class AppLoggerHub : IAppLoggerHub
     {
         this.AppendToBuffer(entry);
 
-        foreach (IAppLoggerSink sink in this.sinks)
+        foreach (var sink in this.sinks)
         {
             sink.Write(entry);
         }

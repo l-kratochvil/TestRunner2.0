@@ -31,7 +31,7 @@
         {
             <div class="filters">
                 <span class="filter-group">
-                    @foreach (LogSeverity severity in Enum.GetValues<LogSeverity>())
+                    @foreach (var severity in Enum.GetValues<LogSeverity>())
                     {
                         <label class="form-check-label filter-option">
                             <input type="checkbox"
@@ -44,7 +44,7 @@
                 </span>
 
                 <span class="filter-group">
-                    @foreach (string source in this.AvailableSources)
+                    @foreach (var source in this.AvailableSources)
                     {
                         <label class="form-check-label filter-option">
                             <input type="checkbox"
@@ -68,7 +68,7 @@
     @if (!this.isCollapsed)
     {
         <div class="app-log-entries" @ref="this.entriesElement">
-            @foreach (LogEntry entry in this.filter.Apply(this.entries))
+            @foreach (var entry in this.filter.Apply(this.entries))
             {
                 <div class="log-entry severity-@entry.Severity.ToString().ToLowerInvariant()">
                     <span class="entry-time">@entry.Timestamp.ToString("HH:mm:ss.fff")</span>

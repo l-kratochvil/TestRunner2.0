@@ -31,7 +31,7 @@ public sealed class BrowserLogger(ILoggerFactory loggerFactory)
     {
         ArgumentNullException.ThrowIfNull(diagnostic);
 
-        LogLevel level = GetLevel(diagnostic.Level);
+        var level = GetLevel(diagnostic.Level);
 
         if (string.IsNullOrEmpty(diagnostic.Detail))
         {

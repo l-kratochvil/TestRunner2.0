@@ -1,6 +1,7 @@
 namespace TestRunner.WebApp.Features.TestDiscovery.Components;
 
 using System.Linq;
+
 using TestRunner.Common.Model;
 
 /// <summary>
@@ -37,7 +38,7 @@ public sealed class TestExplorerViewModel(IEnumerable<TestSuiteEntity> testSuite
     {
         var selectedPaths = executionPaths.ToHashSet(StringComparer.Ordinal);
 
-        foreach (TestTreeNodeData node in this.AllNodes().Where(node => node.IsTestCase))
+        foreach (var node in this.AllNodes().Where(node => node.IsTestCase))
         {
             node.SetChecked(selectedPaths.Contains(node.ExecutionPath));
         }
@@ -56,7 +57,7 @@ public sealed class TestExplorerViewModel(IEnumerable<TestSuiteEntity> testSuite
     {
         // A restored selection the user cannot see is indistinguishable from none, so every group
         // holding one is opened.
-        foreach (TestTreeNodeData node in this.AllNodes())
+        foreach (var node in this.AllNodes())
         {
             if (node.HasChildren && node.CheckState != TestTreeNodeData.State.Unchecked)
             {

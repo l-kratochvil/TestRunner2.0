@@ -16,7 +16,7 @@
 
 <button type="button"
         class="@(this.isRunning ? "btn btn-sm btn-danger" : "btn btn-sm btn-success")"
-        disabled="@this.CurrentCommand.CanExecute(null) == false"
+        disabled="@(!this.CurrentCommand.CanExecute(null))"
         title="@(string.Join(Environment.NewLine, this.ExecutionBlockingReasons))"
         @onclick="@(() => this.CurrentCommand.Execute(null))">
     @(this.CurrentCommand.DisplayText)

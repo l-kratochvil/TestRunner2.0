@@ -1,6 +1,7 @@
 namespace TestRunner.WebApp.Shared.Storage;
 
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+
 using TestRunner.WebApp.Shared.Logging;
 
 public class LocalStorage<TData>(
@@ -15,7 +16,7 @@ public class LocalStorage<TData>(
     {
         try
         {
-            ProtectedBrowserStorageResult<TData> result =
+            var result =
                 await protectedLocalStorage.GetAsync<TData>(BuildKey(key));
 
             return result.Success

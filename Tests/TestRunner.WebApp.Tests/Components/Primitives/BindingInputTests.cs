@@ -4,6 +4,8 @@ using Bunit;
 
 using Fluxor;
 
+using FluentValidation;
+
 using Microsoft.Extensions.DependencyInjection;
 
 using Moq;
@@ -11,6 +13,7 @@ using NUnit.Framework;
 
 using TestRunner.WebApp.Components.Primitives;
 using TestRunner.WebApp.Shared.Validation;
+using TestRunner.WebApp.Shared.ViewModel;
 
 /// <summary>
 /// What the input shows, what it writes back and when it writes it.
@@ -29,6 +32,10 @@ public class BindingInputTests : Bunit.TestContext
 
     private const string GivenVersion = "3.1.4";
     private const string GivenMessage = "Not a version.";
+
+    private const string GivenLetters = "chosen";
+    private const string GivenNonsense = "1234";
+    private const string RefusalMessage = "Letters only.";
 
     private readonly EditedViewModel viewModel = new();
 
@@ -185,6 +192,32 @@ public class BindingInputTests : Bunit.TestContext
                 parameters => parameters.Add(input => input.Binding, model => model.Text)),
             Throws.InstanceOf<InvalidOperationException>());
 
+    [Test]
+    public void Edit__WhenTheViewModelTurnsTheEditDown__ThenShouldGoBackToShowingWhatIsHeld()
+    {
+        // Given:
+        // A view model that refuses an edit leaves its value where it was, so what sends the input
+        // back to showing it is the view model saying the property moved all the same.
+        RefusingViewModel refusing = new() { Name = GivenLetters };
+
+        IRenderedComponent<BindingInput<RefusingViewModel, string>> component =
+            this.RenderComponent<BindingInput<RefusingViewModel, string>>(
+                parameters => parameters
+                    .AddCascadingValue(refusing)
+                    .Add(input => input.Binding, model => model.Name));
+
+        // When:
+        component.Find(InputSelector).Change(GivenNonsense);
+
+        // Then:
+        Assert.Multiple(() =>
+        {
+            Assert.That(refusing.Name, Is.EqualTo(GivenLetters));
+            Assert.That(component.Find(InputSelector).GetAttribute("value"), Is.EqualTo(GivenLetters));
+            Assert.That(component.Find(MessageSelector).TextContent.Trim(), Is.EqualTo(RefusalMessage));
+        });
+    }
+
     private IRenderedComponent<BindingInput<EditedViewModel, string?>> RenderTextInput(
         Action<ComponentParameterCollectionBuilder<BindingInput<EditedViewModel, string?>>>? added = null)
         => this.RenderComponent<BindingInput<EditedViewModel, string?>>(
@@ -196,4 +229,26 @@ public class BindingInputTests : Bunit.TestContext
 
                 added?.Invoke(parameters);
             });
+
+    /// <summary>
+    /// A real view model, which turns down an edit it finds something wrong with.
+    /// </summary>
+    private sealed class RefusingViewModel : ViewModelBase
+    {
+        private string name = string.Empty;
+
+        public RefusingViewModel()
+            => this.InitValidator(
+                this,
+                validator => validator
+                    .RuleFor(model => model.Name)
+                    .Matches("^[a-z]+$")
+                    .WithMessage(RefusalMessage));
+
+        public string Name
+        {
+            get => this.name;
+            set => this.SetProperty(ref this.name, value);
+        }
+    }
 }

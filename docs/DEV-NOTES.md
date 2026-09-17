@@ -70,8 +70,8 @@
 
 #### Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
 - Rozšířit o testy:
-    - Komponenta má mít data kontext
-    - Chování komponenty, když nebyl poskytnut datový kontext
+    - Komponenta dostala DataContext (očekáváno)
+    - Chování komponenty, když nebyl poskytnut DataContext
     - Binding z viewmodel funguje
     - Chyby z viewmodel jsou propagovány do komponenty
 

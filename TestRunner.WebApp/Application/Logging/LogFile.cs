@@ -22,7 +22,7 @@ public static class LogFile
     /// <returns>Path of the log file for <paramref name="timestamp"/>.</returns>
     public static string GetPath(string directoryPath, DateTimeOffset timestamp)
     {
-        string fileName = timestamp.ToString(DateFormat, CultureInfo.InvariantCulture) + Extension;
+        var fileName = timestamp.ToString(DateFormat, CultureInfo.InvariantCulture) + Extension;
 
         return System.IO.Path.Combine(directoryPath, fileName);
     }
@@ -65,7 +65,7 @@ public static class LogFile
         // Materialized before deleting, so that the enumeration is not invalidated underneath.
         List<string> obsoleteFilePaths = [..Enumerate(directoryPath).Skip(retainedFileCount)];
 
-        foreach (string filePath in obsoleteFilePaths)
+        foreach (var filePath in obsoleteFilePaths)
         {
             File.Delete(filePath);
         }

@@ -59,8 +59,8 @@ public static class InitDependencyInjectionExtensions
     /// <returns><see langword="true"/> when the registered implementation asks to be initialised.</returns>
     private static bool IsInitializable(ServiceDescriptor descriptor)
     {
-        Type? implementationType = descriptor.ImplementationType
-                                   ?? descriptor.ImplementationInstance?.GetType();
+        var implementationType = descriptor.ImplementationType
+                                 ?? descriptor.ImplementationInstance?.GetType();
 
         return implementationType is { IsGenericTypeDefinition: false }
                && typeof(IInitializable).IsAssignableFrom(implementationType);

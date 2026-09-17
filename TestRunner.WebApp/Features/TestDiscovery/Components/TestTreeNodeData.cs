@@ -1,6 +1,7 @@
 namespace TestRunner.WebApp.Features.TestDiscovery.Components;
 
 using System.Linq;
+
 using TestRunner.Common.Model;
 
 /// <summary>
@@ -85,10 +86,10 @@ public sealed class TestTreeNodeData
                 return this.isChecked ? State.Checked : State.Unchecked;
             }
 
-            bool hasChecked = false;
-            bool hasUnchecked = false;
+            var hasChecked = false;
+            var hasUnchecked = false;
 
-            foreach (TestTreeNodeData child in this.children)
+            foreach (var child in this.children)
             {
                 switch (child.CheckState)
                 {
@@ -136,7 +137,7 @@ public sealed class TestTreeNodeData
     {
         if (this.HasChildren)
         {
-            foreach (TestTreeNodeData child in this.children)
+            foreach (var child in this.children)
             {
                 child.SetChecked(isSelected);
             }

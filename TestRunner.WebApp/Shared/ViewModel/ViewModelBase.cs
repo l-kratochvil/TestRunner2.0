@@ -26,7 +26,7 @@ public class ViewModelBase
 
     /// <inheritdoc/>
     public bool HasErrors
-        => this.propertyValidities.All(x => x.Value.HasErrors);
+        => this.propertyValidities.Any(x => x.Value.HasErrors);
 
     /// <inheritdoc/>
     public Validity? GetValidity(string propertyName)
@@ -58,8 +58,14 @@ public class ViewModelBase
     }
 
     /// <summary>
-    /// Sets the property value and validates it.
+    /// Sets the property value if nothing is wrong with it.
     /// </summary>
+    /// <remarks>
+    /// A rule reads the value off this view model, so the edit is put in place to be looked at and
+    /// taken back out again where it is refused. What is looked at is therefore the value being
+    /// edited to and never the one being edited away from, which is what leaves a property that
+    /// starts out wrong able to be put right.
+    /// </remarks>
     /// <typeparam name="T">The type of the property value.</typeparam>
     /// <param name="field">A reference to the backing field of the property.</param>
     /// <param name="newValue">The new value to assign.</param>
@@ -69,11 +75,27 @@ public class ViewModelBase
         [NotNullIfNotNull(nameof(newValue))] ref T field,
         T newValue,
         [CallerMemberName] string? propertyName = null)
-        => !this.ValidateProperty(propertyName).HasErrors &&
-           base.SetProperty(ref field, newValue, propertyName);
+    {
+        var refused = field;
+
+        if (!base.SetProperty(ref field, newValue, propertyName))
+        {
+            return false;
+        }
+
+        if (!this.ValidateProperty(propertyName).HasErrors)
+        {
+            return true;
+        }
+
+        field = refused;
+        this.AnnounceRefusal(propertyName);
+
+        return false;
+    }
 
     /// <summary>
-    /// Sets the property value and validates it.
+    /// Sets the property value if nothing is wrong with it.
     /// </summary>
     /// <typeparam name="T">The type of the property value.</typeparam>
     /// <param name="field">A reference to the backing field of the property.</param>
@@ -86,11 +108,27 @@ public class ViewModelBase
         T newValue,
         IEqualityComparer<T> comparer,
         [CallerMemberName] string? propertyName = null)
-        => !this.ValidateProperty(propertyName).HasErrors &&
-           base.SetProperty(ref field, newValue, comparer, propertyName);
+    {
+        var refused = field;
+
+        if (!base.SetProperty(ref field, newValue, comparer, propertyName))
+        {
+            return false;
+        }
+
+        if (!this.ValidateProperty(propertyName).HasErrors)
+        {
+            return true;
+        }
+
+        field = refused;
+        this.AnnounceRefusal(propertyName);
+
+        return false;
+    }
 
     /// <summary>
-    /// Sets the property value and validates it.
+    /// Sets the property value if nothing is wrong with it.
     /// </summary>
     /// <typeparam name="T">The type of the property value.</typeparam>
     /// <param name="oldValue">The current value of the property.</param>
@@ -103,11 +141,27 @@ public class ViewModelBase
         T newValue,
         Action<T> callback,
         [CallerMemberName] string? propertyName = null)
-        => !this.ValidateProperty(propertyName).HasErrors &&
-           base.SetProperty(oldValue, newValue, callback, propertyName);
+    {
+        if (!base.SetProperty(oldValue, newValue, callback, propertyName))
+        {
+            return false;
+        }
+
+        if (!this.ValidateProperty(propertyName).HasErrors)
+        {
+            return true;
+        }
+
+        // Where the value is kept is the caller's to say, so taking the edit back out is asking the
+        // same callback for the value that was there before.
+        callback(oldValue);
+        this.AnnounceRefusal(propertyName);
+
+        return false;
+    }
 
     /// <summary>
-    /// Sets the property value and validates it.
+    /// Sets the property value if nothing is wrong with it.
     /// </summary>
     /// <typeparam name="T">The type of the property value.</typeparam>
     /// <param name="oldValue">The current value of the property.</param>
@@ -122,11 +176,25 @@ public class ViewModelBase
         IEqualityComparer<T> comparer,
         Action<T> callback,
         [CallerMemberName] string? propertyName = null)
-        => !this.ValidateProperty(propertyName).HasErrors &&
-           base.SetProperty(oldValue, newValue, comparer, callback, propertyName);
+    {
+        if (!base.SetProperty(oldValue, newValue, comparer, callback, propertyName))
+        {
+            return false;
+        }
+
+        if (!this.ValidateProperty(propertyName).HasErrors)
+        {
+            return true;
+        }
+
+        callback(oldValue);
+        this.AnnounceRefusal(propertyName);
+
+        return false;
+    }
 
     /// <summary>
-    /// Sets the property value and validates it.
+    /// Sets the property value if nothing is wrong with it.
     /// </summary>
     /// <typeparam name="TModel">The type of the model owning the backing field.</typeparam>
     /// <typeparam name="T">The type of the property value.</typeparam>
@@ -143,8 +211,22 @@ public class ViewModelBase
         Action<TModel, T> callback,
         [CallerMemberName] string? propertyName = null)
         where TModel : class
-        => !this.ValidateProperty(propertyName).HasErrors &&
-           base.SetProperty(oldValue, newValue, model, callback, propertyName);
+    {
+        if (!base.SetProperty(oldValue, newValue, model, callback, propertyName))
+        {
+            return false;
+        }
+
+        if (!this.ValidateProperty(propertyName).HasErrors)
+        {
+            return true;
+        }
+
+        callback(model, oldValue);
+        this.AnnounceRefusal(propertyName);
+
+        return false;
+    }
 
     /// <summary>
     /// Sets the property value and validates it.
@@ -166,8 +248,22 @@ public class ViewModelBase
         Action<TModel, T> callback,
         [CallerMemberName] string? propertyName = null)
         where TModel : class
-        => !this.ValidateProperty(propertyName).HasErrors &&
-           base.SetProperty(oldValue, newValue, comparer, model, callback, propertyName);
+    {
+        if (!base.SetProperty(oldValue, newValue, comparer, model, callback, propertyName))
+        {
+            return false;
+        }
+
+        if (!this.ValidateProperty(propertyName).HasErrors)
+        {
+            return true;
+        }
+
+        callback(model, oldValue);
+        this.AnnounceRefusal(propertyName);
+
+        return false;
+    }
 
     /// <summary>
     /// Validates the specified property using the view model's validator.
@@ -206,4 +302,10 @@ public class ViewModelBase
 
         return validity;
     }
+
+    // A refused edit leaves the value as it was, so nobody would otherwise hear that the property
+    // moved — and a control that is showing the refused edit would go on showing a value this view
+    // model does not hold. Saying it moved is what sends the control back to the value.
+    private void AnnounceRefusal(string? propertyName)
+        => this.OnPropertyChanged(propertyName);
 }

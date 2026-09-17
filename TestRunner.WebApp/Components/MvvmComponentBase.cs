@@ -3,23 +3,16 @@ namespace TestRunner.WebApp.Components;
 using System.ComponentModel;
 
 using Fluxor.Blazor.Web.Components;
+
 using Microsoft.AspNetCore.Components;
 
 /// <summary>
 /// A component that redraws itself whenever the view model it is drawn from reports a change.
 /// </summary>
-/// <remarks>
-/// A component that overrides <see cref="CreateViewModel"/> owns what it makes and disposes of it;
-/// one that does not is drawn from the view model a <see cref="Primitives.DataContext{TViewModel}"/>
-/// above it cascades, and leaves the disposing to whoever put it there. Either way the view model is
-/// listened to for as long as the component lives.
-/// </remarks>
 /// <typeparam name="TDataContext">The view model the component is drawn from.</typeparam>
 public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
     where TDataContext : class, INotifyPropertyChanged
 {
-    private bool ownsViewModel = true;
-
     private int renderPending;
 
     private volatile bool disposed;
@@ -33,7 +26,9 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
     /// </exception>
     protected virtual TDataContext ViewModel
     {
-        get => field ??= this.ResolveViewModel();
+        get => field ??= this.DataContext ?? throw new InvalidOperationException(
+            $"No data context was provided to {this.GetType().Name}. Place the component inside " +
+            $"{nameof(Primitives.DataContext<>)} of {typeof(TDataContext).Name}.");
         set;
     }
 
@@ -77,38 +72,9 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
             this.disposed = true;
 
             this.ViewModel.PropertyChanged -= this.OnViewModelPropertyChanged;
-
-            // A cascaded view model outlives the components drawn from it, so only the one this
-            // component made is thrown away here.
-            if (this.ownsViewModel)
-            {
-                switch (this.ViewModel)
-                {
-                    case IAsyncDisposable asyncDisposable:
-                        await asyncDisposable.DisposeAsync();
-                        break;
-
-                    case IDisposable disposable:
-                        disposable.Dispose();
-                        break;
-                }
-            }
         }
 
         await base.DisposeAsyncCore(disposing);
-    }
-
-    private TDataContext ResolveViewModel()
-    {
-        // Making a view model is what claims it, so a component that makes none is drawn from the
-        // cascaded one without ever being in a position to throw it away.
-        this.ownsViewModel = false;
-
-        // Standing outside a data context leaves the component with nothing to draw, which shows up
-        // as a blank where the control should be rather than as a mistake, so it is said out loud.
-        return this.DataContext ?? throw new InvalidOperationException(
-            $"{this.GetType().Name} neither creates a view model nor is placed inside a " +
-            $"{nameof(Primitives.DataContext<TDataContext>)} of {typeof(TDataContext).Name}.");
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

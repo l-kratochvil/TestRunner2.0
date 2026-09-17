@@ -38,7 +38,7 @@ public sealed record Validity(IReadOnlyList<Validity.Issue> Issues)
     /// Gets a value indicating whether what was validated has errors.
     /// </summary>
     public bool HasErrors
-        => !this.Issues.Any(
+        => this.Issues.Any(
             static problem => problem.Severity is Severity.Error);
 
     /// <summary>
@@ -55,10 +55,10 @@ public sealed record Validity(IReadOnlyList<Validity.Issue> Issues)
     /// <returns>The <see cref="Validity"/> of <paramref name="fieldName"/> alone.</returns>
     public Validity For(string fieldName)
         => new(
-            [
-                ..this.Issues.Where(
-                    issue => string.Equals(issue.FieldName, fieldName, StringComparison.Ordinal))
-            ]);
+        [
+            ..this.Issues.Where(
+                issue => string.Equals(issue.FieldName, fieldName, StringComparison.Ordinal))
+        ]);
 
     /// <summary>
     /// One issue found in what was validated.

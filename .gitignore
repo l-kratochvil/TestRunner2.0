@@ -44,7 +44,10 @@ bld/
 Generated\ Files/
 
 # MSTest test Results
-[Tt]est[Rr]esult*/
+# Named in full rather than with a wildcard: "TestResult*" also swallows source folders that merely
+# start the same way, such as a TestResultInspection feature.
+[Tt]est[Rr]esult/
+[Tt]est[Rr]esults/
 [Bb]uild[Ll]og.*
 
 # NUnit

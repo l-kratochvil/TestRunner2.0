@@ -66,7 +66,7 @@ public sealed class AppSettingsStore(IAppPathsProvider paths, IAppLogger logger)
     {
         ArgumentNullException.ThrowIfNull(update);
 
-        AppSettingsState updated = update(this.Current);
+        var updated = update(this.Current);
 
         if (!await this.storage.WriteAsync(updated))
         {

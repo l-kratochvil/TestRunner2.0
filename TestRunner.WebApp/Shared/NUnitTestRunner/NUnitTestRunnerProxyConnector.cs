@@ -2,7 +2,9 @@ namespace TestRunner.WebApp.Shared.NUnitTestRunner;
 
 using System.Diagnostics;
 using System.IO.Pipes;
+
 using StreamJsonRpc;
+
 using TestRunner.Common.Services;
 
 /// <summary>
@@ -56,7 +58,7 @@ internal sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
     public static async Task<NUnitTestRunnerProxyConnector> ConnectAsync(
         CancellationToken cancellationToken = default)
     {
-        string serverPath = Path.Combine(AppContext.BaseDirectory, ServerRelativePath);
+        var serverPath = Path.Combine(AppContext.BaseDirectory, ServerRelativePath);
 
         if (!File.Exists(serverPath))
         {
@@ -66,7 +68,7 @@ internal sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
 
         // A pipe name of its own per connection lets several instances of the application run side
         // by side without one of them answering the other's server.
-        string pipeName = $"TestRunnerProxy_{Guid.NewGuid():N}";
+        var pipeName = $"TestRunnerProxy_{Guid.NewGuid():N}";
 
         var pipe = new NamedPipeServerStream(
             pipeName,
@@ -82,14 +84,14 @@ internal sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
             serverProcess = StartServer(serverPath, pipeName);
 
             using var connectTimeout = new CancellationTokenSource(ConnectTimeout);
-            using CancellationTokenSource linked = CancellationTokenSource.CreateLinkedTokenSource(
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(
                 cancellationToken, connectTimeout.Token);
 
             await pipe.WaitForConnectionAsync(linked.Token);
 
             var handler = new HeaderDelimitedMessageHandler(pipe, pipe, new SystemTextJsonFormatter());
             var rpc = new JsonRpc(handler);
-            INUnitTestRunnerProxy proxy = rpc.Attach<INUnitTestRunnerProxy>();
+            var proxy = rpc.Attach<INUnitTestRunnerProxy>();
 
             rpc.StartListening();
 
@@ -120,13 +122,13 @@ internal sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
 
     private static Process StartServer(string serverPath, string pipeName)
         => Process.Start(new ProcessStartInfo(serverPath, pipeName)
-        {
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WorkingDirectory = Path.GetDirectoryName(serverPath)!,
-        })
-        ?? throw new InvalidOperationException(
-            $"The NUnit proxy server process could not be started: {serverPath}");
+           {
+               UseShellExecute = false,
+               CreateNoWindow = true,
+               WorkingDirectory = Path.GetDirectoryName(serverPath)!,
+           })
+           ?? throw new InvalidOperationException(
+               $"The NUnit proxy server process could not be started: {serverPath}");
 
     private static void StopServer(Process? serverProcess)
     {
@@ -138,9 +140,9 @@ internal sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
             }
         }
         catch (Exception exception) when (exception
-            is InvalidOperationException
-            or System.ComponentModel.Win32Exception
-            or NotSupportedException)
+                                              is InvalidOperationException
+                                                 or System.ComponentModel.Win32Exception
+                                                 or NotSupportedException)
         {
             // A server that is already gone, or that refuses to be killed, must not keep the
             // application from shutting down: there is nothing left to do about it either way.

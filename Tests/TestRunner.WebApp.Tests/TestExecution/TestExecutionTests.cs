@@ -10,6 +10,7 @@ using Moq;
 using NUnit.Framework;
 
 using TestRunner.Common.Model;
+using TestRunner.Common.Services;
 using TestRunner.WebApp.Shared.Stores.TestConfiguration;
 using TestRunner.WebApp.Shared.Stores.TestDiscovery;
 using TestExecutionComponent = TestRunner.WebApp.Features.TestExecution.Components.TestExecution;
@@ -45,6 +46,12 @@ public class TestExecutionTests : Bunit.TestContext
 
         this.Services.AddSingleton(configurationState.Object);
         this.Services.AddSingleton(testDiscoveryStore.Object);
+
+        // The button reaches for both of these as soon as it is drawn — the runner because a click
+        // would need it, the subscriber because the button is a Fluxor component — so neither can
+        // be left out of a fixture that only asks what stops a run.
+        this.Services.AddSingleton(new Mock<INUnitTestRunnerProxy>().Object);
+        this.Services.AddSingleton(new Mock<IActionSubscriber>().Object);
     }
 
     [TearDown]
@@ -113,7 +120,7 @@ public class TestExecutionTests : Bunit.TestContext
         // Given:
         // What is wrong with it is not said here: the configurator is beside the button and says it
         // field by field.
-        this.configuration = new TestConfigurationState();
+        this.configuration = new TestConfigurationState { HasErrors = true };
         this.GivenSelectedTestCase(TestType.ApplicationTest);
 
         // When:
@@ -143,7 +150,7 @@ public class TestExecutionTests : Bunit.TestContext
     }
 
     private static TestConfigurationState ConfigurationSaidToBeRunnable()
-        => new() { HasErrors = true };
+        => new() { HasErrors = false };
 
     private static string Label(IRenderedComponent<TestExecutionComponent> component)
         => component.Find(ButtonSelector).TextContent.Trim();

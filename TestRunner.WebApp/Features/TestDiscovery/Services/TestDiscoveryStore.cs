@@ -43,7 +43,7 @@ public sealed class TestDiscoveryStore(
     /// <returns>The remembered execution paths, empty when there are none.</returns>
     public async Task<IReadOnlyList<string>> ReadRememberedPathsAsync()
     {
-        LocalStorageData data = await this.localStorage.ReadAsync();
+        var data = await this.localStorage.ReadAsync();
         return data.SelectedTestCasesPaths;
     }
 

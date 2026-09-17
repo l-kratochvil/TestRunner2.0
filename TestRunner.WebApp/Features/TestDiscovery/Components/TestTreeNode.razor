@@ -39,7 +39,7 @@
     @if (this.Data.HasChildren && this.Data.IsExpanded)
     {
         <ul class="node-children">
-            @foreach (TestTreeNodeData child in this.Data.Children)
+            @foreach (var child in this.Data.Children)
             {
                 @* Keyed by the path so that a rediscovered tree pairs nodes by identity and not by
                    position, which would move expansion and focus onto a different test. *@

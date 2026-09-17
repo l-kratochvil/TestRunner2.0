@@ -1,7 +1,9 @@
 namespace TestRunner.WebApp.Shared.JsInterop;
 
 using System.Diagnostics;
+
 using DevKit.Core.Extensions.Types;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
@@ -91,7 +93,7 @@ public sealed class JsModuleInterop(
 
         try
         {
-            IJSObjectReference module = await this.moduleTask.Value;
+            var module = await this.moduleTask.Value;
             await module.DisposeAsync();
         }
         catch (Exception exception) when (IsBrowserGone(exception))

@@ -41,10 +41,10 @@ public class JsonFileStorage<TData>(
                 return fallbackFactory();
             }
 
-            await using FileStream stream = File.OpenRead(filePath);
+            await using var stream = File.OpenRead(filePath);
 
             return await JsonSerializer.DeserializeAsync<TData>(stream, SerializerOptions)
-                ?? fallbackFactory();
+                   ?? fallbackFactory();
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
@@ -71,7 +71,7 @@ public class JsonFileStorage<TData>(
                 Directory.CreateDirectory(directoryPath);
             }
 
-            await using FileStream stream = File.Create(filePath);
+            await using var stream = File.Create(filePath);
             await JsonSerializer.SerializeAsync(stream, data, SerializerOptions);
 
             return true;

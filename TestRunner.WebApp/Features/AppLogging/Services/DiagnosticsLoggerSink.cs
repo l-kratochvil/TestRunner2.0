@@ -1,7 +1,9 @@
 namespace TestRunner.WebApp.Features.AppLogging.Services;
 
 using System.Collections.Concurrent;
+
 using Microsoft.Extensions.Logging;
+
 using TestRunner.WebApp.Features.AppLogging.Models;
 using TestRunner.WebApp.Shared.Logging;
 
@@ -32,13 +34,9 @@ public sealed class DiagnosticsLoggerSink(ILoggerFactory loggerFactory) : IAppLo
     /// </remarks>
     event Action<string>? IAppLoggerSink.Failed
     {
-        add
-        {
-        }
+        add { }
 
-        remove
-        {
-        }
+        remove { }
     }
 
     /// <summary>
@@ -56,11 +54,11 @@ public sealed class DiagnosticsLoggerSink(ILoggerFactory loggerFactory) : IAppLo
     {
         ArgumentNullException.ThrowIfNull(entry);
 
-        ILogger logger = this.loggers.GetOrAdd(
+        var logger = this.loggers.GetOrAdd(
             entry.Source,
             source => loggerFactory.CreateLogger(GetCategory(source)));
 
-        LogLevel level = GetLevel(entry.Severity);
+        var level = GetLevel(entry.Severity);
 
         if (string.IsNullOrEmpty(entry.Detail))
         {
