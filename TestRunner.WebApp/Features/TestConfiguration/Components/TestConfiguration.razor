@@ -8,22 +8,22 @@
 @using TestRunner.WebApp.Shared.Stores.TestConfiguration
 @using TestRunner.WebApp.Shared.Stores.TestDiscovery
 
-@inherits Fluxor.Blazor.Web.Components.FluxorComponent
+@inherits TestRunner.WebApp.Components.MvvmComponentBase<TestConfigurationViewModel>
 
 <section class="test-configurator">
     <h2 class="pane-title">Configuration</h2>
 
-    <DataContext Data="@this.viewModel">
+    <DataContext Data="@this.ViewModel">
         <PropertyGrid>
             <PropertyGridRow Label="Runtime version">
                 <BindingSelect
                     Class="configuration-runtime-version"
                     Binding="@(vm => vm.RuntimeVersion)"
-                    Options="this.viewModel.RuntimeVersions"
+                    Options="this.ViewModel.RuntimeVersions"
                     Placeholder="—" />
             </PropertyGridRow>
 
-            @if (this.viewModel.IsRuntimeTest)
+            @if (this.ViewModel.IsRuntimeTest)
             {
                 <PropertyGridRow Label="HW assembly type">
                     <BindingSelect
@@ -40,7 +40,7 @@
                     Binding="@(vm => vm.IsWriteToTestLinkEnabled)" />
             </PropertyGridRow>
 
-            @if (this.viewModel.IsWriteToTestLinkEnabled)
+            @if (this.ViewModel.IsWriteToTestLinkEnabled)
             {               
                 <BindingInput 
                     Class="configuration-ide-version"
@@ -52,8 +52,6 @@
 </section>
 
 @code {
-    private TestConfigurationViewModel viewModel = null!;
-
     /// <summary>
     /// Gets or sets the configuration this component reads and edits.
     /// </summary>
@@ -85,13 +83,13 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        this.ViewModel.Initialize();
+    }
 
-        this.viewModel = new TestConfigurationViewModel(
+    protected override TestConfigurationViewModel CreateViewModel()
+        => new (
             this.TestConfigurationState,
             this.AppSettingsStore,
             this.LoggerFactory,
             this.Dispatcher);
-
-        this.viewModel.Initialize();
-    }
 }

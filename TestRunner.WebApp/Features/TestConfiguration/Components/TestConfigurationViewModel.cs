@@ -1,8 +1,11 @@
 namespace TestRunner.WebApp.Features.TestConfiguration.Components;
 
 using System.Text.RegularExpressions;
+
 using DevKit.Core.Interfaces;
+
 using FluentValidation;
+
 using Fluxor;
 
 using TestRunner.WebApp.Shared.Domain;
@@ -21,7 +24,6 @@ using TestRunner.WebApp.Shared.ViewModel;
 /// somewhere that is not the state. Knows nothing about Fluxor or the browser, so the rules of
 /// editing can be exercised on their own.
 /// </remarks>
-/// <param name="validator">Says whether the values as they stand can be run with.</param>
 public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
 {
     private readonly IState<TestConfigurationState> state;

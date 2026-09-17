@@ -9,7 +9,6 @@ using Microsoft.JSInterop;
 using TestRunner.WebApp.Application.Paths;
 using TestRunner.WebApp.Shared.JsInterop;
 using TestRunner.WebApp.Shared.NUnitTestRunner;
-using TestRunner.WebApp.Shared.Storage;
 using TestRunner.WebApp.Shared.Stores;
 using TestRunner.WebApp.Shared.Stores.TestConfiguration;
 
@@ -31,11 +30,28 @@ public static class InitServicesExtension
         /// <returns>The service collection, to allow chaining.</returns>
         public IServiceCollection InitSharedServices()
             => services
+                .InitAppOptions()
                 .AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>()
                 .AddSingleton<BrowserLogger>()
                 .AddSingleton<IAppPathsProvider, AppPathsProvider>()
                 .InitFluxor()
                 .InitNUnitTestRunner();
+
+        public IServiceCollection InitAppOptions()
+        {
+            services
+                .AddOptions<AppOptions>()
+                .BindConfiguration(
+                    AppOptions.SectionName,
+                    static binderOptions => binderOptions.ErrorOnUnknownConfiguration = true)
+                .Validate(
+                    static options => !string.IsNullOrWhiteSpace(options.LocalAppDataPath)
+                                      && Path.IsPathFullyQualified(options.LocalAppDataPath),
+                    $"'{AppOptions.SectionName}:{nameof(AppOptions.LocalAppDataPath)}' has to be an absolute path.")
+                .ValidateOnStart();
+
+            return services;
+        }
 
         private IServiceCollection InitNUnitTestRunner()
             => services

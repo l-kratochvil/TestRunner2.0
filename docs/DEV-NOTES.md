@@ -9,6 +9,7 @@
 - Zautomatizování kroků testera - základní
 - Vyřešit Deploy
 - TestDiscovery: Nahradit store za Fluxor
+- Přejmenovat na Zat.Tests.Runner
 - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
 - Lokalizace textů napříč aplikacemi
 - Vylepšení vzhledu
