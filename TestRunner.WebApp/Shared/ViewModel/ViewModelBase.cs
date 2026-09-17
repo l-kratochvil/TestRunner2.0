@@ -89,7 +89,6 @@ public class ViewModelBase
         }
 
         field = refused;
-        this.AnnounceRefusal(propertyName);
 
         return false;
     }
@@ -122,7 +121,6 @@ public class ViewModelBase
         }
 
         field = refused;
-        this.AnnounceRefusal(propertyName);
 
         return false;
     }
@@ -155,7 +153,6 @@ public class ViewModelBase
         // Where the value is kept is the caller's to say, so taking the edit back out is asking the
         // same callback for the value that was there before.
         callback(oldValue);
-        this.AnnounceRefusal(propertyName);
 
         return false;
     }
@@ -188,7 +185,6 @@ public class ViewModelBase
         }
 
         callback(oldValue);
-        this.AnnounceRefusal(propertyName);
 
         return false;
     }
@@ -223,7 +219,6 @@ public class ViewModelBase
         }
 
         callback(model, oldValue);
-        this.AnnounceRefusal(propertyName);
 
         return false;
     }
@@ -260,7 +255,6 @@ public class ViewModelBase
         }
 
         callback(model, oldValue);
-        this.AnnounceRefusal(propertyName);
 
         return false;
     }
@@ -302,10 +296,4 @@ public class ViewModelBase
 
         return validity;
     }
-
-    // A refused edit leaves the value as it was, so nobody would otherwise hear that the property
-    // moved — and a control that is showing the refused edit would go on showing a value this view
-    // model does not hold. Saying it moved is what sends the control back to the value.
-    private void AnnounceRefusal(string? propertyName)
-        => this.OnPropertyChanged(propertyName);
 }

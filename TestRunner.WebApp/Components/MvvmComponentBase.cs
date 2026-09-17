@@ -5,6 +5,7 @@ using System.ComponentModel;
 using Fluxor.Blazor.Web.Components;
 
 using Microsoft.AspNetCore.Components;
+using TestRunner.WebApp.Shared.ViewModel;
 
 /// <summary>
 /// A component that redraws itself whenever the view model it is drawn from reports a change.
@@ -58,6 +59,12 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
     protected override void OnInitialized()
     {
         this.ViewModel.PropertyChanged += this.OnViewModelPropertyChanged;
+
+        if (this.ViewModel is INotifyValidityInfo notifyValidityInfo)
+        {
+            notifyValidityInfo.HasErrorsChanged += this.OnViewModelHasErrorsChanged;
+        }
+
         base.OnInitialized();
     }
 
@@ -72,6 +79,11 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
             this.disposed = true;
 
             this.ViewModel.PropertyChanged -= this.OnViewModelPropertyChanged;
+
+            if (this.ViewModel is INotifyValidityInfo notifyValidityInfo)
+            {
+                notifyValidityInfo.HasErrorsChanged -= this.OnViewModelHasErrorsChanged;
+            }
         }
 
         await base.DisposeAsyncCore(disposing);
@@ -80,6 +92,44 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (this.disposed || !this.ShouldRerenderOn(e.PropertyName))
+        {
+            return;
+        }
+
+        // A view model fed by a store is told of a change on the thread of whoever made it, which
+        // is somebody else's circuit as often as not, so several threads can arrive here at once.
+        // Exchanging the flag rather than reading it and then setting it is what makes one render
+        // out of a burst a guarantee instead of a likelihood.
+        if (Interlocked.Exchange(ref this.renderPending, 1) is 1)
+        {
+            return;
+        }
+
+        try
+        {
+            _ = this.InvokeAsync(() =>
+            {
+                // Cleared before drawing, so that a change raised while the component renders asks
+                // for the next render instead of being swallowed by the one under way.
+                Interlocked.Exchange(ref this.renderPending, 0);
+
+                if (!this.disposed)
+                {
+                    this.StateHasChanged();
+                }
+            });
+        }
+        catch (ObjectDisposedException)
+        {
+            // The circuit went away between the change and this call. Letting the exception out
+            // would stop the change reaching the listeners after this one.
+            Interlocked.Exchange(ref this.renderPending, 0);
+        }
+    }
+
+    private void OnViewModelHasErrorsChanged(bool hasErrors)
+    {
+        if (this.disposed)
         {
             return;
         }
