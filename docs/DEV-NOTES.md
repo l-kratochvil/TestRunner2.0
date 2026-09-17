@@ -18,6 +18,7 @@
 
 - Zrušit ukládání výsledků do souboru: Řeší se už v Z200Tests dll a je to redundatní operace
 - Update nuget balíčků solutionu
+- Změna "Main" v menu na ikonku "home".
 - Playwright/vitest E2E tests
 
 ### LoPrio
@@ -58,6 +59,12 @@
 - Po schválení prorotypu nastylovat komplet
 
 ### MidPrio - Detaily
+
+#### Změna "Main" v menu na ikonku "home"
+
+- Použít toto řešení:
+  - balíčky: a. Blazicons (některé sady nejsou free), b. MudBlazor
+  - css: a. Bootstrap Icons; b. Font Awesome (některé sady nejsou free)
 
 #### Playwright/vitest E2E tests
 

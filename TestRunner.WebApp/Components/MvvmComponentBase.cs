@@ -18,25 +18,24 @@ using Microsoft.AspNetCore.Components;
 public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
     where TDataContext : class, INotifyPropertyChanged
 {
-    // Tidying up reaches the view model through the field and not through the property, so that
-    // disposal does not make the very thing it is about to throw away.
-    private TDataContext? viewModel;
-
-    private bool ownsViewModel;
+    private bool ownsViewModel = true;
 
     private int renderPending;
 
     private volatile bool disposed;
 
     /// <summary>
-    /// Gets the view model this component is drawn from, found on first use.
+    /// Gets or sets the view model this component is drawn from, found on first use.
     /// </summary>
     /// <exception cref="InvalidOperationException">
     /// The component neither makes a view model nor stands under a
     /// <see cref="Primitives.DataContext{TViewModel}"/> that cascades one.
     /// </exception>
-    protected TDataContext ViewModel
-        => this.viewModel ??= this.ResolveViewModel();
+    protected virtual TDataContext ViewModel
+    {
+        get => field ??= this.ResolveViewModel();
+        set;
+    }
 
     /// <summary>
     /// Gets or sets the view model cascaded to this component, if there is one.
@@ -47,16 +46,6 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
     /// </remarks>
     [CascadingParameter]
     private TDataContext? DataContext { get; set; }
-
-    /// <summary>
-    /// Creates the view model this component is drawn from.
-    /// </summary>
-    /// <returns>
-    /// The view model, which this component owns from then on, or <see langword="null"/> to be
-    /// drawn from the one cascaded to it.
-    /// </returns>
-    protected virtual TDataContext? CreateViewModel()
-        => null;
 
     /// <summary>
     /// Says whether a change of the named property is one this component is drawn from.
@@ -87,24 +76,21 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
         {
             this.disposed = true;
 
-            if (this.viewModel is not null)
+            this.ViewModel.PropertyChanged -= this.OnViewModelPropertyChanged;
+
+            // A cascaded view model outlives the components drawn from it, so only the one this
+            // component made is thrown away here.
+            if (this.ownsViewModel)
             {
-                this.viewModel.PropertyChanged -= this.OnViewModelPropertyChanged;
-
-                // A cascaded view model outlives the components drawn from it, so only the one this
-                // component made is thrown away here.
-                if (this.ownsViewModel)
+                switch (this.ViewModel)
                 {
-                    switch (this.viewModel)
-                    {
-                        case IAsyncDisposable asyncDisposable:
-                            await asyncDisposable.DisposeAsync();
-                            break;
+                    case IAsyncDisposable asyncDisposable:
+                        await asyncDisposable.DisposeAsync();
+                        break;
 
-                        case IDisposable disposable:
-                            disposable.Dispose();
-                            break;
-                    }
+                    case IDisposable disposable:
+                        disposable.Dispose();
+                        break;
                 }
             }
         }
@@ -116,12 +102,7 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
     {
         // Making a view model is what claims it, so a component that makes none is drawn from the
         // cascaded one without ever being in a position to throw it away.
-        if (this.CreateViewModel() is { } created)
-        {
-            this.ownsViewModel = true;
-
-            return created;
-        }
+        this.ownsViewModel = false;
 
         // Standing outside a data context leaves the component with nothing to draw, which shows up
         // as a blank where the control should be rather than as a mistake, so it is said out loud.

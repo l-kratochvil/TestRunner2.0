@@ -32,10 +32,10 @@ using TestConfiguratorComponent = TestRunner.WebApp.Features.TestConfiguration.C
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class TestConfiguratorTests : Bunit.TestContext
 {
-    private const string RuntimeVersionSelector = ".configuration-runtime-version";
-    private const string TestStationSelector = ".configuration-test-station";
-    private const string TestLinkSelector = ".configuration-testlink";
-    private const string IdeVersionSelector = ".configuration-ide-version";
+    private const string RuntimeVersionSelector = ".input-runtime-version";
+    private const string TestStationSelector = ".input-hw-assembly-type";
+    private const string TestLinkSelector = ".input-write-to-testlink-enabled";
+    private const string IdeVersionSelector = ".input-ide-version";
 
     private TestDiscoveryState testSelection = new([]);
     private TestConfigurationState configuration = new();

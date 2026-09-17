@@ -2,7 +2,6 @@
 
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 
 using TestRunner.App.Common;
 using TestRunner.App.Stores;

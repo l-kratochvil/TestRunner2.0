@@ -1,12 +1,8 @@
 @* Feature: TestConfiguration — "the user can configure a test run". *@
 
 @using System.Linq
-@using Fluxor
 
 @using TestRunner.WebApp.Shared.Domain
-@using TestRunner.WebApp.Shared.Stores.AppSettings
-@using TestRunner.WebApp.Shared.Stores.TestConfiguration
-@using TestRunner.WebApp.Shared.Stores.TestDiscovery
 
 @inherits TestRunner.WebApp.Components.MvvmComponentBase<TestConfigurationViewModel>
 
@@ -17,7 +13,7 @@
         <PropertyGrid>
             <PropertyGridRow Label="Runtime version">
                 <BindingSelect
-                    Class="configuration-runtime-version"
+                    Class="input-runtime-version"
                     Binding="@(vm => vm.RuntimeVersion)"
                     Options="this.ViewModel.RuntimeVersions"
                     Placeholder="—" />
@@ -27,7 +23,7 @@
             {
                 <PropertyGridRow Label="HW assembly type">
                     <BindingSelect
-                        Class="configuration-test-station"
+                        Class="input-hw-assembly-type"
                         Binding="@(vm => vm.TestedHwAssembly)"
                         Options="TestStationLabels.Offered.Cast<TestedHwAssemblyType?>()"
                         Placeholder="—" />
@@ -36,14 +32,14 @@
 
             <PropertyGridRow Label="Write to TestLink">
                 <BindingCheckbox 
-                    Class="configuration-testlink"
+                    Class="input-write-to-testlink-enabled" @* TODO: Better class name *@
                     Binding="@(vm => vm.IsWriteToTestLinkEnabled)" />
             </PropertyGridRow>
 
             @if (this.ViewModel.IsWriteToTestLinkEnabled)
             {               
                 <BindingInput 
-                    Class="configuration-ide-version"
+                    Class="input-ide-version"
                     Binding="@(vm => vm.IdeVersion)"
                     Placeholder="X.Y.Z" />
             }
@@ -52,32 +48,8 @@
 </section>
 
 @code {
-    /// <summary>
-    /// Gets or sets the configuration this component reads and edits.
-    /// </summary>
     [Inject]
-    private IState<TestConfigurationState> TestConfigurationState { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets the dispatcher configuration changes are sent through.
-    /// </summary>
-    [Inject]
-    private IDispatcher Dispatcher { get; set; } = null!;
-
-    [Inject]
-    private IAppLoggerFactory LoggerFactory { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets the store the test selection is read from.
-    /// </summary>
-    [Inject]
-    private ITestDiscoveryStore TestDiscoveryStore { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets the store the application settings are read from.
-    /// </summary>
-    [Inject]
-    private IAppSettingsStore AppSettingsStore { get; set; } = null!;
+    protected override TestConfigurationViewModel ViewModel { get; set; } = null!;
 
     /// <inheritdoc/>
     protected override void OnInitialized()
@@ -85,11 +57,4 @@
         base.OnInitialized();
         this.ViewModel.Initialize();
     }
-
-    protected override TestConfigurationViewModel CreateViewModel()
-        => new (
-            this.TestConfigurationState,
-            this.AppSettingsStore,
-            this.LoggerFactory,
-            this.Dispatcher);
 }

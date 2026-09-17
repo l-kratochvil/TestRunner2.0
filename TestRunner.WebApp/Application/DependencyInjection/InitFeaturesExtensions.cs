@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using TestRunner.WebApp.Features.AppLogging.Services;
 using TestRunner.WebApp.Features.AppSettings.Services;
+using TestRunner.WebApp.Features.TestConfiguration.Components;
 using TestRunner.WebApp.Features.TestDiscovery.Services;
 using TestRunner.WebApp.Shared.Logging;
 using TestRunner.WebApp.Shared.Stores.AppSettings;
@@ -51,6 +52,7 @@ public static class InitFeaturesExtensions
                 .AddHostedService(static provider => provider.GetRequiredService<AppSettingsStore>());
 
         private IServiceCollection InitTestConfiguration()
-            => services;
+            => services
+                .AddScoped<TestConfigurationViewModel>();
     }
 }
