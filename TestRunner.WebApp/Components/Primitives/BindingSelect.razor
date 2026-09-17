@@ -1,7 +1,8 @@
 @* A choice among offered values, bound to one property of the view model cascaded to it.
 
-   What is offered is handed over as values rather than as text, so the choice written back is the
-   value itself and never something that has to be read back out of the markup. *@
+   What is offered is handed over as values rather than as text, so an option is named by the place
+   it was drawn at and the choice written back is the value itself — never something that has to be
+   read back out of the markup. *@
 
 @using System.ComponentModel
 @using System.Globalization
@@ -20,12 +21,16 @@
 <Validated Validity="this.Validity">
     <select @attributes="this.AdditionalAttributes"
            class="@($"form-select form-select-sm {this.Class}")"
-           @onchange="this.OnSelectedAsync">
+           @bind:get="chosenIndex"
+           @bind:set="this.ChooseAsync"
+           @bind:event="@this.BindingEventName">
         @if (this.Placeholder is not null || chosenIndex is null)
         {
             @* Nothing chosen is drawn as an option of its own, because a browser left without one
                shows the first option instead and the tester reads a value the view model does not
-               hold. Where nothing may be chosen it is only there to be seen. *@
+               hold. It is the one option that has to say it is chosen, because a choice of nothing
+               is not a place among the offered values for the browser to be pointed at. Where
+               nothing may be chosen it is only there to be seen. *@
             <option value=""
                     selected="@(chosenIndex is null)"
                     disabled="@(this.Placeholder is null)"
@@ -36,7 +41,7 @@
         {
             @* An option is named by its place among the offered values, because that is the one
                name every value has — including one the browser could not spell out as text. *@
-            <option value="@index" selected="@(index == chosenIndex)">@this.LabelOf(this.offered[index])</option>
+            <option value="@index">@this.LabelOf(this.offered[index])</option>
         }
     </select>
 </Validated>
@@ -116,14 +121,12 @@
             ? label(option)
             : BindConverter.FormatValue(option, CultureInfo.CurrentCulture)?.ToString() ?? string.Empty;
 
-    private async Task OnSelectedAsync(ChangeEventArgs args)
+    private async Task ChooseAsync(int? index)
     {
-        // The browser hands the chosen option back by the place it was drawn at, so anything else
-        // — the placeholder among it — is the tester choosing none of the offered values.
-        var value = int.TryParse(args.Value as string, CultureInfo.InvariantCulture, out var index)
-                && index >= 0
-                && index < this.offered.Count
-            ? this.offered[index]
+        // An option is handed back by the place it was drawn at, so anything else — the
+        // placeholder among it — is the tester choosing none of the offered values.
+        var value = index is { } chosen && chosen >= 0 && chosen < this.offered.Count
+            ? this.offered[chosen]
             : default;
 
         await this.WriteAsync(value);

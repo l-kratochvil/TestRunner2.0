@@ -43,6 +43,17 @@ public abstract class BindingComponentBase<TViewModel, TBindingValue>
     [Parameter]
     public EventCallback<TBindingValue> OnChange { get; set; }
 
+    /// <summary>
+    /// Gets or sets when an edit is written to the view model.
+    /// </summary>
+    /// <remarks>
+    /// Left unset, an edit is heard once the tester has finished making it, which is what a binding
+    /// means on its own. A page that wants the view model to keep up with every keystroke — to have
+    /// what is wrong with the value said while it is still being typed — asks for it here.
+    /// </remarks>
+    [Parameter]
+    public BindingEvent BindingEvent { get; set; }
+
     [Parameter]
     public string? Class { get; set; }
 
@@ -61,6 +72,17 @@ public abstract class BindingComponentBase<TViewModel, TBindingValue>
     /// Gets the property <see cref="Binding"/> names.
     /// </summary>
     protected PropertyInfo BoundProperty { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the name <see cref="BindingEvent"/> is known by in the browser.
+    /// </summary>
+    /// <remarks>
+    /// What the control renders is told which event to listen for by name, because that is all a
+    /// binding takes — which is why the choice is offered as a <see cref="BindingEvent"/> and named
+    /// here rather than written out in the markup.
+    /// </remarks>
+    protected string BindingEventName
+        => this.BindingEvent.ToEventName();
 
     /// <summary>
     /// Gets the value to show.

@@ -1,10 +1,11 @@
 @* An input bound to one property of the view model cascaded to it.
 
    What the tester types is text, so the input is what a value that is not text is converted through
-   on its way to the view model and back. *@
+   on its way to the view model and back. What does not convert is not something the view model
+   could hold, so the input goes back to showing the value that is held rather than leaving the
+   tester reading one the view model never took. *@
 
 @using System.ComponentModel
-@using System.Globalization
 
 @typeparam TDataContext where TDataContext : class, INotifyPropertyChanged
 @typeparam TBindingValue
@@ -12,24 +13,9 @@
 @inherits BindingComponentBase<TDataContext, TBindingValue>
 
 <Validated Validity="this.Validity">
-    @* TODO: Use @bind instead of value and @oninput? *@
     <input @attributes="this.AdditionalAttributes"
            class="@($"form-control form-control-sm {this.Class}")"
-           value="@BindConverter.FormatValue(this.CurrentValue)"
-           @oninput="this.OnInputAsync" />
+           @bind:get="this.CurrentValue"
+           @bind:set="this.WriteAsync"
+           @bind:event="@this.BindingEventName" />
 </Validated>
-
-@code {
-    private async Task OnInputAsync(ChangeEventArgs args)
-    {
-        // The browser hands every edit over as text, so anything that is not text has to be
-        // converted before it can be written back. What does not convert is not something the view
-        // model could hold, and is left where the tester typed it instead of overwriting it.
-        if (!BindConverter.TryConvertTo(args.Value, CultureInfo.CurrentCulture, out TBindingValue? value))
-        {
-            return;
-        }
-
-        await this.WriteAsync(value);
-    }
-}
