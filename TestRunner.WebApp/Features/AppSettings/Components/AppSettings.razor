@@ -1,59 +1,12 @@
 @* Feature: AppSettings — "the user can view and change persistent application settings". *@
 
-@using TestRunner.WebApp.Features.AppSettings.Models
 @using TestRunner.WebApp.Features.AppSettings.Services
-@using TestRunner.WebApp.Shared.Validation
 
 <section class="settings-editor">
     <h2 class="pane-title">Settings</h2>
-
-    @* DISABLED
-    <PropertyGrid>
-        One folder, holding one folder per installed runtime version, which is where the test
-        configurator reads its choices from. 
-       <PropertyGridRow Label="IDE install folder"
-                        Validity="@this.validity.For(nameof(IAppSettingsValidationSource.IdeInstallFolderPath))">
-         <input type="text"
-                class="form-control form-control-sm settings-ide-install-folder"
-                value="@this.IdeInstallFolderPath"
-                @oninput="this.OnIdeInstallFolderPathChanged" />
-        </PropertyGridRow>
-    </PropertyGrid>
-
-    <div class="settings-actions">
-        <button type="button"
-                class="btn btn-sm btn-primary"
-                disabled="@(!this.CanSave)"
-                @onclick="this.OnSaveAsync">
-            Save
-        </button>
-
-        @if (this.saveStatus is SaveStatus.Saved)
-        {
-            <span class="settings-saved" role="status">Saved.</span>
-        }
-
-        @if (this.saveStatus is SaveStatus.Failed)
-        {
-            <span class="settings-save-failed" role="alert">
-                The settings could not be written to their file — see the log.
-            </span>
-        }
-    </div>
-
-    *@
 </section>
 
 @code {
-    private Validity validity = Validity.Valid;
-    private SaveStatus saveStatus;
-
-    /// <summary>
-    /// Gets the IDE install folder path as it is being edited, which is not what is saved until the
-    /// tester says so.
-    /// </summary>
-    public string IdeInstallFolderPath { get; private set; } = string.Empty;
-
     /// <summary>
     /// Gets or sets the store the application settings are read from and saved to.
     /// </summary>

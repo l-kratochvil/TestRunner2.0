@@ -30,18 +30,20 @@
                 </PropertyGridRow>
             }
 
-            <PropertyGridRow Label="Write to TestLink">
+            <PropertyGridRow Label="Report to TestLink">
                 <BindingCheckbox 
-                    Class="input-write-to-testlink-enabled" @* TODO: Better class name *@
-                    Binding="@(vm => vm.IsWriteToTestLinkEnabled)" />
+                    Class="input-report-to-testlink"
+                    Binding="@(vm => vm.IsTestLinkReportEnabled)" />
             </PropertyGridRow>
 
-            @if (this.ViewModel.IsWriteToTestLinkEnabled)
+            @if (this.ViewModel.IsTestLinkReportEnabled)
             {               
-                <BindingInput 
-                    Class="input-ide-version"
-                    Binding="@(vm => vm.IdeVersion)"
-                    Placeholder="X.Y.Z" />
+                <PropertyGridRow Label="IDE version">
+                    <BindingInput 
+                        Class="input-ide-version"
+                        Binding="@(vm => vm.IdeVersion)"
+                        Placeholder="X.Y.Z" />               
+                </PropertyGridRow>
             }
         </PropertyGrid>
     </DataContext>

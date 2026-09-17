@@ -2,12 +2,14 @@
 
 @using Fluxor
 
-@using TestRunner.WebApp.Shared.Stores.TestConfiguration
-@using TestRunner.WebApp.Shared.Stores.TestDiscovery
-
 @using CommunityToolkit.Mvvm.Input;
 
 @using DevKit.Mvvm.ViewModel.Commands;
+
+@using TestRunner.Common.Services;
+@using TestRunner.WebApp.Shared.Stores.TestConfiguration
+@using TestRunner.WebApp.Shared.Stores.TestDiscovery
+
 
 @inherits Fluxor.Blazor.Web.Components.FluxorComponent
 @implements IDisposable
@@ -21,44 +23,53 @@
 </button>
 
 @code {
-    // TODO: Get this from INUnitTestRunnerProxy?
+    // TODO: Move most code to viewmodel (see TestConfigurationViewModel)
+
+    // TODO: Get this value from INUnitTestRunnerProxy?
     private bool isRunning;
 
-    /// <summary>
-    /// Gets or sets the configuration a run would use, read to tell whether it can start.
-    /// </summary>
+    private CancellationTokenSource? testRunCts;
+
+    [Inject]
+    private INUnitTestRunnerProxy NUnitTestRunnerProxy { get; set; } = null!; 
+
     [Inject]
     private IState<TestConfigurationState> TestConfigurationState { get; set; } = null!;
 
-    /// <summary>
-    /// Gets or sets the store the test selection is read from.
-    /// </summary>
     [Inject]
     private ITestDiscoveryStore TestDiscoveryStore { get; set; } = null!;
 
-    // TODO: Move to viewmodel
     private ExtendedCommand CurrentCommand
         => this.isRunning ? this.StopTestCommand : this.StartTestCommand;
 
     private ExtendedCommand StopTestCommand
         => field ??= new ExtendedCommand(
-                command: new RelayCommand(() => 
-                { 
-                    // TODO: Stop the test
-
-                    this.isRunning = false;
-                },
+                command: new RelayCommand(
+                    () => 
+                    { 
+                        this.testRunCts?.Cancel();
+                        this.isRunning = false;
+                    },
                 canExecute: () => this.isRunning),
             "Stop");
     
     private ExtendedCommand StartTestCommand
         => field ??= new ExtendedCommand(
-                command: new RelayCommand(() => 
-                { 
-                    // TODO: Start the test
+                command: new AsyncRelayCommand(
+                    async () => 
+                    { 
+                        this.testRunCts = new CancellationTokenSource();
 
-                    this.isRunning = true;
-                },
+                        await this.NUnitTestRunnerProxy.RunTestAsync(
+                            this.TestDiscoveryStore.Current.SelectedTestCases,
+                            this.testRunCts.Token);
+
+                            // TODO: Report result:
+                            // - The report feature should handle testlink reporting and showing it in the UI
+                            // - Maybe it uses fluxor Effect?
+
+                        this.isRunning = true;
+                    },
                 canExecute: () => 
                     !this.isRunning && 
                     TestsSelected &&

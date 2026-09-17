@@ -11,7 +11,7 @@ using TestRunner.WebApp.Shared.Domain;
 /// <remarks>
 /// Belongs to one browser and is remembered there.
 /// </remarks>
-/// <param name="IsWriteToTestLinkEnabled">Whether the test result is written to TestLink.</param>
+/// <param name="IsTestLinkReportEnabled">Whether the test result is written to TestLink.</param>
 /// <param name="IdeVersion">
 /// IDE version the test result is filed under in TestLink. Only validated versions are kept here.
 /// </param>
@@ -22,7 +22,7 @@ using TestRunner.WebApp.Shared.Domain;
 /// <param name="TestedHwAssembly">Test station the test run uses.</param>
 [FeatureState]
 public record TestConfigurationState(
-    bool IsWriteToTestLinkEnabled,
+    bool IsTestLinkReportEnabled,
     Version? IdeVersion,
     string? RuntimeVersion,
     TestedHwAssemblyType? TestedHwAssembly)

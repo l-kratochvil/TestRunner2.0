@@ -34,7 +34,7 @@ public class TestConfiguratorTests : Bunit.TestContext
 {
     private const string RuntimeVersionSelector = ".input-runtime-version";
     private const string TestStationSelector = ".input-hw-assembly-type";
-    private const string TestLinkSelector = ".input-write-to-testlink-enabled";
+    private const string TestLinkSelector = ".input-report-to-testlink";
     private const string IdeVersionSelector = ".input-ide-version";
 
     private TestDiscoveryState testSelection = new([]);

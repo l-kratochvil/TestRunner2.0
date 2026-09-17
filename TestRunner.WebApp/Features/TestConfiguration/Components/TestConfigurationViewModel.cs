@@ -116,7 +116,7 @@ public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
                 }));
     }
 
-    public bool IsWriteToTestLinkEnabled
+    public bool IsTestLinkReportEnabled
     {
         get;
         set => this.SetProperty(
@@ -125,7 +125,7 @@ public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
             value => this.dispatcher.Dispatch(
                 new DataChangedAction
                 {
-                    NewIsWriteToTestLinkEnabled = new ValueChange<bool>(value),
+                    NewIsTestLinkReportEnabled = new ValueChange<bool>(value),
                 }));
     } = false;
 
@@ -135,7 +135,7 @@ public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
         this.IdeVersion = this.state.Value.IdeVersion;
         this.RuntimeVersion = this.state.Value.RuntimeVersion ?? string.Empty;
         this.TestedHwAssembly = this.state.Value.TestedHwAssembly;
-        this.IsWriteToTestLinkEnabled = this.state.Value.IsWriteToTestLinkEnabled;
+        this.IsTestLinkReportEnabled = this.state.Value.IsTestLinkReportEnabled;
     }
 
     [GeneratedRegex(@"^\d+")]

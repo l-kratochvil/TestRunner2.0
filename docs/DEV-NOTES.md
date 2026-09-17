@@ -9,7 +9,7 @@
 - Zautomatizování kroků testera - základní
 - Vyřešit Deploy
 - TestDiscovery: Nahradit store za Fluxor
-- Přejmenovat na Zat.Tests.Runner
+- Přejmenovat na Zat.Tests.Runner?
 - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
 - Lokalizace textů napříč aplikacemi
 - Vylepšení vzhledu
@@ -18,6 +18,8 @@
 
 - Zrušit ukládání výsledků do souboru: Řeší se už v Z200Tests dll a je to redundatní operace
 - Update nuget balíčků solutionu
+- Refactor TestDiscovery feature
+- Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
 - Změna "Main" v menu na ikonku "home".
 - Playwright/vitest E2E tests
 
@@ -65,6 +67,13 @@
 - Použít toto řešení:
   - balíčky: a. Blazicons (některé sady nejsou free), b. MudBlazor
   - css: a. Bootstrap Icons; b. Font Awesome (některé sady nejsou free)
+
+#### Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
+- Rozšířit o testy:
+    - Komponenta má mít data kontext
+    - Chování komponenty, když nebyl poskytnut datový kontext
+    - Binding z viewmodel funguje
+    - Chyby z viewmodel jsou propagovány do komponenty
 
 #### Playwright/vitest E2E tests
 
