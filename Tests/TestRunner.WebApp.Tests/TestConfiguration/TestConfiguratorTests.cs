@@ -1,5 +1,7 @@
 namespace TestRunner.WebApp.Tests.TestConfiguration;
 
+using System.Linq;
+
 using Bunit;
 
 using Fluxor;
@@ -7,17 +9,14 @@ using Fluxor;
 using Microsoft.Extensions.DependencyInjection;
 
 using Moq;
+
 using NUnit.Framework;
 
-using System.Linq;
-
 using TestRunner.Common.Model;
-using TestRunner.WebApp.Features.TestConfiguration.Models;
-using TestRunner.WebApp.Features.TestConfiguration.Services;
 using TestRunner.WebApp.Shared.Stores.AppSettings;
 using TestRunner.WebApp.Shared.Stores.TestConfiguration;
 using TestRunner.WebApp.Shared.Stores.TestDiscovery;
-using TestRunner.WebApp.Shared.Validation;
+
 using TestConfiguratorComponent = TestRunner.WebApp.Features.TestConfiguration.Components.TestConfigurator;
 
 /// <summary>
@@ -39,6 +38,7 @@ public class TestConfiguratorTests : Bunit.TestContext
 
     private TestDiscoveryState testSelection = new([]);
     private TestConfigurationState configuration = new();
+
     private InstalledRuntimeVersions installedRuntimeVersions =
         new(["7", "6"], IsInstallFolderReadable: true);
 

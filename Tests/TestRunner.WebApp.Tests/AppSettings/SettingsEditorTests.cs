@@ -7,14 +7,13 @@ using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 
 using Moq;
+
 using NUnit.Framework;
 
 using TestRunner.WebApp.Application.Paths;
 using TestRunner.WebApp.Features.AppSettings.Services;
 using TestRunner.WebApp.Shared.Logging;
-using TestRunner.WebApp.Shared.Storage;
-using TestRunner.WebApp.Shared.Stores.AppSettings;
-using TestRunner.WebApp.Shared.Validation;
+
 using SettingsEditorComponent = TestRunner.WebApp.Features.AppSettings.Components.AppSettings;
 
 /// <summary>

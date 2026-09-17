@@ -5,7 +5,6 @@ using DevKit.Core.Utils;
 
 using StreamJsonRpc;
 
-using TestRunner.Common;
 using TestRunner.NUnitTestRunnerProxy;
 
 internal static class Program

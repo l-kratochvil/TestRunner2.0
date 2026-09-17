@@ -10,7 +10,6 @@ using Microsoft.Extensions.Options;
 using NUnit.Framework;
 
 using TestRunner.WebApp.Application.Logging;
-using TestRunner.WebApp.Application.Paths;
 
 [TestFixture]
 public class InitLoggingExtensionsTests

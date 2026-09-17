@@ -28,4 +28,5 @@
   <Project Path="TestRunner.WebApp/TestRunner.WebApp.csproj">
     <BuildDependency Project="TestRunner.NUnitTestRunnerProxy/TestRunner.NUnitTestRunnerProxy.csproj" />
   </Project>
+  <Project Path="Zat.Z2xxTests.Common/Zat.Z2xxTests.Common.csproj" />
 </Solution>

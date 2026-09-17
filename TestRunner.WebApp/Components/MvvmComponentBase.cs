@@ -5,7 +5,6 @@ using System.ComponentModel;
 using Fluxor.Blazor.Web.Components;
 
 using Microsoft.AspNetCore.Components;
-using TestRunner.WebApp.Shared.ViewModel;
 
 /// <summary>
 /// A component that redraws itself whenever the view model it is drawn from reports a change.

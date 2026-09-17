@@ -7,11 +7,8 @@ using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 
-using DevKit.Core.Utils;
-
 using StreamJsonRpc;
 
-using TestRunner.Common;
 using TestRunner.Common.Services;
 
 /// <summary>

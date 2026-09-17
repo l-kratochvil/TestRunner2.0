@@ -1,6 +1,5 @@
 using TestRunner.WebApp.Application.DependencyInjection;
 using TestRunner.WebApp.Application.Logging;
-using TestRunner.WebApp.Application.Paths;
 using TestRunner.WebApp.Components;
 using TestRunner.WebApp.Shared.NUnitTestRunner;
 

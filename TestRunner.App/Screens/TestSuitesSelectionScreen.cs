@@ -5,7 +5,6 @@ using System.Linq;
 using TestRunner.App.Extensions;
 using TestRunner.App.Stores;
 using TestRunner.Common.Model;
-using TestRunner.Common.Services;
 
 internal class TestSuitesSelectionScreen(
     TestRunStore testRunStore,

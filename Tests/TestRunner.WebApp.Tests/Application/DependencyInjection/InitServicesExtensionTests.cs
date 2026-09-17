@@ -3,9 +3,11 @@ namespace TestRunner.WebApp.Tests.Application.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+
 using Moq;
+
 using NUnit.Framework;
+
 using TestRunner.WebApp.Application.DependencyInjection;
 using TestRunner.WebApp.Application.Logging;
 using TestRunner.WebApp.Application.Paths;
@@ -188,9 +190,9 @@ public class InitServicesExtensionTests
         var paths = new Mock<IAppPathsProvider>();
 
         paths.SetupGet(provider => provider.Directories)
-             .Returns(new AppDirectoryPaths(AppData: appDataPath, Logs: appDataPath));
+            .Returns(new AppDirectoryPaths(AppData: appDataPath, Logs: appDataPath));
         paths.SetupGet(provider => provider.Files)
-             .Returns(new AppFilePaths(UserSettings: Path.Combine(appDataPath, "user-settings.json")));
+            .Returns(new AppFilePaths(UserSettings: Path.Combine(appDataPath, "user-settings.json")));
 
         return paths.Object;
     }

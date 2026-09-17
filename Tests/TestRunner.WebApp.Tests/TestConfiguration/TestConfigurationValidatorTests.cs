@@ -2,7 +2,6 @@ namespace TestRunner.WebApp.Tests.TestConfiguration;
 
 using NUnit.Framework;
 
-using TestRunner.WebApp.Features.TestConfiguration.Services;
 using TestRunner.WebApp.Shared.Domain;
 using TestRunner.WebApp.Shared.Validation;
 using TestRunner.WebApp.Tests.Shared.Validation;

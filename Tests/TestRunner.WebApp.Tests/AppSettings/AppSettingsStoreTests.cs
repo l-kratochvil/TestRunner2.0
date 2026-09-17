@@ -3,13 +3,12 @@ namespace TestRunner.WebApp.Tests.AppSettings;
 using System.IO;
 
 using Moq;
+
 using NUnit.Framework;
 
 using TestRunner.WebApp.Application.Paths;
 using TestRunner.WebApp.Features.AppSettings.Services;
 using TestRunner.WebApp.Shared.Logging;
-using TestRunner.WebApp.Shared.Storage;
-using TestRunner.WebApp.Shared.Stores.AppSettings;
 
 [TestFixture]
 public class AppSettingsStoreTests

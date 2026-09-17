@@ -2,13 +2,14 @@ namespace TestRunner.WebApp.Tests.Components.Primitives;
 
 using Bunit;
 
-using Fluxor;
-
 using FluentValidation;
+
+using Fluxor;
 
 using Microsoft.Extensions.DependencyInjection;
 
 using Moq;
+
 using NUnit.Framework;
 
 using TestRunner.WebApp.Components.Primitives;

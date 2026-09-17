@@ -2,7 +2,6 @@
 
 using HtmlAgilityPack;
 
-using Microsoft.Extensions.DependencyInjection;
 // TOOD: Remove this reference (only NUnitRunnerProxy should know about NUnit)
 using NUnit.Framework.Interfaces;
 

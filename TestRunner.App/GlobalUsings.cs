@@ -6,8 +6,8 @@ global using DevKit.Core.Extensions.Functional;
 
 global using Spectre.Console;
 
-global using TestRunner.App.Utils;
 global using TestRunner.App.Properties;
+global using TestRunner.App.Utils;
 global using TestRunner.Common.Extensions;
 
 global using static Spectre.Console.AnsiConsole;
