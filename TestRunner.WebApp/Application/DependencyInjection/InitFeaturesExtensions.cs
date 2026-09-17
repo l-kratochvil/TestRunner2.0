@@ -8,7 +8,6 @@ using TestRunner.WebApp.Features.TestDiscovery.Services;
 using TestRunner.WebApp.Shared.Logging;
 using TestRunner.WebApp.Shared.Stores.AppSettings;
 using TestRunner.WebApp.Shared.Stores.TestDiscovery;
-using TestRunner.WebApp.Shared.Validation;
 
 /// <summary>
 /// Feature-by-feature registration of application services.
@@ -49,8 +48,7 @@ public static class InitFeaturesExtensions
                 .AddSingleton<AppSettingsStore>()
                 .AddSingleton<IAppSettingsStore>(
                     static provider => provider.GetRequiredService<AppSettingsStore>())
-                .AddHostedService(static provider => provider.GetRequiredService<AppSettingsStore>())
-                .AddSingleton<IAppSettingsValidator, AppSettingsValidator>();
+                .AddHostedService(static provider => provider.GetRequiredService<AppSettingsStore>());
 
         private IServiceCollection InitTestConfiguration()
             => services;

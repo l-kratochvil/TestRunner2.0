@@ -6,10 +6,10 @@
 @using System.ComponentModel
 @using System.Globalization
 
-@typeparam TViewModel where TViewModel : class, INotifyPropertyChanged
+@typeparam TDataContext where TDataContext : class, INotifyPropertyChanged
 @typeparam TBindingValue
 
-@inherits BindingComponentBase<TViewModel, TBindingValue>
+@inherits BindingComponentBase<TDataContext, TBindingValue>
 
 @{
     // Read once per render, so that what marks an option as chosen is not searched for anew for
@@ -18,7 +18,9 @@
 }
 
 <Validated Validity="this.Validity">
-    <select @attributes="this.AdditionalAttributes" @onchange="this.OnSelectedAsync">
+    <select @attributes="this.AdditionalAttributes"
+           class="@($"form-select form-select-sm {this.Class}")"
+           @onchange="this.OnSelectedAsync">
         @if (this.Placeholder is not null || chosenIndex is null)
         {
             @* Nothing chosen is drawn as an option of its own, because a browser left without one
@@ -103,8 +105,8 @@
         if (this.Placeholder is not null && default(TBindingValue) is not null)
         {
             throw new InvalidOperationException(
-                $"Property '{typeof(TViewModel).Name}.{this.BoundProperty.Name}' cannot hold " +
-                $"nothing, so a {nameof(BindingSelect<TViewModel, TBindingValue>)} bound to it " +
+                $"Property '{typeof(TDataContext).Name}.{this.BoundProperty.Name}' cannot hold " +
+                $"nothing, so a {nameof(BindingSelect<TDataContext, TBindingValue>)} bound to it " +
                 $"cannot offer a {nameof(this.Placeholder)}.");
         }
     }

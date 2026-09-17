@@ -43,6 +43,9 @@ public abstract class BindingComponentBase<TViewModel, TBindingValue>
     [Parameter]
     public EventCallback<TBindingValue> OnChange { get; set; }
 
+    [Parameter]
+    public string? Class { get; set; }
+
     /// <summary>
     /// Gets or sets everything else written on the control in the markup.
     /// </summary>

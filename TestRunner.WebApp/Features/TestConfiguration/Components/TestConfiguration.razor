@@ -1,7 +1,9 @@
 @* Feature: TestConfiguration — "the user can configure a test run". *@
 
+@using System.Linq
 @using Fluxor
 
+@using TestRunner.WebApp.Shared.Domain
 @using TestRunner.WebApp.Shared.Stores.AppSettings
 @using TestRunner.WebApp.Shared.Stores.TestConfiguration
 @using TestRunner.WebApp.Shared.Stores.TestDiscovery
@@ -11,58 +13,42 @@
 <section class="test-configurator">
     <h2 class="pane-title">Configuration</h2>
 
-    <PropertyGrid>
-        <PropertyGridRow Label="Runtime version">
-            <Validated Validity="@this.viewModel.GetValidity(nameof(TestConfigurationViewModel.RuntimeVersion))">
-                <select class="form-select form-select-sm configuration-runtime-version"
-                        @bind="@this.viewModel.RuntimeVersion">
-                    <option value="" selected="@(this.viewModel.RuntimeVersion is null)">—</option>
-                    @foreach (var version in this.viewModel.RuntimeVersions)
-                    {
-                        <option value="@version" selected="@(version == this.viewModel.RuntimeVersion)">@version</option>
-                    }
-                </select>
-            </Validated>
-        </PropertyGridRow>
-
-        @if (this.viewModel.IsRuntimeTest)
-        {
-            <PropertyGridRow Label="HW assembly type">
-                <Validated Validity="@this.viewModel.GetValidity(nameof(TestConfigurationViewModel.TestedHwAssembly))">
-                    <select class="form-select form-select-sm configuration-test-station"
-                            @bind="@this.viewModel.TestedHwAssembly">
-                        <option value="" selected="@(this.viewModel.TestedHwAssembly is null)">—</option>
-                        @foreach (var station in TestStationLabels.Offered)
-                        {
-                            <option value="@station" selected="@(station == this.viewModel.TestedHwAssembly)">
-                                @TestStationLabels.For(station)
-                            </option>
-                        }
-                    </select>
-                </Validated>
+    <DataContext Data="@this.viewModel">
+        <PropertyGrid>
+            <PropertyGridRow Label="Runtime version">
+                <BindingSelect
+                    Class="configuration-runtime-version"
+                    Binding="@(vm => vm.RuntimeVersion)"
+                    Options="this.viewModel.RuntimeVersions"
+                    Placeholder="—" />
             </PropertyGridRow>
-        }
 
-        <PropertyGridRow Label="Write to TestLink">
-            <Validated Validity="@this.viewModel.GetValidity(nameof(TestConfigurationViewModel.IsWriteToTestLinkEnabled))">
-                <input type="checkbox"
-                        class="form-check-input configuration-testlink"
-                        @bind="@this.viewModel.IsWriteToTestLinkEnabled" />
-            </Validated>
-        </PropertyGridRow>
-
-        @if (this.viewModel.IsWriteToTestLinkEnabled.HasValue && this.viewModel.IsWriteToTestLinkEnabled.Value)
-        {
-            <Validated Validity="@this.viewModel.GetValidity(nameof(TestConfigurationViewModel.IdeVersion))">
-                <PropertyGridRow Label="IDE version">
-                    <input type="text"
-                        class="form-control form-control-sm configuration-ide-version"
-                        placeholder="6.1 or 6.1.4"
-                        @bind="@this.viewModel.IdeVersion" />
+            @if (this.viewModel.IsRuntimeTest)
+            {
+                <PropertyGridRow Label="HW assembly type">
+                    <BindingSelect
+                        Class="configuration-test-station"
+                        Binding="@(vm => vm.TestedHwAssembly)"
+                        Options="TestStationLabels.Offered.Cast<TestedHwAssemblyType?>()"
+                        Placeholder="—" />
                 </PropertyGridRow>
-            </Validated>
-        }
-    </PropertyGrid>
+            }
+
+            <PropertyGridRow Label="Write to TestLink">
+                <BindingCheckbox 
+                    Class="configuration-testlink"
+                    Binding="@(vm => vm.IsWriteToTestLinkEnabled)" />
+            </PropertyGridRow>
+
+            @if (this.viewModel.IsWriteToTestLinkEnabled)
+            {               
+                <BindingInput 
+                    Class="configuration-ide-version"
+                    Binding="@(vm => vm.IdeVersion)"
+                    Placeholder="X.Y.Z" />
+            }
+        </PropertyGrid>
+    </DataContext>
 </section>
 
 @code {
@@ -105,5 +91,7 @@
             this.AppSettingsStore,
             this.LoggerFactory,
             this.Dispatcher);
+
+        this.viewModel.Initialize();
     }
 }

@@ -8,9 +8,13 @@
 
 @using System.ComponentModel
 
-@typeparam TData where TData : class, INotifyPropertyChanged
+@* Cascaded as a type as well as a value, so a control inside names the property it binds to and
+   nothing else: the view model it belongs to is the one standing above it. *@
+@attribute [CascadingTypeParameter(nameof(TDataContext))]
 
-<CascadingValue TValue="TData" Value="this.Data" IsFixed="true">
+@typeparam TDataContext where TDataContext : class, INotifyPropertyChanged
+
+<CascadingValue TValue="TDataContext" Value="this.Data" IsFixed="true">
     @this.ChildContent
 </CascadingValue>
 
@@ -20,7 +24,7 @@
     /// </summary>
     [Parameter]
     [EditorRequired]
-    public required TData Data { get; set; }
+    public required TDataContext Data { get; set; }
 
     /// <summary>
     /// Gets or sets the content drawn from <see cref="Data"/>.

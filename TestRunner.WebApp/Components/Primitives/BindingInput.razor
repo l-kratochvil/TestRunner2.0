@@ -6,14 +6,15 @@
 @using System.ComponentModel
 @using System.Globalization
 
-@typeparam TViewModel where TViewModel : class, INotifyPropertyChanged
+@typeparam TDataContext where TDataContext : class, INotifyPropertyChanged
 @typeparam TBindingValue
 
-@inherits BindingComponentBase<TViewModel, TBindingValue>
+@inherits BindingComponentBase<TDataContext, TBindingValue>
 
 <Validated Validity="this.Validity">
     @* TODO: Use @bind instead of value and @oninput? *@
     <input @attributes="this.AdditionalAttributes"
+           class="@($"form-control form-control-sm {this.Class}")"
            value="@BindConverter.FormatValue(this.CurrentValue)"
            @oninput="this.OnInputAsync" />
 </Validated>

@@ -1,13 +1,12 @@
 namespace TestRunner.WebApp.Features.TestConfiguration.Components;
 
-using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
-
+using DevKit.Core.Interfaces;
+using FluentValidation;
 using Fluxor;
 
 using TestRunner.WebApp.Shared.Domain;
 using TestRunner.WebApp.Shared.Logging;
-using TestRunner.WebApp.Shared.Storage;
 using TestRunner.WebApp.Shared.Stores.AppSettings;
 using TestRunner.WebApp.Shared.Stores.TestConfiguration;
 using TestRunner.WebApp.Shared.ViewModel;
@@ -23,14 +22,12 @@ using TestRunner.WebApp.Shared.ViewModel;
 /// editing can be exercised on their own.
 /// </remarks>
 /// <param name="validator">Says whether the values as they stand can be run with.</param>
-public partial class TestConfigurationViewModel : ViewModelBase
+public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
 {
     private readonly IState<TestConfigurationState> state;
     private readonly IAppSettingsStore appSettingsStore;
     private readonly IAppLogger logger;
     private readonly IDispatcher dispatcher;
-
-    private readonly TestConfigurationViewModelValidator validator;
 
     public TestConfigurationViewModel(
         IState<TestConfigurationState> state,
@@ -42,13 +39,34 @@ public partial class TestConfigurationViewModel : ViewModelBase
         this.state = state;
         this.appSettingsStore = appSettingsStore;
 
-        this.validator = new TestConfigurationViewModelValidator(this);
         this.logger = loggerFactory.CreateLogger(LogSources.App);
 
         this.HasErrorsChanged +=
             hasErrors => this.dispatcher.Dispatch(
                 new StatusChangedAction(
                     NewHasErrors: new ValueChange<bool>(hasErrors)));
+
+        this.InitValidator(this, validator =>
+        {
+            validator
+                .RuleFor(x => x.RuntimeVersion)
+                .NotEmpty()
+                .WithMessage("Runtime version is required.");
+
+            validator
+                .RuleFor(x => x.IdeVersion)
+                .Cascade(CascadeMode.Stop)
+                .NotNull()
+                .WithMessage("IDE version required.")
+                .Must(x => x is not null && IdeVersionFormat().IsMatch(x.ToString()))
+                .WithMessage("Write the IDE version as x.y or x.y.z, for example 6.1 or 6.1.4.");
+
+            validator
+                .RuleFor(x => x.TestedHwAssembly)
+                .NotNull()
+                .NotEqual(TestedHwAssemblyType.Unknown)
+                .WithMessage("Tested hardware assembly is required.");
+        });
     }
 
     // TODO: Determine based on selected test entities
@@ -57,26 +75,18 @@ public partial class TestConfigurationViewModel : ViewModelBase
     public IReadOnlyList<string> RuntimeVersions
         => field ??= this.InitRuntimeVersions();
 
-    public string? RuntimeVersion
+    public string RuntimeVersion
     {
-        get => field ??= this.state.Value.RuntimeVersion;
+        get;
         set => this.SetProperty(
             field,
             value,
-            value =>
-            {
-                if (!this.validator.Validate(x => x.RuntimeVersion).HasErrors)
+            value => this.dispatcher.Dispatch(
+                new DataChangedAction
                 {
-                    return;
-                }
-
-                this.dispatcher.Dispatch(
-                    new DataChangedAction
-                    {
-                        NewRuntimeVersion = new ValueChange<string?>(value),
-                    });
-            });
-    }
+                    NewRuntimeVersion = new ValueChange<string?>(value),
+                }));
+    } = string.Empty;
 
     public Version? IdeVersion
     {
@@ -84,57 +94,54 @@ public partial class TestConfigurationViewModel : ViewModelBase
         set => this.SetProperty(
             field,
             value,
-            value =>
-            {
-                if (!this.validator.Validate(x => x.IdeVersion).HasErrors)
+            value => this.dispatcher.Dispatch(
+                new DataChangedAction
                 {
-                    return;
-                }
-
-                this.dispatcher.Dispatch(
-                    new DataChangedAction
-                    {
-                        NewIdeVersion = new ValueChange<Version?>(value),
-                    });
-            });
+                    NewIdeVersion = new ValueChange<Version?>(value),
+                }));
     }
 
     public TestedHwAssemblyType? TestedHwAssembly
     {
-        get => field ??= this.state.Value.TestedHwAssembly;
-        set => this.SetProperty(
-            field,
-            value,
-            value =>
-            {
-                if (!this.validator.Validate(x => x.TestedHwAssembly).HasErrors)
-                {
-                    return;
-                }
-
-                this.dispatcher.Dispatch(
-                    new DataChangedAction
-                    {
-                        NewTestedHwAssembly = new ValueChange<TestedHwAssemblyType?>(value),
-                    });
-            });
-    }
-
-    public bool? IsWriteToTestLinkEnabled
-    {
-        get => field ??= this.state.Value.IsWriteToTestLinkEnabled;
+        get;
         set => this.SetProperty(
             field,
             value,
             value => this.dispatcher.Dispatch(
                 new DataChangedAction
                 {
-                    NewIsWriteToTestLinkEnabled = new ValueChange<bool>(value ?? false),
+                    NewTestedHwAssembly = new ValueChange<TestedHwAssemblyType?>(value),
                 }));
+    }
+
+    public bool IsWriteToTestLinkEnabled
+    {
+        get;
+        set => this.SetProperty(
+            field,
+            value,
+            value => this.dispatcher.Dispatch(
+                new DataChangedAction
+                {
+                    NewIsWriteToTestLinkEnabled = new ValueChange<bool>(value),
+                }));
+    } = false;
+
+    /// <inheritdoc/>
+    public void Initialize()
+    {
+        this.IdeVersion = this.state.Value.IdeVersion;
+        this.RuntimeVersion = this.state.Value.RuntimeVersion ?? string.Empty;
+        this.TestedHwAssembly = this.state.Value.TestedHwAssembly;
+        this.IsWriteToTestLinkEnabled = this.state.Value.IsWriteToTestLinkEnabled;
     }
 
     [GeneratedRegex(@"^\d+")]
     private static partial Regex LeadingNumber();
+
+    // Semantic versioning with the patch left out, which is how the IDE versions are written down.
+    [GeneratedRegex(@"^\d+\.\d+(\.\d+)?$")]
+    private static partial Regex IdeVersionFormat();
 
     private IReadOnlyList<string> InitRuntimeVersions()
     {

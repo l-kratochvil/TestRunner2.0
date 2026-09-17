@@ -6,13 +6,14 @@
 @using System.ComponentModel
 @using System.Globalization
 
-@typeparam TViewModel where TViewModel : class, INotifyPropertyChanged  
+@typeparam TDataContext where TDataContext : class, INotifyPropertyChanged  
 
-@inherits BindingComponentBase<TViewModel, bool>
+@inherits BindingComponentBase<TDataContext, bool>
 
 <Validated Validity="this.Validity">
     @* TODO: Use @bind instead of value and @oninput? *@
     <input @attributes="this.AdditionalAttributes"
+           class="@($"form-check-input {this.Class}")"
            type="checkbox"
            checked="@this.CurrentValue"
            @oninput="this.OnInputAsync" />

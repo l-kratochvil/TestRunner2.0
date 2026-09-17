@@ -14,13 +14,13 @@ using Microsoft.AspNetCore.Components;
 /// above it cascades, and leaves the disposing to whoever put it there. Either way the view model is
 /// listened to for as long as the component lives.
 /// </remarks>
-/// <typeparam name="TViewModel">The view model the component is drawn from.</typeparam>
-public abstract class MvvmComponentBase<TViewModel> : FluxorComponent
-    where TViewModel : class, INotifyPropertyChanged
+/// <typeparam name="TDataContext">The view model the component is drawn from.</typeparam>
+public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
+    where TDataContext : class, INotifyPropertyChanged
 {
     // Tidying up reaches the view model through the field and not through the property, so that
     // disposal does not make the very thing it is about to throw away.
-    private TViewModel? viewModel;
+    private TDataContext? viewModel;
 
     private bool ownsViewModel;
 
@@ -35,7 +35,7 @@ public abstract class MvvmComponentBase<TViewModel> : FluxorComponent
     /// The component neither makes a view model nor stands under a
     /// <see cref="Primitives.DataContext{TViewModel}"/> that cascades one.
     /// </exception>
-    protected TViewModel ViewModel
+    protected TDataContext ViewModel
         => this.viewModel ??= this.ResolveViewModel();
 
     /// <summary>
@@ -46,7 +46,7 @@ public abstract class MvvmComponentBase<TViewModel> : FluxorComponent
     /// cascaded view model and one drawn from a view model of its own are written the same way.
     /// </remarks>
     [CascadingParameter]
-    private TViewModel? DataContext { get; set; }
+    private TDataContext? DataContext { get; set; }
 
     /// <summary>
     /// Creates the view model this component is drawn from.
@@ -55,7 +55,7 @@ public abstract class MvvmComponentBase<TViewModel> : FluxorComponent
     /// The view model, which this component owns from then on, or <see langword="null"/> to be
     /// drawn from the one cascaded to it.
     /// </returns>
-    protected virtual TViewModel? CreateViewModel()
+    protected virtual TDataContext? CreateViewModel()
         => null;
 
     /// <summary>
@@ -112,7 +112,7 @@ public abstract class MvvmComponentBase<TViewModel> : FluxorComponent
         await base.DisposeAsyncCore(disposing);
     }
 
-    private TViewModel ResolveViewModel()
+    private TDataContext ResolveViewModel()
     {
         // Making a view model is what claims it, so a component that makes none is drawn from the
         // cascaded one without ever being in a position to throw it away.
@@ -127,7 +127,7 @@ public abstract class MvvmComponentBase<TViewModel> : FluxorComponent
         // as a blank where the control should be rather than as a mistake, so it is said out loud.
         return this.DataContext ?? throw new InvalidOperationException(
             $"{this.GetType().Name} neither creates a view model nor is placed inside a " +
-            $"{nameof(Primitives.DataContext<TViewModel>)} of {typeof(TViewModel).Name}.");
+            $"{nameof(Primitives.DataContext<TDataContext>)} of {typeof(TDataContext).Name}.");
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
