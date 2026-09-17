@@ -60,11 +60,11 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
     {
         this.ViewModel.PropertyChanged += this.OnViewModelPropertyChanged;
 
-        if (this.ViewModel is INotifyValidityInfo notifyValidityInfo)
-        {
-            notifyValidityInfo.HasErrorsChanged += this.OnViewModelHasErrorsChanged;
-        }
-
+        // Is this necessary?
+        // if (this.ViewModel is INotifyValidityInfo notifyValidityInfo)
+        // {
+        //     notifyValidityInfo.HasErrorsChanged += this.OnViewModelHasErrorsChanged;
+        // }
         base.OnInitialized();
     }
 
@@ -80,10 +80,11 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
 
             this.ViewModel.PropertyChanged -= this.OnViewModelPropertyChanged;
 
-            if (this.ViewModel is INotifyValidityInfo notifyValidityInfo)
-            {
-                notifyValidityInfo.HasErrorsChanged -= this.OnViewModelHasErrorsChanged;
-            }
+            // Is this necessary?
+            // if (this.ViewModel is INotifyValidityInfo notifyValidityInfo)
+            // {
+            //     notifyValidityInfo.HasErrorsChanged -= this.OnViewModelHasErrorsChanged;
+            // }
         }
 
         await base.DisposeAsyncCore(disposing);

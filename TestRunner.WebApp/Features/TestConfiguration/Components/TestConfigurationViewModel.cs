@@ -92,7 +92,7 @@ public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
 
     public Version? IdeVersion
     {
-        get => field ??= this.state.Value.IdeVersion;
+        get;
         set => this.SetProperty(
             field,
             value,
