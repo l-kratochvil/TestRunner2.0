@@ -29,6 +29,7 @@
     <ProjectReference Include="..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
     <ProjectReference Include="..\..\DevKit.Mvvm\DevKit.Mvvm\DevKit.Mvvm.csproj" />
     <ProjectReference Include="..\TestRunner.Common\TestRunner.Common.csproj" />
+    <ProjectReference Include="..\Zat.Z2xxTests.Common\Zat.Z2xxTests.Common.csproj" />
   </ItemGroup>
 
   <Target Name="RestoreTypeScriptTooling" BeforeTargets="CompileTypeScript" Condition="!Exists('$(MSBuildProjectDirectory)\node_modules\.bin\tsc.cmd')">

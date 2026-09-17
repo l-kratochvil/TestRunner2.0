@@ -8,11 +8,12 @@ using FluentValidation;
 
 using Fluxor;
 
-using TestRunner.WebApp.Shared.Domain;
 using TestRunner.WebApp.Shared.Logging;
 using TestRunner.WebApp.Shared.Stores.AppSettings;
 using TestRunner.WebApp.Shared.Stores.TestConfiguration;
 using TestRunner.WebApp.Shared.ViewModel;
+
+using Zat.Z2xxTests.Common;
 
 /// <summary>
 /// The test configuration as the configurator shows it: the values being edited, which of them are

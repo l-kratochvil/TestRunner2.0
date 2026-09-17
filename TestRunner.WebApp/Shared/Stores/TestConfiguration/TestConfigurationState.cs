@@ -3,7 +3,8 @@ namespace TestRunner.WebApp.Shared.Stores.TestConfiguration;
 using System.Text.Json.Serialization;
 
 using Fluxor;
-using TestRunner.WebApp.Shared.Domain;
+
+using Zat.Z2xxTests.Common;
 
 /// <summary>
 /// The test run a tester is putting together, apart from the test selection.

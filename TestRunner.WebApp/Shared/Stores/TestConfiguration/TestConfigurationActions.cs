@@ -1,6 +1,6 @@
 namespace TestRunner.WebApp.Shared.Stores.TestConfiguration;
 
-using TestRunner.WebApp.Shared.Domain;
+using Zat.Z2xxTests.Common;
 
 public record StatusChangedAction(
     ValueChange<bool>? NewHasErrors);

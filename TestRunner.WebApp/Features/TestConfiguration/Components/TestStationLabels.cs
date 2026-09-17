@@ -1,6 +1,6 @@
 namespace TestRunner.WebApp.Features.TestConfiguration.Components;
 
-using TestRunner.WebApp.Shared.Domain;
+using Zat.Z2xxTests.Common;
 
 /// <summary>
 /// The test stations the configurator offers, and what each one is called on screen.
