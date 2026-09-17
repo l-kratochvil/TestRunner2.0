@@ -7,7 +7,7 @@ public abstract class StoreBase<TState> : IStore<TState>
     private TState? current;
 
     /// <inheritdoc/>
-    public event Action? Changed;
+    public event Action<TState>? Changed;
 
     /// <inheritdoc/>
     public TState Current
@@ -42,6 +42,6 @@ public abstract class StoreBase<TState> : IStore<TState>
     protected void SetState(TState state)
     {
         this.current = state;
-        this.Changed?.Invoke();
+        this.Changed?.Invoke(state);
     }
 }

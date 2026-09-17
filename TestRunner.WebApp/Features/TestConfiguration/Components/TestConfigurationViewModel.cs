@@ -30,7 +30,6 @@ public partial class TestConfigurationViewModel : ViewModelBase
     private readonly IAppLogger logger;
     private readonly IDispatcher dispatcher;
 
-    private readonly Lazy<bool> isWriteToTestLinkEnabledLazy;
     private readonly TestConfigurationViewModelValidator validator;
 
     public TestConfigurationViewModel(
@@ -41,7 +40,6 @@ public partial class TestConfigurationViewModel : ViewModelBase
     {
         this.dispatcher = dispatcher;
         this.state = state;
-
         this.appSettingsStore = appSettingsStore;
 
         this.validator = new TestConfigurationViewModelValidator(this);

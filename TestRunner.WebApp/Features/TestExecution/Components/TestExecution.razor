@@ -1,24 +1,27 @@
 @* Feature: TestExecution — "the user can execute a test". *@
 
 @using Fluxor
+
 @using TestRunner.WebApp.Shared.Stores.TestConfiguration
 @using TestRunner.WebApp.Shared.Stores.TestDiscovery
 
+@using CommunityToolkit.Mvvm.Input;
+
+@using DevKit.Mvvm.ViewModel.Commands;
+
+@inherits Fluxor.Blazor.Web.Components.FluxorComponent
 @implements IDisposable
 
-@* Deliberately nothing but the button: where it is drawn is the caller's business, which is what
-   lets the test explorer take it into its header row. *@
 <button type="button"
         class="@(this.isRunning ? "btn btn-sm btn-danger" : "btn btn-sm btn-success")"
-        disabled="@(!this.isRunning && this.TestBlockingReason is not null)"
-        title="@(this.isRunning ? null : this.TestBlockingReason)"
-        @onclick="this.OnToggle">
-    @(this.isRunning ? "Stop" : "Start")
+        disabled="@this.CurrentCommand.CanExecute(null) == false"
+        title="@(string.Join(Environment.NewLine, this.ExecutionBlockingReasons))"
+        @onclick="@(() => this.CurrentCommand.Execute(null))">
+    @(this.CurrentCommand.DisplayText)
 </button>
 
 @code {
-    // Which of the two actions the button offers. Starting and stopping a test run is not wired up
-    // yet, so nothing outside the button has to know about it and a field is enough.
+    // TODO: Get this from INUnitTestRunnerProxy?
     private bool isRunning;
 
     /// <summary>
@@ -33,41 +36,84 @@
     [Inject]
     private ITestDiscoveryStore TestDiscoveryStore { get; set; } = null!;
 
-    // What stops a run from being started, or null when nothing does. Two things have to hold, and
-    // each is asked of the feature that owns it: tests have been selected, which is the test
-    // explorer's business, and the configuration says it can be run with, which the configurator
-    // answers by the rules it owns. What exactly is missing from the configuration is left to the
-    // configurator beside the button, which says it field by field.
-    private string? TestBlockingReason
-        => (this.TestDiscoveryStore.Current.SelectedTestCases.Count, this.TestConfigurationState.Value.HasErrors) switch
+    // TODO: Move to viewmodel
+    private ExtendedCommand CurrentCommand
+        => this.isRunning ? this.StopTestCommand : this.StartTestCommand;
+
+    private ExtendedCommand StopTestCommand
+        => field ??= new ExtendedCommand(
+                command: new RelayCommand(() => 
+                { 
+                    // TODO: Stop the test
+
+                    this.isRunning = false;
+                },
+                canExecute: () => this.isRunning),
+            "Stop");
+    
+    private ExtendedCommand StartTestCommand
+        => field ??= new ExtendedCommand(
+                command: new RelayCommand(() => 
+                { 
+                    // TODO: Start the test
+
+                    this.isRunning = true;
+                },
+                canExecute: () => 
+                    !this.isRunning && 
+                    TestsSelected &&
+                    !this.ConfigurationHasErrors),
+            "Start");
+
+    private IEnumerable<string> ExecutionBlockingReasons
+    {
+        get
         {
-            (0, _) => "No tests selected",
-            (_, false) => "Configuration has errors",
-            _ => null,
-        };
+            if (!TestsSelected)
+            {
+                yield return "No tests selected";
+            }
+
+            if (ConfigurationHasErrors)
+            {
+                yield return "Configuration has errors";
+            }
+        }
+    }
+
+    private bool ConfigurationHasErrors 
+        => this.TestConfigurationState.Value.HasErrors;
+
+    private bool TestsSelected 
+        => this.TestDiscoveryStore.Current.SelectedTestCases.Count > 0;
 
     /// <inheritdoc/>
     public void Dispose()
-    {
-        this.TestDiscoveryStore.Changed -= this.OnDependencyChanged;
-        this.TestConfigurationState.StateChanged -= this.OnStateChanged;
-    }
+        => this.TestDiscoveryStore.Changed -= this.OnTestDiscoveryStoreChanged;
 
     /// <inheritdoc/>
     protected override void OnInitialized()
     {
+        base.OnInitialized();
+
         // Whether a run may start follows from the selection and from the configuration, so the
         // button is redrawn whenever either of them moves.
-        this.TestDiscoveryStore.Changed += this.OnDependencyChanged;
-        this.TestConfigurationState.StateChanged += this.OnStateChanged;
+        this.TestDiscoveryStore.Changed += this.OnTestDiscoveryStoreChanged;
+
+        this.SubscribeToAction<StatusChangedAction>(action => 
+        {
+            if (action.NewHasErrors is null)
+            {
+                return;
+            }
+
+            this.OnDependencyChanged();
+        });
     }
 
-    private void OnStateChanged(object? sender, EventArgs args)
+    private void OnTestDiscoveryStoreChanged(TestDiscoveryState state)
         => this.OnDependencyChanged();
 
     private void OnDependencyChanged()
         => this.InvokeAsync(this.StateHasChanged);
-
-    private void OnToggle()
-        => this.isRunning = !this.isRunning;
 }

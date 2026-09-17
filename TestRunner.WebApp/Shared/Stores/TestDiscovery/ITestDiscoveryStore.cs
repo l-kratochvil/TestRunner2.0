@@ -12,7 +12,7 @@ public interface ITestDiscoveryStore
     /// <summary>
     /// Raised after the test selection changes.
     /// </summary>
-    event Action? Changed;
+    event Action<TestDiscoveryState>? Changed;
 
     /// <summary>
     /// Gets the current test selection.
