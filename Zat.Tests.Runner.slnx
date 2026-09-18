@@ -10,7 +10,7 @@
   <Folder Name="/Solution Items/docs/">
     <File Path="docs/DEV-NOTES.md" />
     <File Path="docs/Issue-0002.docx" />
-    <File Path="docs/internals/index.md" />
+    <File Path="docs/TODO.md" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Tests/NUnitTestAssembly.Net461/NUnitTestAssembly.Net461.csproj" />
