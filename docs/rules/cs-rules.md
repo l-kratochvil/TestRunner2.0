@@ -20,8 +20,8 @@ parameterless constructor.
 
 The `ViewModel` suffix is reserved for the view model of a Razor component of the same base name —
 `Component.razor` is the view, `ComponentViewModel` is its view model. For example,
-[TestExplorer.razor](/TestRunner.WebApp/Features/TestDiscovery/Components/TestExplorer.razor) pairs
-with [TestExplorerViewModel](/TestRunner.WebApp/Features/TestDiscovery/Components/TestExplorerViewModel.cs).
+[TestExplorer.razor](/Zat.Tests.Runner.WebApp/Features/TestDiscovery/Components/TestExplorer.razor) pairs
+with [TestExplorerViewModel](/Zat.Tests.Runner.WebApp/Features/TestDiscovery/Components/TestExplorerViewModel.cs).
 
 Other classes that hold UI state or data — a tree node, a row, a DTO shown on screen — keep their
 own descriptive name instead of picking up the suffix (e.g. `TestTreeNodeData`, not

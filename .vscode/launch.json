@@ -8,8 +8,8 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build-webapp",
-      "program": "${workspaceFolder}/TestRunner.WebApp/bin/Debug/net10.0/TestRunner.WebApp.dll",
-      "cwd": "${workspaceFolder}/TestRunner.WebApp",
+      "program": "${workspaceFolder}/Zat.Tests.Runner.WebApp/bin/Debug/net10.0/Zat.Tests.Runner.WebApp.dll",
+      "cwd": "${workspaceFolder}/Zat.Tests.Runner.WebApp",
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -26,8 +26,8 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build-webapp",
-      "program": "${workspaceFolder}/TestRunner.WebApp/bin/Debug/net10.0/TestRunner.WebApp.dll",
-      "cwd": "${workspaceFolder}/TestRunner.WebApp",
+      "program": "${workspaceFolder}/Zat.Tests.Runner.WebApp/bin/Debug/net10.0/Zat.Tests.Runner.WebApp.dll",
+      "cwd": "${workspaceFolder}/Zat.Tests.Runner.WebApp",
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -35,7 +35,7 @@
         "action": "debugWithEdge",
         "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
         "uriFormat": "%s",
-        "webRoot": "${workspaceFolder}/TestRunner.WebApp/wwwroot"
+        "webRoot": "${workspaceFolder}/Zat.Tests.Runner.WebApp/wwwroot"
       }
     }
   ]

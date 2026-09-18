@@ -51,14 +51,14 @@ asks for a commit.
 Write the subject in format `< prefix > - < project-name > - < file-name >: < imperative-summary >`:
 
 - **< prefix >**: Is required. Supports one of these options: a. `Feat`: for a new capability; b. `Fix`: for a defect; c. `Change`: for reworked behaviour; d. `Dev`: for work that leaves behaviour intact (refactoring, docs, warnings, tooling)
-- **< project-name >**: It's the project name minus the `TestRunner.` base prefix
-  (`TestRunner.WebApp` → `WebApp`); drop this part when the change spans the solution.
+- **< project-name >**: It's the project name minus the `Zat.Tests.Runner.` base prefix
+  (`Zat.Tests.Runner.WebApp` → `WebApp`); drop this part when the change spans the solution.
 - **< file-name >**: Name the single edited file, plus its follow-up tests; drop this part otherwise.
 
 ##### Examples
 
 ```text
-Fix - App - NUnitTestRunnerProxyConnector.cs: Fix hang on proxy process exit
+Fix - App - NUnitZat.Tests.RunnerProxyConnector.cs: Fix hang on proxy process exit
 Feat - WebApp - TestExplorer.razor: Add test suite filter to discovery tree
 Dev: Update agents context
 ```

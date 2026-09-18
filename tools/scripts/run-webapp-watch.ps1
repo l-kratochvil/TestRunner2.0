@@ -1,4 +1,4 @@
-# Spustí TestRunner.WebApp v režimu watch (hot reload).
+# Spustí Zat.Tests.Runner.WebApp v režimu watch (hot reload).
 # Použití:
 #   .\tools\scripts\run-webapp-watch.ps1          # profil http (http://localhost:5078)
 #   .\tools\scripts\run-webapp-watch.ps1 https    # profil https

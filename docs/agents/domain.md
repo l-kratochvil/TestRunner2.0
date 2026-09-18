@@ -19,10 +19,10 @@ This is a single-context repo:
 ├── CONTEXT.md          ← created lazily by /domain-modeling
 ├── docs/ADR/
 │   └── ADR-0001-initial.md
-├── TestRunner.App/
-├── TestRunner.Common/
-├── TestRunner.WebApp/
-└── TestRunner.NUnitTestRunnerProxy/
+├── Zat.Tests.Runner.App/
+├── Zat.Tests.Runner.Common/
+├── Zat.Tests.Runner.WebApp/
+└── Zat.Tests.Runner.NUnitTestRunnerProxy/
 ```
 
 ## Use the glossary's vocabulary

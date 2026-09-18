@@ -290,17 +290,17 @@ FakesAssemblies/
 .ntvs_analysis.dat
 node_modules/
 
-# Everything outside wwwroot in TestRunner.WebApp is authored in TypeScript and compiled in place
-# to a sibling .js by the CompileTypeScript MSBuild target (see TestRunner.WebApp.csproj), so any
+# Everything outside wwwroot in Zat.Tests.Runner.WebApp is authored in TypeScript and compiled in place
+# to a sibling .js by the CompileTypeScript MSBuild target (see Zat.Tests.Runner.WebApp.csproj), so any
 # such .js is a build output. wwwroot holds static/vendored assets whose .js is source, hence the
 # carve-out; author new scripts as .ts outside wwwroot, not as .js inside it.
-TestRunner.WebApp/**/*.js
-TestRunner.WebApp/**/*.js.map
-!TestRunner.WebApp/wwwroot/**
+Zat.Tests.Runner.WebApp/**/*.js
+Zat.Tests.Runner.WebApp/**/*.js.map
+!Zat.Tests.Runner.WebApp/wwwroot/**
 
-# The one part of wwwroot that is generated: the shared modules built out of TestRunner.WebApp/
+# The one part of wwwroot that is generated: the shared modules built out of Zat.Tests.Runner.WebApp/
 # Browser, which have to land under wwwroot to be served at all. Edit them there, never here.
-TestRunner.WebApp/wwwroot/browser/
+Zat.Tests.Runner.WebApp/wwwroot/browser/
 
 # Visual Studio 6 build log
 *.plg

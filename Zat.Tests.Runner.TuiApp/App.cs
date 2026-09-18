@@ -1,0 +1,75 @@
+namespace Zat.Tests.Runner.TuiApp;
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+using Zat.Tests.Runner.Common.Services;
+using Zat.Tests.Runner.TuiApp.Screens;
+using Zat.Tests.Runner.TuiApp.Stores;
+
+internal class App
+{
+    public static async Task RunAsync(IHost host)
+    {
+        File.Delete(Paths.Files.TestRunnerConfig); // Clean up config file from previous run, if exists
+
+        try
+        {
+            var nunitTestRunnerProxy = host.Services.GetRequiredService<INUnitTestRunnerProxy>();
+            var testRunStore = host.Services.GetRequiredService<TestRunStore>();
+
+            // testRunStore.LoadedTestSuites = await nunitTestRunnerProxy.LoadTestAssemblyAsync(Paths.Files.TestAssemblyFilePath);
+            testRunStore.LoadedTestSuites
+                = await nunitTestRunnerProxy.LoadTestAssemblyAsync(
+                    @"c:\Users\l-kratochvil\source\repos\Zat.Tests.Runner\Tests\NUnitTestAssembly.Net481\bin\Debug\net481\NUnitTestAssembly.Net481.dll");
+
+            await MainRenderAsync(host.Services.GetRequiredService<HomeScreen>());
+        }
+        catch (Exception ex)
+        {
+            Clear();
+
+            WriteLine("Při běhu aplikace Zat.Tests.Runner se vyskytla chyba:"); // TODO: Localize text
+            WriteException(ex);
+            WriteLine("Aplikaci ukončíte libovolnou klávesou..."); // TODO: Localize text
+
+            AnsiConsole.Console.Input.ReadKey(true);
+        }
+        finally
+        {
+            File.Delete(Paths.Files.TestRunnerConfig); // Clean up config file from previous run, if exists
+        }
+    }
+
+    public static async Task MainRenderAsync(IScreen initScreen)
+    {
+        var currentScreen = initScreen;
+
+        var screens = new Stack<IScreen>();
+
+        while (true)
+        {
+            currentScreen ??= screens.TryPop(out var nextScreen)
+                ? nextScreen // Redirect one screen back if not next screen not provided
+                : initScreen; // Or return to the initial screen
+
+            var renderOutput = await currentScreen.RenderAsync();
+            if (renderOutput.Exit)
+            {
+                break;
+            }
+
+            if (renderOutput.NextScreen is not null)
+            {
+                screens.Push(currentScreen);
+            }
+
+            currentScreen = renderOutput.NextScreen;
+        }
+    }
+}

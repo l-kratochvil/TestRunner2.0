@@ -1,7 +1,7 @@
-# TestRunner 2.0
+# Zat.Tests.Runner 2.0
 
 A tool for running automated NUnit test suites against a test station and reporting the results to
-TestLink. The web front-end (`TestRunner.WebApp`, Blazor Server) runs on the test machine itself and
+TestLink. The web front-end (`Zat.Tests.Runner.WebApp`, Blazor Server) runs on the test machine itself and
 is reached from a browser.
 
 ## Setup
@@ -15,7 +15,7 @@ two repositories must sit side by side:
 
 ```text
 <parent>
-├── TestRunner2.0
+├── Zat.Tests.Runner2.0
 └── DevKit.Core
 ```
 

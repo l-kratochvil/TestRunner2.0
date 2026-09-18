@@ -7,7 +7,7 @@
       "type": "process",
       "args": [
         "build",
-        "${workspaceFolder}/TestRunner.WebApp/TestRunner.WebApp.csproj",
+        "${workspaceFolder}/Zat.Tests.Runner.WebApp/Zat.Tests.Runner.WebApp.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary;ForceNoAlign"
       ],

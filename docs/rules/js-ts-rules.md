@@ -16,7 +16,7 @@ receives whatever was sent.
 
 Declare each such parameter as `unknown` and name it with a `u` prefix (`uElement`, `uOptions`), so
 that everywhere it is used, before the guard has run, the name itself says the value is still
-unchecked. Then check it with the [guards module](../../TestRunner.WebApp/Browser/guards.ts)
+unchecked. Then check it with the [guards module](../../Zat.Tests.Runner.WebApp/Browser/guards.ts)
 (`/browser/guards.js`), which also reports a mismatch to the application log.
 
 If a check fails, return immediately: `null` means the call was never valid, not a value to build

@@ -1,4 +1,4 @@
-# Spustí TestRunner.WebApp z příkazové řádky.
+# Spustí Zat.Tests.Runner.WebApp z příkazové řádky.
 # Použití:
 #   .\tools\scripts\run-webapp.ps1            # profil http (http://localhost:5078)
 #   .\tools\scripts\run-webapp.ps1 https      # profil https
@@ -9,7 +9,7 @@ param(
 )
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$project = Join-Path $repoRoot "TestRunner.WebApp"
+$project = Join-Path $repoRoot "Zat.Tests.Runner.WebApp"
 
 if ($Watch) {
     dotnet watch --project $project --launch-profile $Profile

@@ -6,17 +6,6 @@
   - NUnitTestRunnerProxy by mohl filtrovat runtime test. sady na základě atributu (namísto jména)
   - Atribut by musel být nugetu/projektu sdíleném s Z2xxTest
 
-### Sdílený projekt/nuget mezi runnerem a Z2xxTests
-
-- Bude netstandard2.0
-- Ponese:
-  - Různé konstanty (cestu ke config souboru, cestu ke screenshotům)
-  - Enum TestedHwAssemblyType
-  - Různé atributy
-  - atd.
-- Bude ve vlastním repu nebo vlastní nuget
-- Název? Z2xxTests.Common.Slim?
-
 ### Virtuální stroj (VM)
 
 - Bude se muset nacházet v síti (kvůli email notifikacím a přístupu na GOGO)
@@ -24,7 +13,7 @@
 - Tester bude muset vždy zkontrolovat, zda nejsou aktualizace, provést je a pak mi dá vědět, abych upravil image VM
 - Oracle VirtualBox má problémy s odpojováním USB (VMWare se zdál být OK)
 
-## TestRunner.WebApp
+## Zat.Tests.Runner.WebApp
 
 - V první fázi bude možné k apliakaci přistupovat pouze přímo z test. PC
 - Web app server se na test. PC bude spouštět jako služba (automaticky při startu)
@@ -64,7 +53,7 @@
 - [1](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/introduction?view=aspnetcore-10.0)
 - [2](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/simple?view=aspnetcore-10.0)
 
-## TestRunner.App
+## Zat.Tests.Runner.TuiApp
 
 ### RunTestScreen
 
