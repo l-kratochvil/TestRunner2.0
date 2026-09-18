@@ -7,7 +7,9 @@
 
 @using System.ComponentModel
 
-@typeparam TDataContext where TDataContext : class, INotifyPropertyChanged
+@using Zat.Tests.Runner.WebApp.Shared.ViewModel;
+
+@typeparam TDataContext where TDataContext : class, INotifyPropertyChanged, INotifyDataInfo
 @typeparam TBindingValue
 
 @inherits BindingComponentBase<TDataContext, TBindingValue>

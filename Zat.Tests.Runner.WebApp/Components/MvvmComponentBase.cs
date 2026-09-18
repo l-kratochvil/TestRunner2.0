@@ -6,12 +6,14 @@ using Fluxor.Blazor.Web.Components;
 
 using Microsoft.AspNetCore.Components;
 
+using Zat.Tests.Runner.WebApp.Shared.ViewModel;
+
 /// <summary>
 /// A component that redraws itself whenever the view model it is drawn from reports a change.
 /// </summary>
 /// <typeparam name="TDataContext">The view model the component is drawn from.</typeparam>
 public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
-    where TDataContext : class, INotifyPropertyChanged
+    where TDataContext : class, INotifyPropertyChanged, INotifyDataInfo
 {
     private int renderPending;
 
@@ -78,12 +80,7 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
             this.disposed = true;
 
             this.ViewModel.PropertyChanged -= this.OnViewModelPropertyChanged;
-
-            // Is this necessary?
-            // if (this.ViewModel is INotifyValidityInfo notifyValidityInfo)
-            // {
-            //     notifyValidityInfo.HasErrorsChanged -= this.OnViewModelHasErrorsChanged;
-            // }
+            this.ViewModel.DataChanged -= this.OnViewModelDataChanged;
         }
 
         await base.DisposeAsyncCore(disposing);
@@ -127,7 +124,7 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
         }
     }
 
-    private void OnViewModelHasErrorsChanged(bool hasErrors)
+    private void OnViewModelDataChanged(object? sender, EventArgs e)
     {
         if (this.disposed)
         {

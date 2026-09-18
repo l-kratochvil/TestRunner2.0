@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/DevKit/">
+    <Project Path="../DevKit.Core/DevKit.Core/DevKit.Core.csproj" />
+    <Project Path="../DevKit.Mvvm/DevKit.Mvvm/DevKit.Mvvm.csproj" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
@@ -19,7 +23,6 @@
     <Project Path="Tests/Zat.Tests.Runner.NUnitTestRunnerProxy.Tests/Zat.Tests.Runner.NUnitTestRunnerProxy.Tests.csproj" Id="82ad2fa9-69d8-4a6d-9b39-56276ff807bd" />
     <Project Path="Tests/Zat.Tests.Runner.WebApp.Tests/Zat.Tests.Runner.WebApp.Tests.csproj" />
   </Folder>
-  <Project Path="../DevKit.Core/DevKit.Core/DevKit.Core.csproj" />
   <Project Path="Zat.Tests.Runner.TuiApp/Zat.Tests.Runner.TuiApp.csproj">
     <BuildDependency Project="Zat.Tests.Runner.NUnitTestRunnerProxy/Zat.Tests.Runner.NUnitTestRunnerProxy.csproj" />
   </Project>

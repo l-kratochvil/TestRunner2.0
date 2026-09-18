@@ -21,10 +21,10 @@ public static class TestStationLabels
         {
             [TestedHwAssemblyType.HW00] = "HW00",
             [TestedHwAssemblyType.HW01] = "HW01",
-            [TestedHwAssemblyType.HW02_1M] = "HW02 - 1M",
-            [TestedHwAssemblyType.HW02_37M] = "HW02 - 37M",
+            [TestedHwAssemblyType.HW02_BB1M] = "HW02 - BB1M",
+            [TestedHwAssemblyType.HW02_BB37M] = "HW02 - BB37M",
             [TestedHwAssemblyType.HW03] = "HW03",
-            [TestedHwAssemblyType.HW04_1M] = "HW04 - 1M",
+            [TestedHwAssemblyType.HW04_BD1M] = "HW04 - BD1M",
         };
 
     /// <summary>

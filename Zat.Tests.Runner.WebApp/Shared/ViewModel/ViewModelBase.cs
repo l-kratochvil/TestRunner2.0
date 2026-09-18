@@ -12,9 +12,9 @@ using Zat.Tests.Runner.WebApp.Shared.Validation;
 /// <summary>
 /// Base class for view models, adding property validation on top of <see cref="CommunityToolkit.Mvvm.ComponentModel.ObservableObject"/>.
 /// </summary>
-public class ViewModelBase
+public abstract class ViewModelBase
     : CommunityToolkit.Mvvm.ComponentModel.ObservableObject,
-      INotifyValidityInfo
+      INotifyValidityInfo, INotifyDataInfo
 {
     private readonly ConcurrentDictionary<string, Validity> propertyValidities = new();
 
@@ -22,6 +22,13 @@ public class ViewModelBase
 
     /// <inheritdoc/>
     public event Action<bool>? HasErrorsChanged;
+
+    public event EventHandler? DataChanged;
+
+    protected ViewModelBase()
+    {
+        this.HasErrorsChanged += _ => this.DataChanged?.Invoke(this, EventArgs.Empty);
+    }
 
     /// <inheritdoc/>
     public bool HasErrors

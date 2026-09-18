@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Services;
+using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Shared.Logging;
 
 /// <summary>
@@ -15,13 +16,14 @@ using Zat.Tests.Runner.WebApp.Shared.Logging;
 /// </remarks>
 /// <param name="proxy">Proxy the test assembly is discovered through.</param>
 /// <param name="loggerFactory">Creates the log discovery failures are reported to.</param>
-public sealed class NUnitTestRunnerStore(INUnitTestRunnerProxy proxy, IAppLoggerFactory loggerFactory)
+public sealed class NUnitTestRunnerStore(
+    INUnitTestRunnerProxy proxy,
+    IAppLoggerFactory loggerFactory,
+    IAppPathsProvider appPathsProvider)
     : INUnitTestRunnerStore, IHostedService
 {
-    // TODO: The test assembly is picked by the tester, so this belongs to the application settings
-    // rather than to the code, see the AppSettings feature.
-    private const string TestAssemblyPath =
-        @"c:\Users\l-kratochvil\source\repos\Zat.Tests.Runner2.0\Tests\NUnitTestAssembly.Net481\bin\Debug\net481\NUnitTestAssembly.Net481.dll";
+    // private const string TestAssemblyPath =
+    //    @"c:\Users\l-kratochvil\source\repos\Zat.Tests.Runner\Tests\NUnitTestAssembly.Net481\bin\Debug\net481\NUnitTestAssembly.Net481.dll";
 
     private readonly IAppLogger logger = loggerFactory.CreateLogger(LogSources.TestRun);
 
@@ -41,9 +43,13 @@ public sealed class NUnitTestRunnerStore(INUnitTestRunnerProxy proxy, IAppLogger
     {
         try
         {
-            this.LoadedTestSuites = await proxy.LoadTestAssemblyAsync(TestAssemblyPath, cancellationToken);
+            // var testAssemblyPath =
+            //    @"c:\Users\l-kratochvil\source\repos\Zat.Tests.Runner\Tests\NUnitTestAssembly.Net481\bin\Debug\net481\NUnitTestAssembly.Net481.dll";
+            var testAssemblyPath = appPathsProvider.Files.MainAssemblyDll;
 
-            this.logger.Info($"Loaded {this.LoadedTestSuites.Count} test suites.", TestAssemblyPath);
+            this.LoadedTestSuites = await proxy.LoadTestAssemblyAsync(testAssemblyPath, cancellationToken);
+
+            this.logger.Info($"Loaded {this.LoadedTestSuites.Count} test suites.", testAssemblyPath);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {

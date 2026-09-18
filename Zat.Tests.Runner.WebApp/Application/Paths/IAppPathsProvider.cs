@@ -23,4 +23,14 @@ public interface IAppPathsProvider
     /// Gets the file extensions used by the application.
     /// </summary>
     AppFileExtensions Extensions { get; }
+
+    /// <summary>
+    /// Gets the file names used by the application.
+    /// </summary>
+    AppFileNames FileNames { get; }
+
+    /// <summary>
+    /// Gets the directory names used by the application.
+    /// </summary>
+    AppDirectoryNames DirectoryNames { get; }
 }

@@ -22,7 +22,7 @@ using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 /// <typeparam name="TBindingValue">The type of the property the control is bound to.</typeparam>
 public abstract class BindingComponentBase<TViewModel, TBindingValue>
     : MvvmComponentBase<TViewModel>
-    where TViewModel : class, INotifyPropertyChanged
+    where TViewModel : class, INotifyPropertyChanged, INotifyDataInfo
 {
     private Func<TViewModel, TBindingValue> readValue = null!;
 
