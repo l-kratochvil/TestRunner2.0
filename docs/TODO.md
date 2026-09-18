@@ -7,14 +7,13 @@
 - Zautomatizování kroků testera - základní
 - Vyřešit Deploy
 - TestDiscovery: Nahradit store za Fluxor
-- Přejmenovat na Zat.Tests.Runner?
 - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
 - Lokalizace textů napříč aplikacemi
 - Vylepšení vzhledu
 
 ## MidPrio
 
-- Zrušit ukládání výsledků do souboru: Řeší se už v Z200Tests dll a je to redundatní operace
+- Zrušit ukládání výsledků do souboru: Řeší se už v Zat.Z200Tests a je to redundatní operace
 - Update nuget balíčků solutionu
 - Refactor TestDiscovery feature
 - Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
